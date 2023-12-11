@@ -2,12 +2,21 @@ import telebot
 import random
 import re
 import time
+import requests
+import json
+import os
 
 
-#Ferramentas
-CHAVE_API = "CHAVE_API_BOT"
+#FERRAMENTAS
+#Telebot
+CHAVE_API = "6694425215:AAHCFFL7bsCuMciKQCjF_U9_-W7OChxalro"
 bot = telebot.TeleBot(CHAVE_API)
 botName = "@KannaKamui2BOT"
+
+#ChatGPT
+chatgpt_key = os.getenv("OPENAI_API_KEY")
+link = "https://api.openai.com/v1/chat/completions"
+id_modelo = "gpt-3.5-turbo"
 
 
 #Gifs
@@ -55,7 +64,6 @@ slapGifs = [
 #Labels
 headLabel = "============◇============\n"
 footerLabel = "\n============◇============"
-multiSocos = "🤛 🤛 🤛 🤛 🤛 🤛 🤛 🤛 🤛"
 
 #Chats
 gruposAutorizados = [
@@ -73,6 +81,11 @@ def isAdmin(admin, mensagem):
     admin = bool(False)
     pass
   return admin
+
+
+#Verifica se o Texto da Mensagem está vazio ao usar /kannagpt
+def VerificaSeVazioGPT(texto):
+  return len(texto) > 15
 
 
 #Se a Kanna não for admin envia uma mensagem de erro
@@ -99,6 +112,11 @@ def AcaoErrada(mensagem, username, acao):
       f"{headLabel}@{username}\nVocê precisa mencionar alguém\npara usar {acao}! {formaCorreta}{footerLabel}"
   )
   ApagarMensagemAcao(mensagem)
+
+
+#Sempre que o usuário enviar um input vazio ou muito curto ao GPT, o bot irá retornar uma mensagem de erro
+def InputVazio(mensagem):
+  bot.reply_to(mensagem, "Por favor, insira um texto maior para usar o GPT!")
 
 
 #Apagar Mensagem de Ação
@@ -129,6 +147,37 @@ def TentarMachucarKanna(mensagem, username):
     "https://gifdb.com/images/high/anime-kanna-crying-ceuw6xkxbdq4pc2y.gif",
     caption=f"{headLabel}@{username}\nPor que está tentando fazer\nisso Onii-chan? Você quer\nmachucar a Kanna?\n\n/sim_machucar_kanna\n/nao_machucar_kanna{footerLabel}")
 
+  
+#ChatGPT da Kanna
+@bot.message_handler(commands=["kannagpt"])
+def kannagpt(mensagem):
+
+  grupo_id = mensagem.chat.id
+  username = mensagem.from_user.username
+
+  if VerificaSeVazioGPT(mensagem.text):
+    if grupo_id in gruposAutorizados:
+      user_input = mensagem.text
+      
+      body_mensagem = {
+        "model": id_modelo,
+        "messages": [{"role": "user", "content": user_input}]
+      }
+      
+      body_mensagem = json.dumps(body_mensagem)
+  
+      headers = {"Authorization": f"Bearer {chatgpt_key}", "Content-Type": "application/json"}
+      requisicao = requests.post(link, headers=headers, data=body_mensagem)
+  
+      resposta = requisicao.json()
+      mensagemGPT = resposta["choices"][0]["message"]["content"]
+  
+      bot.reply_to(mensagem, mensagemGPT)
+    else:
+      GrupoNaoAutorizado(grupo_id, mensagem, username)
+  else:
+    InputVazio(mensagem)
+    
 
 #Acao machucar a Kanna
 @bot.message_handler(commands=["sim_machucar_kanna"])
