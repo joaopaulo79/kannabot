@@ -9,7 +9,7 @@ import os
 
 #FERRAMENTAS
 #Telebot
-CHAVE_API = "6694425215:AAHCFFL7bsCuMciKQCjF_U9_-W7OChxalro"
+CHAVE_API = "OPENAI_API_KEY"
 bot = telebot.TeleBot(CHAVE_API)
 botName = "@KannaKamui2BOT"
 
