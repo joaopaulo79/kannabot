@@ -1,0 +1,7 @@
+{
+  "Erro_Comando": "\nVerifique a sintaxe e tente novamente. Se o erro persistir, tente novamente mais tarde.",
+  "Erro_Grupo": "\nDesculpe, mas eu não tenho autorização para interagir com esse grupo. SAINDO!!!",
+  "Erro_Admin": "\nNão tenho permissão para usar esse comando!",
+  "Erro_Button": "\nErro ao utilizar o botão, tente novamente mais tarde.",
+  "Erro_Alvo_Indefinido": "\nNão foi possível encontrar o alvo."
+}

@@ -1,0 +1,40 @@
+{
+  "auto_punch": {
+    "Gif": "https://media1.tenor.com/m/yGxUGyhsQ_YAAAAd/buu-hitting-self.gif",
+    "Caption": " <b>socou</b> a si mesmo! Esse cara ta bem?? 🤔🤔"
+  },
+  "action_punch": {
+    "Gifs": [
+        "https://c.tenor.com/VrWzG0RWmRQAAAAC/tenor.gif",
+        "https://media.tenor.com/44IcPjhMv5oAAAAd/punch-anime.gif",
+        "https://media.tenor.com/GuML2yHT58kAAAAd/punch-anime.gif",
+        "https://c.tenor.com/gV0dzQ9WZycAAAAC/tenor.gif",
+        "https://64.media.tumblr.com/06ff864c72a9cae3e1d2e2b862fdd486/tumblr_o26zo8cpDN1qj5jqso1_540.gif",
+        "https://pa1.aminoapps.com/6602/014fb33cd391ee330f6678f6f856e12b90cb26fd_hq.gif",
+        "https://pa1.aminoapps.com/5668/41102d6eba9ba3d2812ee4b25ef51ce911d3a0f3_hq.gif",
+        "https://i.pinimg.com/originals/8d/50/60/8d50607e59db86b5afcc21304194ba57.gif",
+        "https://media.tenor.com/fG4HO_ccb68AAAAC/anime-my-hero-academia.gif",
+        "https://giffiles.alphacoders.com/169/169756.gif",
+        "https://i.kym-cdn.com/photos/images/newsfeed/001/856/131/1af.gif",
+        "https://media.tenor.com/SUmpLViwKxkAAAAC/anime.gif",
+        "https://gifdb.com/images/high/one-punch-man-vs-evil-aquatic-water-ewq3dhaq2mstvirj.gif",
+        "https://i.pinimg.com/originals/69/42/5c/69425c3f92baabb3b489eb34d27cc6b9.gif",
+        "https://c.tenor.com/p_mMicg1pgUAAAAC/tenor.gif",
+        "https://media1.tenor.com/m/FKP8EFeGFzEAAAAC/no-chiochannotsuugakuro.gif",
+        "https://media1.tenor.com/m/R0Up44dF6iEAAAAC/anime-barakamon.gif",
+        "https://media1.tenor.com/m/lWmjgII6fcgAAAAd/saki-saki-mukai-naoya.gif"
+    ],
+    "Caption1": " deu um <b>soco</b> em ",
+    "Caption2": "! Isso parece doer bastante! 😦",
+    "Button": "Devolver Soco"
+  },
+  "punch_me": {
+    "Gif": "https://media1.tenor.com/m/ZHgR2wX5M3AAAAAC/kanna-ill-kill-you.gif",
+    "Caption": "\nKanna não gostou disso! 😠😠",
+    "Button": "Pedir Desculpa"
+  },
+  "punch_me_back": {
+    "Gif": "https://media1.tenor.com/m/16LOESjiKYkAAAAC/kanna-sleeping.gif",
+    "Caption": "\nTa bom, Kanna ti perdoa! 😊😊"
+  }
+}

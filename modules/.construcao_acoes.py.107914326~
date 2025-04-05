@@ -1,0 +1,239 @@
+from modules.__init__ import Msg, bot
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+import random, json
+
+
+#Arquivos Punch 
+caminho_gif_punch = "./arquivos_json/action_files/punch.json"
+with open(caminho_gif_punch) as arquivo_gif_punch:
+  dados_gif_punch = json.load(arquivo_gif_punch)
+
+#Arquivos Slap
+caminho_gif_slap = "./arquivos_json/action_files/slap.json"
+with open(caminho_gif_slap) as arquivo_gif_slap:
+  dados_gif_slap = json.load(arquivo_gif_slap)
+
+#Arquivos Kiss
+caminho_gif_kiss = "./arquivos_json/action_files/kiss.json"
+with open(caminho_gif_kiss) as arquivo_gif_kiss:
+  dados_gif_kiss = json.load(arquivo_gif_kiss)
+
+#Arquivos Shy
+caminho_gif_shy = "./arquivos_json/action_files/shy.json"
+with open(caminho_gif_shy) as arquivo_gif_shy:
+  dados_gif_shy = json.load(arquivo_gif_shy)
+
+#Arquivos Hug
+caminho_gif_hug = "./arquivos_json/action_files/hug.json"
+with open(caminho_gif_hug) as arquivo_gif_hug:
+  dados_gif_hug = json.load(arquivo_gif_hug)
+
+#Arquivos Labels
+caminho_labels = "./arquivos_json/text_files/labels.json"
+with open(caminho_labels) as arquivo_labels:
+  dados_labels = json.load(arquivo_labels)
+
+class Construcao_Acoes:
+  def Arguments(self, target):
+    self.mensagem = Msg.Message()
+    self.username = Msg.Username()
+    self.markup = InlineKeyboardMarkup()
+    self.target = target
+    self.labels = dados_labels
+    self.punch = dados_gif_punch
+    self.slap = dados_gif_slap
+    self.kiss = dados_gif_kiss
+    self.shy = dados_gif_shy
+    self.hug = dados_gif_hug
+
+  def Case_Auto_Punch(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.punch["auto_punch"]["Gif"],
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}@{self.username}{self.punch['auto_punch']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Punch(self):
+    callback_button = InlineKeyboardButton(
+      self.punch["action_punch"]["Button"],
+      callback_data="Devolver_Soco"
+    )
+    self.markup.add(callback_button)
+
+    bot.send_animation(
+        self.mensagem.chat.id,
+        random.choice(self.punch["action_punch"]["Gifs"]),
+        parse_mode="HTML",
+        caption=
+        f"{self.labels['h']}@{self.username}{self.punch['action_punch']['Caption1']}{self.target}{self.punch['action_punch']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Punch_Me(self):
+    callback_button = InlineKeyboardButton(
+      self.punch["punch_me"]["Button"], 
+      callback_data="Pedir_Desculpa"
+    )
+    self.markup.add(callback_button)
+
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.punch["punch_me"]["Gif"],
+      caption=
+      f"{self.labels['h']}@{self.username}{self.punch['punch_me']['Caption']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Punch_Me_Desculpa(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.punch["punch_me_back"]["Gif"],
+      caption=f"{self.labels['h']}@{self.username}{self.punch['punch_me_back']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Revida_Punch(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.punch["action_punch"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}{self.target}{self.punch['action_punch']['Caption1']}@{self.username}{self.punch['action_punch']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Auto_Slap(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.slap["auto_slap"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.slap['auto_slap']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Slap(self):
+    callback_button = InlineKeyboardButton(
+      self.slap["action_slap"]["Button"],
+      callback_data="Devolver_Tapa"
+    )
+    self.markup.add(callback_button)
+
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.slap["action_slap"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.slap['action_slap']['Caption1']}{self.target}{self.slap['action_slap']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Revida_Slap(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.slap["action_slap"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}{self.target}{self.slap['action_slap']['Caption1']}@{self.username}{self.slap['action_slap']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Kiss_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.kiss["kiss_me"]["Gif"],
+      caption=
+      f"{self.labels['h']}@{self.username}{self.kiss['kiss_me']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Auto_Kiss(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.kiss["auto_kiss"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.kiss['auto_kiss']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Kiss(self):
+    callback_button1 = InlineKeyboardButton(
+      self.kiss["action_kiss"]["Button1"],
+      callback_data="Aceitar_Beijo"
+    )
+    callback_button2 = InlineKeyboardButton(
+      self.kiss["action_kiss"]["Button2"],
+      callback_data="Rejeitar_Beijo"
+    )
+    self.markup.add(callback_button1, callback_button2)
+
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.kiss["action_kiss"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.kiss['action_kiss']['Caption1']}{self.target}{self.kiss['action_kiss']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Rejeita_Kiss(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.slap["action_slap"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}{self.target}{self.kiss['action_kiss']['Caption3']}@{self.username}{self.kiss['action_kiss']['Caption4']}{self.labels['f']}"
+    )
+
+  def Case_Choque_Kiss(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.shy["emote_shy"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}@{self.username}{self.kiss['action_kiss']['Caption5']}{self.target}{self.kiss['action_kiss']['Caption6']}{self.labels['f']}"
+    )
+
+  def Case_Auto_Shy(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.shy["emote_shy"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}@{self.username}{self.shy['auto_shy']['Caption1']}{self.labels['f']}"
+    )
+
+  def Case_Shy_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.shy["emote_shy"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}{self.target}{self.shy['shy_me']['Caption1']}@{self.username}{self.shy['shy_me']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Hug(self):
+    callback_button1 = InlineKeyboardButton(
+      self.hug["action_hug"]["Button1"],
+      callback_data="Aceitar_Abraço"
+    )
+    callback_button2 = InlineKeyboardButton(
+      self.hug["action_hug"]["Button2"],
+      callback_data="Rejeitar_Abraço"
+    )
+    self.markup.add(callback_button1, callback_button2)
+
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.hug["action_hug"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.hug['action_hug']['Caption1']}{self.target}{self.hug['action_hug']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Hug_Me(self):
+    bot.send_animation(
+    self.mensagem.chat.id,
+    self.hug["hug_me"]["Gif"],
+    caption=
+    f"{self.labels['h']}@{self.username}{self.hug['hug_me']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Choque_Hug(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.shy["emote_shy"]["Gifs"]),
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}@{self.username}{self.hug['action_hug']['Caption3']}{self.target}{self.hug['action_hug']['Caption4']}{self.labels['f']}"
+    )

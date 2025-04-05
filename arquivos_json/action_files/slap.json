@@ -1,0 +1,36 @@
+{
+  "auto_slap": {
+    "Gif": "https://media1.tenor.com/m/t_af4BtQEJkAAAAC/shikimori-san-anime-slap-self.gif",
+    "Caption": "\nEstá tentando se concentrar!"
+  },
+  "action_slap": {
+    "Gifs": [
+      "https://media1.tenor.com/m/eU5H6GbVjrcAAAAC/slap-jjk.gif",
+      "https://media1.tenor.com/m/Ws6Dm1ZW_vMAAAAC/girl-slap.gif",
+      "https://media1.tenor.com/m/5jBuDXkDsjYAAAAC/slap.gif",
+      "https://media1.tenor.com/m/s8rSKVbvcZUAAAAC/anime-anime-slap.gif",
+      "https://media1.tenor.com/m/Y5P4zj4N81gAAAAC/hinatwt.gif",
+      "https://media1.tenor.com/m/FrEq8y-Qf78AAAAC/anime-slapping.gif",
+      "https://media1.tenor.com/m/8Oh_VMwp8k0AAAAC/slap.gif",
+      "https://media1.tenor.com/m/KJ1Lj0PQDxsAAAAC/anime.gif",
+      "https://media1.tenor.com/m/uTT2gXruNtkAAAAC/oreimo-anime.gif",
+      "https://media1.tenor.com/m/YJ9sYBxEOEQAAAAd/akebi-chan-anime.gif",
+      "https://media1.tenor.com/m/aIEua3fw3-MAAAAC/akane-kurokawa-yuki-sumi.gif",
+      "https://media1.tenor.com/m/aP7Du3RWX6YAAAAC/slap-anime.gif",
+      "https://media1.tenor.com/m/b6uuOgWuG2EAAAAC/tower-of-god-anime.gif",
+      "https://media1.tenor.com/m/6jRpSy6u3KAAAAAd/familiar-of-zero-zero-no-tsukaima.gif"
+    ],
+    "Caption1": " deu um <b>tapa</b> na cara de ",
+    "Caption2": "! Espero que não tenha deixado marca! 😦😦",
+    "Button": "Devolver Tapa"
+  },
+  "slap_me": {
+    "Gif": "https://media1.tenor.com/m/ZHgR2wX5M3AAAAAC/kanna-ill-kill-you.gif",
+    "Caption": "\nKanna não gostou disso! 😠😠",
+    "Button": "Pedir Desculpa"
+  },
+  "slap_me_back": {
+    "Gif": "https://media1.tenor.com/m/16LOESjiKYkAAAAC/kanna-sleeping.gif",
+    "Caption": "\nTa bom, Kanna ti perdoa! 😊😊"
+  }
+}
