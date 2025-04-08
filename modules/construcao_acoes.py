@@ -53,6 +53,11 @@ caminho_gif_highfive = "./arquivos_json/action_files/highfive.json"
 with open(caminho_gif_highfive) as arquivo_gif_highfive:
   dados_gif_highfive = json.load(arquivo_gif_highfive)
 
+#Arquivos Poke
+caminho_gif_poke = "./arquivos_json/action_files/poke.json"
+with open(caminho_gif_poke) as arquivo_gif_poke:
+  dados_gif_poke = json.load(arquivo_gif_poke)
+
 #Arquivos Labels
 caminho_labels = "./arquivos_json/text_files/labels.json"
 with open(caminho_labels) as arquivo_labels:
@@ -75,6 +80,7 @@ class Construcao_Acoes:
     self.push = dados_gif_push
     self.stare = dados_gif_stare
     self.highfive = dados_gif_highfive
+    self.poke = dados_gif_poke
 
   def Case_Auto_Punch(self):
     bot.send_animation(
@@ -456,4 +462,24 @@ class Construcao_Acoes:
       self.highfive["action_highfive"]["Gifs_Negado"],
       parse_mode="HTML",
       caption=f"{self.labels['h']}{self.target}{self.highfive['action_highfive']['Caption5']}@{self.username}{self.highfive['action_highfive']['Caption6']}{self.labels['f']}"
+    )
+
+  def Case_Poke(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(self.poke["action_poke"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.poke['action_poke']['Caption1']}{self.target}{self.poke['action_poke']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Poke_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      self.poke["poke_me"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{self.poke['poke_me']['Caption']}{self.labels['f']}",
+      reply_markup=self.markup
     )
