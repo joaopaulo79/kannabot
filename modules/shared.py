@@ -1,7 +1,7 @@
 import telebot, os
-from modules.mensagem_usuario import Mensagem_Usuario
-from modules.erros_utilizacao import Erros_Utilizacao
-from modules.checagem_autorizacao import Checagens_Autorizacao
+from modules._config.mensagem_usuario import Mensagem_Usuario
+from modules._config.erros_utilizacao import Erros_Utilizacao
+from modules._config.checagem_autorizacao import Checagens_Autorizacao
 
 def get_construcao_acoes():
   from modules.emotes.construcao_acoes import Construcao_Acoes

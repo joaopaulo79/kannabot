@@ -1,6 +1,6 @@
-from modules.checagem_autorizacao import Checagens_Autorizacao
+from modules._config.checagem_autorizacao import Checagens_Autorizacao
 from modules.emotes.construcao_acoes import Construcao_Acoes
-from modules.erros_utilizacao import Erros_Utilizacao
+from modules._config.erros_utilizacao import Erros_Utilizacao
 from modules.__init__ import bot, botName, Msg
 
 #FERRAMENTAS

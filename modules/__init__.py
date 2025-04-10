@@ -1,5 +1,5 @@
 import telebot, os
-from modules.mensagem_usuario import Mensagem_Usuario
+from modules._config.mensagem_usuario import Mensagem_Usuario
 from modules.emotes.open_json import Abrir_Arquivos_Emotes
 
 CHAVE_API = os.getenv("CHAVE_API_BOT")
