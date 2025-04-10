@@ -1,6 +1,12 @@
 import json
 
 class Abrir_Arquivos_Emotes:
+  def Case_Open_Labels(self):
+    caminho_labels = "./arquivos_json/text_files/labels.json"
+    with open(caminho_labels) as arquivo_labels:
+      dados_labels = json.load(arquivo_labels)
+    return dados_labels
+
   def Case_Open_Punch(self):
     caminho_gif_punch = "./arquivos_json/action_files/punch.json"
     with open(caminho_gif_punch) as arquivo_gif_punch:
@@ -67,8 +73,8 @@ class Abrir_Arquivos_Emotes:
       dados_gif_poke = json.load(arquivo_gif_poke)
     return dados_gif_poke
 
-  def Case_Open_Labels(self):
-    caminho_labels = "./arquivos_json/text_files/labels.json"
-    with open(caminho_labels) as arquivo_labels:
-      dados_labels = json.load(arquivo_labels)
-    return dados_labels
+  def Case_Open_Bite(self):
+    caminho_gif_bite = "./arquivos_json/action_files/bite.json"
+    with open(caminho_gif_bite) as arquivo_gif_bite:
+      dados_gif_bite = json.load(arquivo_gif_bite)
+    return dados_gif_bite

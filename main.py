@@ -424,5 +424,35 @@ def poke(mensagem):
       Erro.Erro_Grupo()
   except:
     Erro.Erro_Comando()
+
+#Def que analisa o comando /bite
+@bot.message_handler(commands=["bite"])
+def bite(mensagem):
+  try:
+    Erro.Arguments(mensagem)
+    Msg.Arguments(mensagem)
+
+    if Checar.grupo_autorizado(Msg.Grupo_Id()):
+      if Checar.is_admin(mensagem):
+
+        if Msg.Target() == None:
+          Erro.Erro_Alvo_Indefinido()
+
+        else:
+          Acoes.Arguments(Msg.Target())
+
+          if f"@{Msg.Username()}" == Msg.Target():
+            Erro.Erro_Alvo_Indefinido()
+          else:
+            if Msg.Target() != botName:
+              Acoes.Case_Bite()
+            else:
+              Acoes.Case_Bite_Me()
+      else:
+          Erro.Erro_Admin()
+    else:
+      Erro.Erro_Grupo()
+  except:
+    Erro.Erro_Comando()
     
 bot.polling()

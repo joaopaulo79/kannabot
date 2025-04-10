@@ -411,3 +411,23 @@ class Construcao_Acoes:
       f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Poke()['poke_me']['Caption']}{self.labels['f']}",
       reply_markup=self.markup
     )
+
+  def Case_Bite(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Bite()["action_bite"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Bite()['action_bite']['Caption1']}{self.target}{Abrir.Case_Open_Bite()['action_bite']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Bite_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Bite()["bite_me"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{Abrir.Case_Open_Bite()['bite_me']['Caption1']}@{self.username}{Abrir.Case_Open_Bite()['bite_me']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
