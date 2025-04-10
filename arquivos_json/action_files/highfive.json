@@ -1,6 +1,12 @@
 {
   "action_highfive": {
-    "Gif": "https://media1.tenor.com/m/OnHDfwVpq3YAAAAC/anime-kon.gif",
+    "Gif_Convite": "https://media1.tenor.com/m/OnHDfwVpq3YAAAAC/anime-kon.gif",
+    "Caption1": " está te convidando para dar um <b>toca aqui!</b> Você vai aceitar ",
+    "Caption2": "?",
+    "Button1": "Aceitar!",
+    "Button2": "Recusar!"
+  },
+  "response_highfive": {
     "Gifs_Aceito": [
       "https://media1.tenor.com/m/DEins0z5F4QAAAAC/high-five-double-high-five.gif",
       "https://media1.tenor.com/m/VuKivEBIUc8AAAAC/renora-rwby.gif",
@@ -23,15 +29,13 @@
       "https://media1.tenor.com/m/mpzev9mwQkQAAAAC/yay-high-five.gif",
       "https://media1.tenor.com/m/D19KjcLyS3QAAAAd/kasugano-urara-amai-shiroh.gif"
     ],
+    "Caption1": " aceitou o convite! ",
+    "Caption2": " é isso ai, parece que vocês são bons amigos!"
+  },
+  "reject_highfive": {
     "Gifs_Negado": "https://media1.tenor.com/m/mYBqYpXvfacAAAAC/aharen-is-indecipherable-aharen-san.gif",
-    "Caption1": " está te convidando para dar um <b>toca aqui!</b> Você vai aceitar ",
-    "Caption2": "?",
-    "Caption3": " aceitou o convite! ",
-    "Caption4": " é isso ai, parece que vocês são bons amigos!",
-    "Caption5": " ignorou o <b>toca aqui</b> de ",
-    "Caption6": ", nossa, mas quanta frieza...",
-    "Button1": "Aceitar!",
-    "Button2": "Recusar!"
+    "Caption1": " ignorou o <b>toca aqui</b> de ",
+    "Caption2": ", nossa, mas quanta frieza..."
   },
   "highfive_me": {
     "Gif": "https://media1.tenor.com/m/o6oEMD03JrsAAAAC/kanna-kanna-kamui.gif",

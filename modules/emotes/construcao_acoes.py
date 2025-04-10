@@ -37,7 +37,7 @@ class Construcao_Acoes:
   def Case_Punch_Me(self):
     callback_button = InlineKeyboardButton(
       Abrir.Case_Open_Punch()["punch_me"]["Button"], 
-      callback_data="Pedir_Desculpa"
+      callback_data="Pedir_Desculpa_Punch"
     )
     self.markup.add(callback_button)
 
@@ -61,7 +61,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Punch()["action_punch"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Punch()['action_punch']['Caption3']}@{self.username}{Abrir.Case_Open_Punch()['action_punch']['Caption4']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Punch()['action_punch_back']['Caption1']}@{self.username}{Abrir.Case_Open_Punch()['action_punch_back']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Auto_Slap(self):
@@ -94,9 +94,31 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Slap()["action_slap"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Slap()['action_slap']['Caption1']}@{self.username}{Abrir.Case_Open_Slap()['action_slap']['Caption2']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Slap()['action_slap_back']['Caption1']}@{self.username}{Abrir.Case_Open_Slap()['action_slap_back']['Caption2']}{self.labels['f']}"
     )
 
+  def Case_Slap_Me(self):
+    callback_button = InlineKeyboardButton(
+      Abrir.Case_Open_Slap()["slap_me"]["Button"], 
+      callback_data="Pedir_Desculpa_Slap"
+    )
+    self.markup.add(callback_button)
+
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Slap()["slap_me"]["Gif"],
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Slap()['slap_me']['Caption']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Slap_Me_Desculpa(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Slap()["slap_me_back"]["Gif"],
+      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Slap()['slap_me_back']['Caption']}{self.labels['f']}"
+    )
+  
   def Case_Kiss_Me(self):
     bot.send_animation(
       self.mensagem.chat.id,
@@ -139,7 +161,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Slap()["action_slap"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Kiss()['action_kiss']['Caption3']}@{self.username}{Abrir.Case_Open_Kiss()['action_kiss']['Caption4']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Kiss()['action_rejeita_kiss']['Caption1']}@{self.username}{Abrir.Case_Open_Kiss()['action_rejeita_kiss']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Choque_Kiss(self):
@@ -147,7 +169,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Shy()["emote_shy"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Kiss()['action_kiss']['Caption5']}{self.target}{Abrir.Case_Open_Kiss()['action_kiss']['Caption6']}{self.labels['f']}"
+      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Kiss()['action_aceita_kiss']['Caption1']}{self.target}{Abrir.Case_Open_Kiss()['action_aceita_kiss']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Auto_Shy(self):
@@ -158,12 +180,20 @@ class Construcao_Acoes:
       caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Shy()['auto_shy']['Caption1']}{self.labels['f']}"
     )
 
-  def Case_Shy_Me(self):
+  def Case_Shy(self):
     bot.send_animation(
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Shy()["emote_shy"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Shy()['shy_me']['Caption1']}@{self.username}{Abrir.Case_Open_Shy()['shy_me']['Caption2']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Shy()['action_shy']['Caption1']}@{self.username}{Abrir.Case_Open_Shy()['action_shy']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Shy_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Shy()["shy_me"]["Gif"],
+      parse_mode="HTML",
+      caption=f"{self.labels['h']}{Abrir.Case_Open_Shy()['shy_me']['Caption1']}@{self.username}{Abrir.Case_Open_Shy()['shy_me']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Hug(self):
@@ -199,7 +229,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Shy()["emote_shy"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Hug()['action_hug']['Caption5']}{self.target}{Abrir.Case_Open_Hug()['action_hug']['Caption6']}{self.labels['f']}"
+      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Hug()['action_aceita_hug']['Caption1']}{self.target}{Abrir.Case_Open_Hug()['action_aceita_hug']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Rejeita_Hug(self):
@@ -207,7 +237,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Push()["action_push"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Hug()['action_hug']['Caption3']}@{self.username}{Abrir.Case_Open_Hug()['action_hug']['Caption4']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Hug()['action_rejeita_hug']['Caption1']}@{self.username}{Abrir.Case_Open_Hug()['action_rejeita_hug']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Cuddle(self):
@@ -244,7 +274,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Shy()["emote_shy"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Cuddle()['action_cuddle']['Caption5']}{self.target}{Abrir.Case_Open_Cuddle()['action_cuddle']['Caption6']}{self.labels['f']}"
+      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Cuddle()['action_aceita_cuddle']['Caption1']}{self.target}{Abrir.Case_Open_Cuddle()['action_aceita_cuddle']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Rejeita_Cuddle(self):
@@ -252,7 +282,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Push()["action_push"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Cuddle()['action_cuddle']['Caption3']}@{self.username}{Abrir.Case_Open_Cuddle()['action_cuddle']['Caption4']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Cuddle()['action_rejeita_cuddle']['Caption1']}@{self.username}{Abrir.Case_Open_Cuddle()['action_rejeita_cuddle']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Pat(self):
@@ -288,7 +318,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Shy()["emote_shy"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Pat()['action_pat']['Caption5']}{self.target}{Abrir.Case_Open_Pat()['action_pat']['Caption6']}{self.labels['f']}"
+      caption=f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Pat()['action_aceita_pat']['Caption1']}{self.target}{Abrir.Case_Open_Pat()['action_aceita_pat']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Rejeita_Pat(self):
@@ -296,7 +326,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Push()["action_push"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Pat()['action_pat']['Caption3']}@{self.username}{Abrir.Case_Open_Pat()['action_pat']['Caption4']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Pat()['action_rejeita_pat']['Caption1']}@{self.username}{Abrir.Case_Open_Pat()['action_rejeita_pat']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Push(self):
@@ -360,7 +390,7 @@ class Construcao_Acoes:
 
     bot.send_animation(
       self.mensagem.chat.id,
-      Abrir.Case_Open_Highfive()["action_highfive"]["Gif"],
+      Abrir.Case_Open_Highfive()["action_highfive"]["Gif_Convite"],
       parse_mode="HTML",
       caption=
       f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Highfive()['action_highfive']['Caption1']}{self.target}{Abrir.Case_Open_Highfive()['action_highfive']['Caption2']}{self.labels['f']}",
@@ -379,17 +409,17 @@ class Construcao_Acoes:
   def Case_Aceita_Highfive(self):
     bot.send_animation(
       self.mensagem.chat.id,
-      random.choice(Abrir.Case_Open_Highfive()["action_highfive"]["Gifs_Aceito"]),
+      random.choice(Abrir.Case_Open_Highfive()["response_highfive"]["Gifs_Aceito"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Highfive()['action_highfive']['Caption3']}@{self.username}{Abrir.Case_Open_Highfive()['action_highfive']['Caption4']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Highfive()['response_highfive']['Caption1']}@{self.username}{Abrir.Case_Open_Highfive()['response_highfive']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Rejeita_Highfive(self):
     bot.send_animation(
       self.mensagem.chat.id,
-      Abrir.Case_Open_Highfive()["action_highfive"]["Gifs_Negado"],
+      Abrir.Case_Open_Highfive()["reject_highfive"]["Gifs_Negado"],
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Highfive()['action_highfive']['Caption5']}@{self.username}{Abrir.Case_Open_Highfive()['action_highfive']['Caption6']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Highfive()['reject_highfive']['Caption1']}@{self.username}{Abrir.Case_Open_Highfive()['reject_highfive']['Caption2']}{self.labels['f']}"
     )
 
   def Case_Poke(self):

@@ -26,17 +26,19 @@
     ],
     "Caption1": " deu um <b>soco</b> em ",
     "Caption2": "! Isso parece doer, acho que vai dar briga! 😦",
-    "Caption3": " devolveu o <b>soco</b> de ",
-    "Caption4": "! Ai ai ai... eu sabia que isso ia acontecer... 😥",
     "Button": "Devolver Soco"
+  },
+  "action_punch_back": {
+    "Caption1": " devolveu o <b>soco</b> de ",
+    "Caption2": "! Ai ai ai... eu sabia que isso ia acontecer... 😥"
   },
   "punch_me": {
     "Gif": "https://media1.tenor.com/m/ZHgR2wX5M3AAAAAC/kanna-ill-kill-you.gif",
-    "Caption": "\nKanna não gostou disso! 😠😠",
+    "Caption": ", não doeu nem um pouquinho, mas a Kanna não gostou disso! 😠",
     "Button": "Pedir Desculpa"
   },
   "punch_me_back": {
-    "Gif": "https://media1.tenor.com/m/16LOESjiKYkAAAAC/kanna-sleeping.gif",
-    "Caption": "\nTa bom, Kanna ti perdoa! 😊😊"
+    "Gif": "https://media1.tenor.com/m/HfWXQRLCzj4AAAAd/kanna-kamui-unamused.gif",
+    "Caption": " a Kanna vai deixar passar dessa vez, mas não se acostume... 😑"
   }
 }

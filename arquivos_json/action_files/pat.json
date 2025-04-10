@@ -31,12 +31,16 @@
     ],
     "Caption1": " fez um <b>cafuné</b> gostoso em ",
     "Caption2": "! Deve ser um carinho muito bom! 😋",
-    "Caption3": " <b>rejeitou</b> o cafuné de ",
-    "Caption4": ", acho que ele(a) não está muito receptivo(a) a carinhos na cabeça hoje... 😓",
-    "Caption5": " parece que seu cafuné foi super-efetivo, ",
-    "Caption6": " ficou com vergonha!",
     "Button1": "Choque!",
     "Button2": "Rejeitar!"
+  },
+  "action_aceita_pat": {
+    "Caption1": " parece que seu cafuné foi super-efetivo, ",
+    "Caption2": " ficou com vergonha!"
+  },
+  "action_rejeita_pat": {
+    "Caption1": " <b>rejeitou</b> o cafuné de ",
+    "Caption2": ", acho que ele(a) não está muito receptivo(a) a carinhos na cabeça hoje... 😓"
   },
   "pat_me": {
     "Gif": "https://media1.tenor.com/m/16LOESjiKYkAAAAC/kanna-sleeping.gif",

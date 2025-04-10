@@ -12,16 +12,20 @@
       "https://media1.tenor.com/m/ZHeWMKzI39QAAAAd/hug-hugs.gif"
     ],
     "Caption1": " deu um <b>abraço</b> bem aconchegante em ",
-    "Caption2": "! Eu também quero! 😍",
-    "Caption3": " <b>rejeitou</b> o carinho de ",
-    "Caption4": ", acho que ele(a) não está em um dia muito bom... 😓",
-    "Caption5": " parece que seu carinho é bom demais! ",
-    "Caption6": " ficou envergonhado(a)!",
+    "Caption2": "! Eu também quero! 😍",  
     "Button1": "Choque!",
     "Button2": "Rejeitar!"
   },
+  "action_aceita_cuddle": {
+    "Caption1": " parece que seu carinho é bom demais! ",
+    "Caption2": " ficou envergonhado(a)!"
+  },
+  "action_rejeita_cuddle": {
+    "Caption1": " <b>rejeitou</b> o carinho de ",
+    "Caption2": ", acho que ele(a) não está em um dia muito bom... 😓"
+  },
   "cuddle_me": {
-    "Gif": "https://media1.tenor.com/m/Y2jL9Ag973cAAAAC/kanna-kamui-miss-kobayashi%27s-dragon-maid.gif",
-    "Caption": " a Kanna gostou do seu carinho! 🥰🥰"
+    "Gif": "https://media1.tenor.com/m/9MVP1kC9BrsAAAAC/kanna-kanna-kamui.gif",
+    "Caption": " a Kanna gostou do seu carinho e quer mais! 🥰🥰"
   }
 }

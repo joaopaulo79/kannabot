@@ -14,7 +14,7 @@ Erro = Erros_Utilizacao()
 def handle_callback(call):
   user = 0
   try:
-    if call.data == "Pedir_Desculpa":
+    if call.data == "Pedir_Desculpa_Punch":
       if call.from_user.username == Msg.Username():
         Acoes.Case_Punch_Me_Desculpa()
       else:
@@ -29,6 +29,11 @@ def handle_callback(call):
       if call.from_user.username == Msg.TargetUsername():
         user += 1
         Acoes.Case_Revida_Slap()
+      else:
+        pass
+    elif call.data == "Pedir_Desculpa_Slap":
+      if call.from_user.username == Msg.Username():
+        Acoes.Case_Slap_Me_Desculpa()
       else:
         pass
     elif call.data == "Rejeitar_Beijo":
@@ -158,7 +163,7 @@ def slap(mensagem):
             if Msg.Target() != botName:
               Acoes.Case_Slap()
             else:
-              Acoes.Case_Punch_Me()
+              Acoes.Case_Slap_Me()
       else:
         Erro.Erro_Admin()
     else:
@@ -216,7 +221,7 @@ def shy(mensagem):
             Acoes.Case_Auto_Shy()
           else:
             if Msg.Target() != botName:
-              Acoes.Case_Shy_Me()
+              Acoes.Case_Shy()
             else:
               Acoes.Case_Shy_Me()
       else:

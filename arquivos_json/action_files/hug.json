@@ -31,12 +31,16 @@
     ],
     "Caption1": " te deu um <b>abraço</b> quentinho ",
     "Caption2": "! Achei muito fofinho! 😍😍",
-    "Caption3": " <b>rejeitou</b> o abraço de ",
-    "Caption4": ", acho que ele(a) não está de bom humor... 😓",
-    "Caption5": " parece que seu abraço foi super-efetivo, ",
-    "Caption6": " ficou sem palavras!",
     "Button1": "Choque!",
     "Button2": "Rejeitar!"
+  },
+  "action_aceita_hug": {
+    "Caption1": " parece que seu abraço foi super-efetivo, ",
+    "Caption2": " ficou sem palavras!"
+  },
+  "action_rejeita_hug": {
+    "Caption1": " <b>rejeitou</b> o abraço de ",
+    "Caption2": ", acho que ele(a) não está de bom humor... 😓"
   },
   "hug_me": {
     "Gif": "https://media1.tenor.com/m/Y2jL9Ag973cAAAAC/kanna-kamui-miss-kobayashi%27s-dragon-maid.gif",

@@ -25,15 +25,19 @@
     ],
     "Caption1": " deu um <b>beijinho</b> em ",
     "Caption2": "! Que fofoo! 😍😍",
-    "Caption3": " <b>rejeitou</b> ",
-    "Caption4": ", acho que o beijo não foi tão bom assim...",
-    "Caption5": " parece que seu beijo foi super-efetivo, ",
-    "Caption6": " ficou sem palavras!",
     "Button1": "Choque!",
     "Button2": "Rejeitar!"
   },
+  "action_aceita_kiss": {
+    "Caption1": " parece que seu beijo foi super-efetivo, ",
+    "Caption2": " ficou sem palavras!"
+  },
+  "action_rejeita_kiss": {
+    "Caption1": " <b>rejeitou</b> ",
+    "Caption2": ", acho que o beijo não foi tão bom assim..."
+  },
   "kiss_me": {
     "Gif": "https://media1.tenor.com/m/rUTi33pGvGsAAAAd/kanna-kanna-kamui.gif",
-    "Caption": "\nMorra lolicon! 😡😡"
+    "Caption": " a Kanna ainda é muito nova pra essas coisas, morra lolicon! 😡😡"
   }
 }

@@ -31,10 +31,15 @@
     ]
   },
   "auto_shy": {
-    "Caption1": " está <b>envergonhado(a)!</b>"
+    "Caption1": " está <b>envergonhado(a)!</b> O que será que aconteceu hein? Uhmm suspeito... 😏"
   },
-  "shy_me": {
+  "action_shy": {
     "Caption1": " <b>envergonhou</b> ",
     "Caption2": "! O que será que ele(a) fez hein? Uhmm suspeito... 😏"
+  },
+  "shy_me": {
+    "Gif": "https://media1.tenor.com/m/f5bVBz0Gk_EAAAAd/kanna-dragon-maid.gif",
+    "Caption1": "A beleza da Kanna é incontestável, deixou até mesmo ",
+    "Caption2": " <b>envergonhado(a)</b>! 😌"
   }
 }
