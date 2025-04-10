@@ -1,6 +1,3 @@
-from queue import Empty
-import telebot, requests, json, os
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from modules.checagem_autorizacao import Checagens_Autorizacao
 from modules.emotes.construcao_acoes import Construcao_Acoes
 from modules.erros_utilizacao import Erros_Utilizacao
