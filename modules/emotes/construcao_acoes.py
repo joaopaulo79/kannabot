@@ -1,86 +1,25 @@
-from modules.__init__ import Msg, bot
+from modules.__init__ import Msg, bot, Abrir
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-import random, json
-
-
-#Arquivos Punch 
-caminho_gif_punch = "./arquivos_json/action_files/punch.json"
-with open(caminho_gif_punch) as arquivo_gif_punch:
-  dados_gif_punch = json.load(arquivo_gif_punch)
-
-#Arquivos Slap
-caminho_gif_slap = "./arquivos_json/action_files/slap.json"
-with open(caminho_gif_slap) as arquivo_gif_slap:
-  dados_gif_slap = json.load(arquivo_gif_slap)
-
-#Arquivos Kiss
-caminho_gif_kiss = "./arquivos_json/action_files/kiss.json"
-with open(caminho_gif_kiss) as arquivo_gif_kiss:
-  dados_gif_kiss = json.load(arquivo_gif_kiss)
-
-#Arquivos Shy
-caminho_gif_shy = "./arquivos_json/action_files/shy.json"
-with open(caminho_gif_shy) as arquivo_gif_shy:
-  dados_gif_shy = json.load(arquivo_gif_shy)
-
-#Arquivos Hug
-caminho_gif_hug = "./arquivos_json/action_files/hug.json"
-with open(caminho_gif_hug) as arquivo_gif_hug:
-  dados_gif_hug = json.load(arquivo_gif_hug)
-
-#Arquivos Cuddle
-caminho_gif_cuddle = "./arquivos_json/action_files/cuddle.json"
-with open(caminho_gif_cuddle) as arquivo_gif_cuddle:
-  dados_gif_cuddle = json.load(arquivo_gif_cuddle)
-
-#Arquivos Pat
-caminho_gif_pat = "./arquivos_json/action_files/pat.json"
-with open(caminho_gif_pat) as arquivo_gif_pat:
-  dados_gif_pat = json.load(arquivo_gif_pat)
-
-#Arquivos Push
-caminho_gif_push = "./arquivos_json/action_files/push.json"
-with open(caminho_gif_push) as arquivo_gif_push:
-  dados_gif_push = json.load(arquivo_gif_push)
-
-#Arquivos Stare
-caminho_gif_stare = "./arquivos_json/action_files/stare.json"
-with open(caminho_gif_stare) as arquivo_gif_stare:
-  dados_gif_stare = json.load(arquivo_gif_stare)
-
-#Arquivos Highfive
-caminho_gif_highfive = "./arquivos_json/action_files/highfive.json"
-with open(caminho_gif_highfive) as arquivo_gif_highfive:
-  dados_gif_highfive = json.load(arquivo_gif_highfive)
-
-#Arquivos Poke
-caminho_gif_poke = "./arquivos_json/action_files/poke.json"
-with open(caminho_gif_poke) as arquivo_gif_poke:
-  dados_gif_poke = json.load(arquivo_gif_poke)
-
-#Arquivos Labels
-caminho_labels = "./arquivos_json/text_files/labels.json"
-with open(caminho_labels) as arquivo_labels:
-  dados_labels = json.load(arquivo_labels)
+import random
 
 class Construcao_Acoes:
   def Arguments(self, target):
+    self.target = target
     self.mensagem = Msg.Message()
     self.username = Msg.Username()
     self.markup = InlineKeyboardMarkup()
-    self.target = target
-    self.labels = dados_labels
-    self.punch = dados_gif_punch
-    self.slap = dados_gif_slap
-    self.kiss = dados_gif_kiss
-    self.shy = dados_gif_shy
-    self.hug = dados_gif_hug
-    self.cuddle = dados_gif_cuddle
-    self.pat = dados_gif_pat
-    self.push = dados_gif_push
-    self.stare = dados_gif_stare
-    self.highfive = dados_gif_highfive
-    self.poke = dados_gif_poke
+    self.labels = Abrir.Case_Open_Labels()
+    self.punch = Abrir.Case_Open_Punch()
+    self.slap = Abrir.Case_Open_Slap()
+    self.kiss = Abrir.Case_Open_Kiss()
+    self.shy = Abrir.Case_Open_Shy()
+    self.hug = Abrir.Case_Open_Hug()
+    self.cuddle = Abrir.Case_Open_Cuddle()
+    self.pat = Abrir.Case_Open_Pat()
+    self.push = Abrir.Case_Open_Push()
+    self.stare = Abrir.Case_Open_Stare()
+    self.highfive = Abrir.Case_Open_Highfive()
+    self.poke = Abrir.Case_Open_Poke()
 
   def Case_Auto_Punch(self):
     bot.send_animation(

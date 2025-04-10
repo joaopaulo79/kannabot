@@ -4,7 +4,7 @@ from modules.erros_utilizacao import Erros_Utilizacao
 from modules.checagem_autorizacao import Checagens_Autorizacao
 
 def get_construcao_acoes():
-  from modules.construcao_acoes import Construcao_Acoes
+  from modules.emotes.construcao_acoes import Construcao_Acoes
   return Construcao_Acoes
 
 CHAVE_API = os.getenv("CHAVE_API_BOT")
