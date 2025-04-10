@@ -61,7 +61,7 @@ class Construcao_Acoes:
       self.mensagem.chat.id,
       random.choice(Abrir.Case_Open_Punch()["action_punch"]["Gifs"]),
       parse_mode="HTML",
-      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Punch()['action_punch']['Caption1']}@{self.username}{Abrir.Case_Open_Punch()['action_punch']['Caption2']}{self.labels['f']}"
+      caption=f"{self.labels['h']}{self.target}{Abrir.Case_Open_Punch()['action_punch']['Caption3']}@{self.username}{Abrir.Case_Open_Punch()['action_punch']['Caption4']}{self.labels['f']}"
     )
 
   def Case_Auto_Slap(self):
