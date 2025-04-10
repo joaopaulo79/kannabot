@@ -78,3 +78,9 @@ class Abrir_Arquivos_Emotes:
     with open(caminho_gif_bite) as arquivo_gif_bite:
       dados_gif_bite = json.load(arquivo_gif_bite)
     return dados_gif_bite
+
+  def Case_Open_Lick(self):
+    caminho_gif_lick = "./arquivos_json/action_files/lick.json"
+    with open(caminho_gif_lick) as arquivo_gif_lick:
+      dados_gif_lick = json.load(arquivo_gif_lick)
+    return dados_gif_lick 

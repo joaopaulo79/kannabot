@@ -90,7 +90,19 @@ def handle_callback(call):
         user += 1
         Acoes.Case_Rejeita_Highfive()
       else:
-        pass    
+        pass
+    elif call.data == "Aceitar_Lambida":
+      if call.from_user.username == Msg.TargetUsername():
+        user += 1
+        Acoes.Case_Revida_Lick()
+      else:
+        pass
+    elif call.data == "Rejeitar_Lambida":
+      if call.from_user.username == Msg.TargetUsername():
+        user += 1
+        Acoes.Case_Rejeita_Lick()
+      else: 
+        pass
   except:
     Erro.Erro_Button(user)
 
@@ -454,5 +466,34 @@ def bite(mensagem):
       Erro.Erro_Grupo()
   except:
     Erro.Erro_Comando()
-    
+
+#Def que analisa o comando /lick
+@bot.message_handler(commands=["lick"])
+def lick(mensagem):
+  try:
+    Erro.Arguments(mensagem)
+    Msg.Arguments(mensagem)
+
+    if Checar.grupo_autorizado(Msg.Grupo_Id()):
+      if Checar.is_admin(mensagem):
+
+        if Msg.Target() == None:
+          Erro.Erro_Alvo_Indefinido()
+
+        else:
+          Acoes.Arguments(Msg.Target())
+          if f"@{Msg.Username()}" == Msg.Target():
+            Erro.Erro_Alvo_Indefinido()
+          else:
+            if Msg.Target() != botName:
+              Acoes.Case_Lick()
+            else:
+              Acoes.Case_Lick_Me()
+      else:
+          Erro.Erro_Admin()
+    else:
+      Erro.Erro_Grupo()
+  except:
+    Erro.Erro_Comando()
+
 bot.polling()

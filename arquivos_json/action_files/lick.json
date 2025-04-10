@@ -1,0 +1,30 @@
+{
+  "action_lick": {
+    "Gifs": [
+      "https://media1.tenor.com/m/Go7wnhOWjSkAAAAC/anime-lick-face.gif",
+      "https://media1.tenor.com/m/d0CunrDQsJ4AAAAC/licks-face-anime-anime.gif",
+      "https://media1.tenor.com/m/Jel-MDAH0ucAAAAd/anime-zero-two.gif",
+      "https://media1.tenor.com/m/c833DFWYQPcAAAAC/wtf-lick-face.gif",
+      "https://media1.tenor.com/m/Mwz2ih3-a-cAAAAC/anime-anime-kasumi.gif",
+      "https://media1.tenor.com/m/zoPOIvogEpwAAAAC/lick.gif"
+    ],
+    "Caption1": " deu uma <b>lambida</b> em ",
+    "Caption2": "! Isso parece ser um ato de afeto, mas também pode ser um ato de agressão! 😏",
+    "Button1": "Lamber Também!",
+    "Button2": "Rejeitar!"
+  },
+  "action_revida_lick": {
+    "Gif": "https://media1.tenor.com/m/HfWXQRLCzj4AAAAC/kanna-kamui-unamused.gif",
+    "Caption1": " e ",
+    "Caption2": " parem já os dois com essa pouca vergonha! Isso aqui é um grupo de família, não um zoológico! 😡"
+  },
+  "action_rejeita_lick": {
+    "Caption1": " achou nojenta a <b>lambida</b> de ",
+    "Caption2": "! Eu também acho, não sei o que ele(a) está pensando... 😓"
+  },
+  "lick_me": {
+    "Gif": "https://media1.tenor.com/m/rUTi33pGvGsAAAAd/kanna-kanna-kamui.gif",
+    "Caption1": "Ei ",
+    "Caption2": "!\nMorra lolicon! 😡😡"
+  }
+}

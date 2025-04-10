@@ -431,3 +431,50 @@ class Construcao_Acoes:
       f"{self.labels['h']}{Abrir.Case_Open_Bite()['bite_me']['Caption1']}@{self.username}{Abrir.Case_Open_Bite()['bite_me']['Caption2']}{self.labels['f']}",
       reply_markup=self.markup
     )
+
+  def Case_Lick(self):
+    callback_button1 = InlineKeyboardButton(
+      Abrir.Case_Open_Lick()["action_lick"]["Button1"],
+      callback_data="Aceitar_Lambida"
+    )
+    callback_button2 = InlineKeyboardButton(
+      Abrir.Case_Open_Lick()["action_lick"]["Button2"],
+      callback_data="Rejeitar_Lambida"
+    )
+    self.markup.add(callback_button1, callback_button2)
+    
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Lick()["action_lick"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Lick()['action_lick']['Caption1']}{self.target}{Abrir.Case_Open_Lick()['action_lick']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Lick_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Lick()["lick_me"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{Abrir.Case_Open_Lick()['lick_me']['Caption1']}@{self.username}{Abrir.Case_Open_Lick()['lick_me']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Revida_Lick(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Lick()["action_revida_lick"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{self.target}{Abrir.Case_Open_Lick()['action_revida_lick']['Caption1']}@{self.username}{Abrir.Case_Open_Lick()['action_revida_lick']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Rejeita_Lick(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Push()["action_push"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{self.target}{Abrir.Case_Open_Lick()['action_rejeita_lick']['Caption1']}@{self.username}{Abrir.Case_Open_Lick()['action_rejeita_lick']['Caption2']}{self.labels['f']}"
+    )
