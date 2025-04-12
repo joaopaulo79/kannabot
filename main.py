@@ -530,4 +530,33 @@ def bonk(mensagem):
   except:
     Erro.Erro_Comando()
 
+#Def que analisa o comando /tickle
+@bot.message_handler(commands=["tickle"])
+def tickle(mensagem):
+  try:
+    Erro.Arguments(mensagem)
+    Msg.Arguments(mensagem)
+
+    if Checar.grupo_autorizado(Msg.Grupo_Id()):
+      if Checar.is_admin(mensagem):
+
+        if Msg.Target() == None:
+          Erro.Erro_Alvo_Indefinido()
+
+        else:
+          Acoes.Arguments(Msg.Target())
+          if f"@{Msg.Username()}" == Msg.Target():
+            Erro.Erro_Alvo_Indefinido()
+          else:
+            if Msg.Target() != botName:
+              Acoes.Case_Tickle()
+            else:
+              Acoes.Case_Tickle_Me()
+      else:
+          Erro.Erro_Admin()
+    else:
+      Erro.Erro_Grupo()
+  except:
+    Erro.Erro_Comando()
+  
 bot.polling()

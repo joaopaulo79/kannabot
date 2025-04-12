@@ -526,3 +526,21 @@ class Construcao_Acoes:
       caption=
       f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Bonk()['bonk_me']['Caption1']}{self.labels['f']}"
     )
+
+  def Case_Tickle(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Tickle()["action_tickle"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Tickle()['action_tickle']['Caption1']}{self.target}{Abrir.Case_Open_Tickle()['action_tickle']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Tickle_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Tickle()["tickle_me"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Tickle()['tickle_me']['Caption1']}{self.labels['f']}"
+    )

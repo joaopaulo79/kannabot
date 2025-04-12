@@ -90,3 +90,9 @@ class Abrir_Arquivos_Emotes:
     with open(caminho_gif_bonk) as arquivo_gif_bonk:
       dados_gif_bonk = json.load(arquivo_gif_bonk)
     return dados_gif_bonk
+
+  def Case_Open_Tickle(self):
+    caminho_gif_tickle = "./arquivos_json/action_files/tickle.json"
+    with open(caminho_gif_tickle) as arquivo_gif_tickle:
+      dados_gif_tickle = json.load(arquivo_gif_tickle)
+    return dados_gif_tickle
