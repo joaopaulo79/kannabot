@@ -108,6 +108,18 @@ def handle_callback(call):
         Acoes.Case_Rejeita_Lick()
       else: 
         pass
+    elif call.data == "Acenar_de_Volta":
+      if call.from_user.username == Msg.TargetUsername():
+        user += 1
+        Acoes.Case_Devolve_Wave()
+      else:
+        pass
+    elif call.data == "Cumprimentar":
+      if call.from_user.username != Msg.Username():
+        user += 1
+        Acoes.Case_Welcome_Wave(call.from_user.username)
+      else:
+        pass
   except:
     Erro.Erro_Button(user)
 
@@ -552,6 +564,36 @@ def tickle(mensagem):
               Acoes.Case_Tickle()
             else:
               Acoes.Case_Tickle_Me()
+      else:
+          Erro.Erro_Admin()
+    else:
+      Erro.Erro_Grupo()
+  except:
+    Erro.Erro_Comando()
+
+#Def que analisa o comando /wave
+@bot.message_handler(commands=["wave"])
+def wave(mensagem):
+  try:
+    Erro.Arguments(mensagem)
+    Msg.Arguments(mensagem)
+
+    if Checar.grupo_autorizado(Msg.Grupo_Id()):
+      if Checar.is_admin(mensagem):
+
+        if Msg.Target() == None:
+          Acoes.Arguments("Vazio")
+          Acoes.Case_Auto_Wave()
+
+        else:
+          Acoes.Arguments(Msg.Target())
+          if f"@{Msg.Username()}" == Msg.Target():
+            Erro.Erro_Alvo_Indefinido()
+          else:
+            if Msg.Target() != botName:
+              Acoes.Case_Wave()
+            else:
+              Acoes.Case_Wave_Me()
       else:
           Erro.Erro_Admin()
     else:

@@ -96,3 +96,9 @@ class Abrir_Arquivos_Emotes:
     with open(caminho_gif_tickle) as arquivo_gif_tickle:
       dados_gif_tickle = json.load(arquivo_gif_tickle)
     return dados_gif_tickle
+
+  def Case_Open_Wave(self):
+    caminho_gif_wave = "./arquivos_json/action_files/wave.json"
+    with open(caminho_gif_wave) as arquivo_gif_wave:
+      dados_gif_wave = json.load(arquivo_gif_wave)
+    return dados_gif_wave

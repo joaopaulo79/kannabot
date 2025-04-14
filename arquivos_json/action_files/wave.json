@@ -44,13 +44,23 @@
       "https://media1.tenor.com/m/C9xajr5WbRQAAAAC/hello-hey.gif"
     ],
     "Caption1": " está <b>acenando</b> para ",
-    "Caption2": "!"
+    "Caption2": "! 😊",
+    "Button": "Acenar de Volta!"
   },
   "auto_wave": {
-    "Caption": " acabou de chegar ao chat! Vamos todos cumprimentar ele(a)? 😊"
+    "Caption": " acabou de chegar ao chat! Vamos todos cumprimentar ele(a)? 😊",
+    "Button": "Acenar para "
   },
   "wave_me": {
-    "Gif": "https://media1.tenor.com/m/1MfQk9vFF7MAAAAC/anime-bye-bye-maki.gif",
+    "Gif": "https://media1.tenor.com/m/ZCRdkVVlbL8AAAAd/kanna-kamui-kanna-kobayashi.gif",
     "Caption": " a Kanna está feliz em ver você! 😊"
+  },
+  "wave_back": {
+    "Caption1": " <b>acenou</b> de volta para você ",
+    "Caption2": "! Ele(a) está feliz em ver você! 😊"
+  },
+  "wave_welcome": {
+    "Caption1": " está te <b>cumprimentando</b> ",
+    "Caption2": "! Seja bem-vindo(a)! 😊"
   }
 }

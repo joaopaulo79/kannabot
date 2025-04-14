@@ -544,3 +544,62 @@ class Construcao_Acoes:
       caption=
       f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Tickle()['tickle_me']['Caption1']}{self.labels['f']}"
     )
+
+  def Case_Wave(self):
+    callback_button = InlineKeyboardButton(
+      Abrir.Case_Open_Wave()["action_wave"]["Button"],
+      callback_data="Acenar_de_Volta"
+    )
+    self.markup.add(callback_button)
+    
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Wave()["action_wave"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Wave()['action_wave']['Caption1']}{self.target}{Abrir.Case_Open_Wave()['action_wave']['Caption2']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Wave_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Wave()["wave_me"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Wave()['wave_me']['Caption']}{self.labels['f']}"
+    )
+
+  def Case_Auto_Wave(self):
+    callback_button = InlineKeyboardButton(
+      f"{Abrir.Case_Open_Wave()['auto_wave']['Button']}@{self.username}{'!'}",
+      callback_data="Cumprimentar"
+    )
+    self.markup.add(callback_button)
+    
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Wave()["action_wave"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Wave()['auto_wave']['Caption']}{self.labels['f']}",
+      reply_markup=self.markup
+    )
+
+  def Case_Devolve_Wave(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Wave()["action_wave"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{self.target}{Abrir.Case_Open_Wave()['wave_back']['Caption1']}@{self.username}{Abrir.Case_Open_Wave()['wave_back']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Welcome_Wave(self, acenante):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Wave()["action_wave"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{acenante}{Abrir.Case_Open_Wave()['wave_welcome']['Caption1']}@{self.username}{Abrir.Case_Open_Wave()['wave_welcome']['Caption2']}{self.labels['f']}"
+    )    
