@@ -24,3 +24,6 @@ class Mensagem_Usuario:
   def TargetUsername(self):
     self.targetusername = self.mensagem.text.split(" @")[1]
     return self.targetusername
+
+  def User_Id(self):
+    return self.mensagem.from_user.id

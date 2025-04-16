@@ -2,6 +2,7 @@ from modules._config.checagem_autorizacao import Checagens_Autorizacao
 from modules.emotes.construcao_acoes import Construcao_Acoes
 from modules._config.erros_utilizacao import Erros_Utilizacao
 from modules.__init__ import bot, botName, Msg
+from modules._config.verificar_button import Log
 
 #FERRAMENTAS
 #Telebot
@@ -13,109 +14,113 @@ Erro = Erros_Utilizacao()
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback(call):
   user = 0
-  try:
-    if call.data == "Pedir_Desculpa_Punch":
-      if call.from_user.username == Msg.Username():
+  try:      
+    if Log.Ja_Clicou(call.from_user.id):
+      print(f"O usuário {call.from_user.username} já clicou no botão.")
+      return
+      
+    if call.data == "Pedir_Desculpa_Punch":       
+      if Log.Case_Username_Username(call.from_user.username, call.from_user.id):
         Acoes.Case_Punch_Me_Desculpa()
       else:
         pass     
     elif call.data == "Devolver_Soco":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Revida_Punch()
       else:
         pass
     elif call.data == "Devolver_Tapa":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Revida_Slap()
       else:
         pass
     elif call.data == "Pedir_Desculpa_Slap":
-      if call.from_user.username == Msg.Username():
+      if Log.Case_Username_Username(call.from_user.username, call.from_user.id):
         Acoes.Case_Slap_Me_Desculpa()
       else:
         pass
     elif call.data == "Rejeitar_Beijo":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Rejeita_Kiss()
       else:
         pass
     elif call.data == "Aceitar_Beijo":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Choque_Kiss()
       else:
         pass
     elif call.data == "Aceitar_Abraço":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Choque_Hug()
       else:
         pass
     elif call.data == "Rejeitar_Abraço":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Rejeita_Hug()
       else:
         pass
     elif call.data == "Aceitar_Carinho":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Choque_Cuddle()
       else:
         pass
     elif call.data == "Rejeitar_Carinho":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Rejeita_Cuddle()
       else:
         pass
     elif call.data == "Aceitar_Cafuné":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Choque_Pat()
       else:
         pass
     elif call.data == "Rejeitar_Cafuné":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Rejeita_Pat()
       else:
         pass
     elif call.data == "Aceitar_Toca_Aqui":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Aceita_Highfive()
       else:
         pass
     elif call.data == "Rejeitar_Toca_Aqui":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Rejeita_Highfive()
       else:
         pass
     elif call.data == "Aceitar_Lambida":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Revida_Lick()
       else:
         pass
     elif call.data == "Rejeitar_Lambida":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Rejeita_Lick()
       else: 
         pass
     elif call.data == "Acenar_de_Volta":
-      if call.from_user.username == Msg.TargetUsername():
+      if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Devolve_Wave()
       else:
         pass
     elif call.data == "Cumprimentar":
-      if call.from_user.username != Msg.Username():
+      if Log.Case_Username_Not_Username(call.from_user.username, call.from_user.id):
         user += 1
         Acoes.Case_Welcome_Wave(call.from_user.username)
       else:
@@ -129,6 +134,7 @@ def punch(mensagem):
     try:
         Erro.Arguments(mensagem)
         Msg.Arguments(mensagem)
+        Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):    
             if Checar.is_admin(mensagem):
@@ -159,6 +165,7 @@ def slap(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -189,6 +196,7 @@ def kiss(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -219,6 +227,7 @@ def shy(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -249,6 +258,7 @@ def hug(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -279,6 +289,7 @@ def cuddle(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -309,6 +320,7 @@ def pat(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -339,6 +351,7 @@ def push(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -369,6 +382,7 @@ def stare(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -400,6 +414,7 @@ def highfive(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):    
       if Checar.is_admin(mensagem):
@@ -430,6 +445,7 @@ def poke(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):
       if Checar.is_admin(mensagem):
@@ -460,6 +476,7 @@ def bite(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):
       if Checar.is_admin(mensagem):
@@ -490,6 +507,7 @@ def lick(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):
       if Checar.is_admin(mensagem):
@@ -519,6 +537,7 @@ def bonk(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):
       if Checar.is_admin(mensagem):
@@ -548,6 +567,7 @@ def tickle(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):
       if Checar.is_admin(mensagem):
@@ -577,6 +597,7 @@ def wave(mensagem):
   try:
     Erro.Arguments(mensagem)
     Msg.Arguments(mensagem)
+    Log.Limpar_Log()
 
     if Checar.grupo_autorizado(Msg.Grupo_Id()):
       if Checar.is_admin(mensagem):
