@@ -3,7 +3,7 @@ import os
 from modules.__init__ import Msg
 
 # Caminho do arquivo de log
-log_path = "./arquivos_json/config_files/log_buttons.json"
+log_path = "./data/arquivos_json/config_files/log_buttons.json"
 
 # Classe para gerenciar os cliques em botões
 class Verificar_Button:

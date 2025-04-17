@@ -2,7 +2,7 @@ import json, telebot, threading
 from modules.__init__ import Msg, bot
 
 #Arquivos Erros
-caminho_erros = "./arquivos_json/text_files/mensagens_erro.json"
+caminho_erros = "./data/arquivos_json/text_files/mensagens_erro.json"
 with open(caminho_erros) as arquivo_erros:
   dados_erros = json.load(arquivo_erros)
   
