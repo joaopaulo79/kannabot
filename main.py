@@ -1,8 +1,8 @@
-from modules._config.checagem_autorizacao import Checagens_Autorizacao
-from modules.emotes.construcao_acoes import Construcao_Acoes
-from modules._config.erros_utilizacao import Erros_Utilizacao
-from modules.__init__ import bot, botName, Msg
-from modules._config.verificar_button import Log
+from src._config.checagem_autorizacao import Checagens_Autorizacao
+from src.emotes.construcao_acoes import Construcao_Acoes
+from src._config.erros_utilizacao import Erros_Utilizacao
+from src.__init__ import bot, botName, Msg
+from src.emotes.verificar_button import Log
 
 #FERRAMENTAS
 #Telebot
@@ -131,33 +131,33 @@ def handle_callback(call):
 #Def que analisa o comando /punch
 @bot.message_handler(commands=["punch"])
 def punch(mensagem):  
-    try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
+  try:
+      Erro.Arguments(mensagem)
+      Msg.Arguments(mensagem)
+      Log.Limpar_Log()
 
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):    
-            if Checar.is_admin(mensagem):
-              
-                if Msg.Target() == None:
-                  Erro.Erro_Alvo_Indefinido()
-                  
+      if Checar.grupo_autorizado(Msg.Grupo_Id()):    
+          if Checar.is_admin(mensagem):
+            
+              if Msg.Target() == None:
+                Erro.Erro_Alvo_Indefinido()
+                
+              else:
+                Acoes.Arguments(Msg.Target())
+
+                if f"@{Msg.Username()}" == Msg.Target():
+                    Acoes.Case_Auto_Punch()
                 else:
-                  Acoes.Arguments(Msg.Target())
-  
-                  if f"@{Msg.Username()}" == Msg.Target():
-                      Acoes.Case_Auto_Punch()
-                  else:
-                      if Msg.Target() != botName:
-                          Acoes.Case_Punch()
-                      else:
-                          Acoes.Case_Punch_Me()
-            else:
-                Erro.Erro_Admin()
-        else:
-            Erro.Erro_Grupo()
-    except:
-        Erro.Erro_Comando()
+                    if Msg.Target() != botName:
+                        Acoes.Case_Punch()
+                    else:
+                        Acoes.Case_Punch_Me()
+          else:
+              Erro.Erro_Admin()
+      else:
+          Erro.Erro_Grupo()
+  except:
+      Erro.Erro_Comando()
 
 #Def que analisa o comando /slap
 @bot.message_handler(commands=["slap"])

@@ -1,4 +1,4 @@
-from modules.__init__ import Msg, bot, Abrir
+from src.__init__ import Msg, bot, Abrir
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 import random
 

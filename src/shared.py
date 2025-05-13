@@ -1,10 +1,10 @@
 import telebot, os
-from modules._config.mensagem_usuario import Mensagem_Usuario
-from modules._config.erros_utilizacao import Erros_Utilizacao
-from modules._config.checagem_autorizacao import Checagens_Autorizacao
+from src._config.mensagem_usuario import Mensagem_Usuario
+from src._config.erros_utilizacao import Erros_Utilizacao
+from src._config.checagem_autorizacao import Checagens_Autorizacao
 
 def get_construcao_acoes():
-  from modules.emotes.construcao_acoes import Construcao_Acoes
+  from src.emotes.construcao_acoes import Construcao_Acoes
   return Construcao_Acoes
 
 CHAVE_API = os.getenv("CHAVE_API_BOT")

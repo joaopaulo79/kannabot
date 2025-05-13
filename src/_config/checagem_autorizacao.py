@@ -1,5 +1,4 @@
-import json
-import os
+import json, os
 from telebot import TeleBot
 
 class Checagens_Autorizacao: 
@@ -8,7 +7,6 @@ class Checagens_Autorizacao:
         self.carregar_grupos_autorizados()
 
     def carregar_grupos_autorizados(self):
-        #Carrega os IDs dos grupos autorizados a usar o bot.
         caminho_grupos_autorizados = str(os.getenv("CAMINHO_AUTORZACAO"))
         with open(caminho_grupos_autorizados) as arquivo:
             dados_autorizacao = json.load(arquivo)
@@ -24,7 +22,6 @@ class Checagens_Autorizacao:
         return False
 
     def is_admin(self, mensagem) -> bool:
-        # Verifica se o usuário é administrador deletando uma mensagem.
         try:
             self.bot.delete_message(mensagem.chat.id, mensagem.id)
             return True
