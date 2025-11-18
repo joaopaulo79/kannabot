@@ -602,4 +602,31 @@ class Construcao_Acoes:
       parse_mode="HTML",
       caption=
       f"{self.labels['h']}@{acenante}{Abrir.Case_Open_Wave()['wave_welcome']['Caption1']}@{self.username}{Abrir.Case_Open_Wave()['wave_welcome']['Caption2']}{self.labels['f']}"
-    )    
+    )
+
+  def Case_Auto_Cry(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Cry()["emote_cry"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}@{self.username}{Abrir.Case_Open_Cry()['auto_cry']['Caption1']}{self.labels['f']}"
+    )
+
+  def Case_Cry(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      random.choice(Abrir.Case_Open_Cry()["emote_cry"]["Gifs"]),
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{self.target}{Abrir.Case_Open_Cry()['action_cry']['Caption1']}@{self.username}{Abrir.Case_Open_Cry()['action_cry']['Caption2']}{self.labels['f']}"
+    )
+
+  def Case_Cry_Me(self):
+    bot.send_animation(
+      self.mensagem.chat.id,
+      Abrir.Case_Open_Cry()["cry_me"]["Gif"],
+      parse_mode="HTML",
+      caption=
+      f"{self.labels['h']}{Abrir.Case_Open_Cry()['cry_me']['Caption1']}@{self.username}{Abrir.Case_Open_Cry()['cry_me']['Caption2']}{self.labels['f']}"
+    )

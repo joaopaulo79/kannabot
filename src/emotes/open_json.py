@@ -102,3 +102,9 @@ class Abrir_Arquivos_Emotes:
     with open(caminho_gif_wave) as arquivo_gif_wave:
       dados_gif_wave = json.load(arquivo_gif_wave)
     return dados_gif_wave
+
+  def Case_Open_Cry(self):
+    caminho_gif_cry = "./data/arquivos_json/action_files/cry.json"
+    with open(caminho_gif_cry) as arquivo_gif_cry:
+      dados_gif_cry = json.load(arquivo_gif_cry)
+    return dados_gif_cry

@@ -1,0 +1,39 @@
+{
+  "emote_cry": {
+    "Gifs": [
+      "https://media1.tenor.com/m/35S_M89zT3sAAAAC/horimiya-anime.gif",
+      "https://media1.tenor.com/m/VO2in_SxlvAAAAAC/sad-taiga-aisaka.gif",
+      "https://media1.tenor.com/m/ZURDvrz5D38AAAAC/feliz-cumplea%C3%B1os.gif",
+      "https://media1.tenor.com/m/IHVd7sXB66YAAAAC/anime-cry-hinagiku.gif",
+      "https://media1.tenor.com/m/mt4gvZUXooMAAAAC/crying-tears.gif",
+      "https://media1.tenor.com/m/sm8afT0kzFQAAAAC/nekosas.gif",
+      "https://media1.tenor.com/m/mgVzx-npGLoAAAAd/killua-zoldyck.gif",
+      "https://media1.tenor.com/m/DkmWogvYcqwAAAAC/anime.gif",
+      "https://media1.tenor.com/m/E6aC6uBVLxkAAAAC/anime-cry.gif",
+      "https://media1.tenor.com/m/3mscVoYlvOcAAAAd/ruby-hoshino-oshi-no-ko.gif",
+      "https://media1.tenor.com/m/c1PMAiegtCkAAAAd/violet-evergarden-violet.gif",
+      "https://media1.tenor.com/m/EhwgANzgzdIAAAAC/anime-cry.gif",
+      "https://media1.tenor.com/m/1auUfC_qO7oAAAAC/anime-hestia.gif",
+      "https://c.tenor.com/t2NKJ9Zs0scAAAAC/tenor.gif",
+      "https://media1.tenor.com/m/tBS5IwTtZloAAAAC/soul-eater-maka.gif",
+      "https://media1.tenor.com/m/96Rd03VKI8EAAAAC/anime-rem.gif",
+      "https://media1.tenor.com/m/uWRE3j0J-NQAAAAd/anime-prima-doll.gif",
+      "https://media1.tenor.com/m/mI7XPp-IaIgAAAAC/anime-remi.gif",
+      "https://media1.tenor.com/m/TQeKG-fM2PIAAAAd/mob-psycho100-crying.gif",
+      "https://media1.tenor.com/m/C9xwOZZrt7MAAAAC/bandori-bang-dream.gif",
+      "https://media1.tenor.com/m/l3B7VMDKHN8AAAAC/anime-spy-x-family.gif"
+    ]
+  },
+  "auto_cry": {
+    "Caption1": " está <b>chorando</b>! O que será que aconteceu? 😢"
+  },
+  "action_cry": {
+    "Caption1": " fez ",
+    "Caption2": " <b>chorar</b>! O que será que aconteceu? 😢"
+  },
+  "cry_me": {
+    "Gif": "https://media1.tenor.com/m/6pnYsTfJH5AAAAAC/kanna-kanna-kamui.gif",
+    "Caption1": "A Kanna não gosta de ver ",
+    "Caption2": " <b>chorar</b>, desculpe... 😢"
+  }
+}

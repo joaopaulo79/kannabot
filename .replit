@@ -11,3 +11,6 @@ language = "python3"
 [deployment]
 run = ["sh", "-c", "run"]
 deploymentTarget = "cloudrun"
+
+[agent]
+expertMode = true
