@@ -33,6 +33,7 @@ class Moderation:
     def __init__(self, bot, config, store, audit, clock=None, roles=None):
         self.bot, self.store, self.audit = bot, store, audit
         self.roles = roles
+        self.identities = None
         self.governance = store if isinstance(store, Governance) else None
         self.permissions = Permissions(bot, config.grupos_id, roles)
         self.seen = Seen()
@@ -55,6 +56,8 @@ class Moderation:
         rule = None
         try:
             actor = self.permissions.actor(message, command)
+            if self.identities is not None:
+                message=self.identities.prepare(message,command)
             reply, target = self.reply_target(message)
             parts = message.text.split(maxsplit=1)
             reason = self.audit.clean(parts[1].strip()) if len(parts)>1 else ""
@@ -113,6 +116,9 @@ class Moderation:
             result=Result("done",self.feedback(command,message,target,reason,duration,rule,result.message))
         metadata=self.roles.metadata(message.chat.id,actor,target) if self.roles else {}
         context_data.update(metadata)
+        if self.identities is not None and target is not None:
+            username=self.identities.username(message.chat.id,target)
+            if username:context_data["target_username"]=username
         metadata=context_data
         if rule:metadata.update(rule_code=rule["code"],rule_version=rule["version"])
         if command=="warn" and result.outcome=="done" and self.governance:

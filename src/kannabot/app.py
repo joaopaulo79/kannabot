@@ -1,4 +1,5 @@
 import os
+from kannabot.identities import Identities, register as register_identities
 from pathlib import Path
 from telebot import TeleBot
 from kannabot.audit import Audit
@@ -22,8 +23,11 @@ def create_app(configuracao=None, client=None, home=None):
     bot = client if client is not None else TeleBot(settings.token)
     bot.kanna_audit = Audit(bot, settings.log_chat_id, root / "var/audit.jsonl", secrets=(settings.token,))
     store = Governance(root / "var/moderation.sqlite3")
+    bot.kanna_identities = Identities(bot, settings.grupos_id, store.path)
+    register_identities(bot, bot.kanna_identities)
     bot.kanna_roles = Roles(bot, settings.grupos_id, store)
     bot.kanna_moderation = Moderation(bot, settings, store, bot.kanna_audit, roles=bot.kanna_roles)
+    bot.kanna_moderation.identities = bot.kanna_identities
     bot.kanna_administration = Administration(bot.kanna_moderation, store, bot.kanna_roles, bot.kanna_audit)
     bot.kanna_antispam = Antispam(bot, settings, policy, bot.kanna_audit, roles=bot.kanna_roles)
     bot.kanna_review = Review(bot.kanna_moderation, ReviewStore(root / "var/moderation.sqlite3"), bot.kanna_audit)

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from kannabot.identities import Identities
 from functools import partial
 from html import escape
 from threading import RLock
@@ -32,6 +33,7 @@ class ConfirmedSendFailure(RuntimeError):
 class Emotes:
     def __init__(self,bot,config):
         self.bot,self.config=bot,config
+        self.identities=None
         self.permissions=Permissions(bot,config.grupos_id)
         self.interactions=Interactions()
         self.known=OrderedDict();self.lock=RLock()
@@ -60,6 +62,13 @@ class Emotes:
         elif target:
             with self.lock:
                 target_id = self.known.get((message.chat.id, target.lstrip('@').casefold()))
+            if self.identities is not None and target.casefold()!=self.config.bot_username.casefold():
+                try:
+                    resolved=self.identities.resolve(message.chat.id,target)
+                    target_id=resolved.id
+                    target="@"+escape(resolved.username)
+                except ValueError as error:
+                    self.bot.send_message(message.chat.id,str(error));return
         actions=Construcao_Acoes(self.bot,msg,Abrir_Arquivos_Emotes())
         # Capture the message ID returned by send_animation for callback context.
         owner=message.from_user.id
@@ -114,6 +123,8 @@ class Emotes:
 
 def register(bot,config,state_dir):
     service=Emotes(bot,config)
+    identities=getattr(bot,"kanna_identities",None)
+    if isinstance(identities,Identities):service.identities=identities
     for command in COMMANDS:
         bot.message_handler(commands=[command])(partial(service.command,command))
     bot.callback_query_handler(func=lambda call:True)(service.callback)
