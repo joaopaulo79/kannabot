@@ -6,6 +6,7 @@ from time import monotonic
 import unicodedata
 from telebot.handler_backends import ContinueHandling
 from kannabot.interacoes import Seen
+from kannabot.links import violates
 from kannabot.permissions import Permissions, PermissionDenied
 
 @dataclass(frozen=True)
@@ -28,8 +29,9 @@ class Antispam:
         self.logged=Seen(ttl=60,clock=clock)
     def handle(self,message):
         chat=message.chat.id;options=self.policy.get(chat,"spam")
+        links=self.policy.get(chat,"links")
         user=getattr(message,"from_user",None)
-        if not self.permissions.authorized(chat) or not options or user is None or getattr(user,"is_bot",False) or getattr(message,"sender_chat",None) is not None:
+        if not self.permissions.authorized(chat) or (not options and not links) or user is None or getattr(user,"is_bot",False) or getattr(message,"sender_chat",None) is not None:
             return []
         if getattr(message,"new_chat_members",None) or getattr(message,"left_chat_member",None):
             return []
@@ -40,7 +42,12 @@ class Antispam:
             return []
         if not self.seen.claim((chat,message.message_id)):
             return []
-        return self.inspect(message,options)
+        detections=self.inspect(message,options) if options else []
+        if links and violates(message,links):
+            detections.append(Detection("links",chat,user.id,message.message_id))
+            if self.logged.claim((chat,user.id,"links")):
+                self.audit.record(chat,None,user.id,"spam_observe","links","done")
+        return detections
     def inspect(self,message,options):
         now=self.clock();chat=message.chat.id;user=message.from_user.id
         text=getattr(message,"text",None) or getattr(message,"caption",None) or ""

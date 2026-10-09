@@ -1,6 +1,7 @@
 """Validated local policies, disabled when no file is configured."""
 import json
 from pathlib import Path
+from kannabot.links import normalize_host
 from kannabot._config.configuracao import ErroConfiguracao
 
 class Policy:
@@ -14,8 +15,19 @@ class Policy:
                 valid = str(int(group))==group
             except (TypeError,ValueError):
                 valid=False
-            if not valid or not isinstance(options,dict) or set(options)-{"welcome", "spam"}:
+            if not valid or not isinstance(options,dict) or set(options)-{"welcome", "spam", "links"}:
                 raise ErroConfiguracao("Grupo ou opção de política inválido.")
+            links=options.get("links")
+            if links is not None:
+                if not isinstance(links,dict) or set(links)!={"allow","deny","include_subdomains"} or type(links["include_subdomains"]) is not bool:
+                    raise ErroConfiguracao("Links requerem allow, deny e include_subdomains booleano.")
+                try:
+                    for name in ("allow","deny"):
+                        if not isinstance(links[name],list) or len(links[name])>100:
+                            raise ValueError()
+                        links[name]=[normalize_host(host) for host in links[name]]
+                except (ValueError,UnicodeError):
+                    raise ErroConfiguracao("Domínios de política inválidos.") from None
             spam=options.get("spam")
             if spam is not None:
                 keys={"flood_limit","flood_window","repeat_limit","repeat_window"}
