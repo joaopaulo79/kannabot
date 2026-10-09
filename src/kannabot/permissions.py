@@ -1,0 +1,47 @@
+from telebot import apihelper
+
+class PermissionDenied(ValueError):
+    pass
+
+class Permissions:
+    def __init__(self, bot, groups):
+        self.bot = bot
+        self.groups = frozenset(groups)
+
+    def authorized(self, chat_id):
+        return type(chat_id) is int and chat_id in self.groups
+
+    def member(self, chat_id, user_id):
+        if not self.authorized(chat_id) or type(user_id) is not int:
+            raise PermissionDenied("Grupo ou identidade não autorizado.")
+        try:
+            return self.bot.get_chat_member(chat_id, user_id)
+        except Exception:
+            raise PermissionDenied("Não foi possível confirmar permissões.") from None
+
+    def is_admin(self, chat_id, user_id):
+        return self.member(chat_id, user_id).status in ("administrator", "creator")
+
+    def actor(self, message):
+        user = getattr(message, "from_user", None)
+        if getattr(message, "sender_chat", None) is not None or user is None or getattr(user, "is_bot", False):
+            raise PermissionDenied("Comando requer administrador identificado.")
+        if not self.is_admin(message.chat.id, user.id):
+            raise PermissionDenied("Comando exclusivo de administradores.")
+        return user.id
+
+    def target(self, chat_id, user_id):
+        if self.is_admin(chat_id, user_id):
+            raise PermissionDenied("Administradores estão protegidos.")
+        return user_id
+
+    def bot_right(self, chat_id, right):
+        try:
+            bot_id = self.bot.get_me().id
+            role = self.member(chat_id, bot_id)
+        except Exception:
+            raise PermissionDenied("Não foi possível confirmar direitos do bot.") from None
+        if role.status == "creator":
+            return
+        if role.status != "administrator" or getattr(role, right, False) is not True:
+            raise PermissionDenied("O bot não possui a permissão necessária.")

@@ -1,26 +1,15 @@
-from telebot import TeleBot
+from kannabot.permissions import Permissions, PermissionDenied
 
 class Checagens_Autorizacao:
-    def __init__(self, bot: TeleBot, configuracao):
-        self.bot = bot
-        self.configuracao = configuracao
-        self.carregar_grupos_autorizados()
+    def __init__(self, bot, configuracao):
+        self.permissions = Permissions(bot, configuracao.grupos_id)
 
-    def carregar_grupos_autorizados(self):
-        self.id_autorizacao = list(self.configuracao.grupos_id)
+    def grupo_autorizado(self, grupo_id):
+        return self.permissions.authorized(grupo_id)
 
-    def grupo_autorizado(self, grupo_id: int) -> bool:
-        grupo_id_formatado = int(str(grupo_id).replace("-100", "-"))
-
-        for id_autorizado in self.id_autorizacao:
-            id_formatado = int(str(id_autorizado).replace("-100", "-"))
-            if grupo_id_formatado == id_formatado:
-                return True
-        return False
-
-    def is_admin(self, mensagem) -> bool:
+    def is_admin(self, mensagem):
         try:
-            self.bot.delete_message(mensagem.chat.id, mensagem.id)
+            self.permissions.actor(mensagem)
             return True
-        except:
+        except PermissionDenied:
             return False
