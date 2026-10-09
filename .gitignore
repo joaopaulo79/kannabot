@@ -1,0 +1,26 @@
+# Credenciais e dados locais
+.env
+.env.*
+!.env.example
+data/local/
+var/
+# Ambientes, caches e ferramentas locais
+.venv/
+venv/
+.tools/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+# Build e logs
+build/
+dist/
+*.egg-info/
+*.log
+.DS_Store
+Thumbs.db

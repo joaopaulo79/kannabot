@@ -1,7 +1,7 @@
 from src._config.checagem_autorizacao import Checagens_Autorizacao
 from src.emotes.construcao_acoes import Construcao_Acoes
 from src._config.erros_utilizacao import Erros_Utilizacao
-from src.__init__ import bot, botName, Msg
+from src import bot, botName, Msg
 from src.emotes.verificar_button import Log
 
 #FERRAMENTAS

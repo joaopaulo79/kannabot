@@ -1,5 +1,5 @@
 import json, telebot, threading
-from src.__init__ import Msg, bot
+from src import Msg, bot
 
 #Arquivos Erros
 caminho_erros = "./data/arquivos_json/text_files/mensagens_erro.json"
