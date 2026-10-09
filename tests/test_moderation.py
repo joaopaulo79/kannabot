@@ -95,3 +95,33 @@ class ModerationTests(unittest.TestCase):
         self.bot.restrict_chat_member.assert_not_called()
         self.bot.get_chat.return_value=N(type="supergroup");self.bot.restrict_chat_member.return_value=False
         self.assertEqual(self.service.handle("mute",self.msg).outcome,"failed")
+
+    def test_kick_removes_then_allows_voluntary_return(self):
+        self.bot.ban_chat_member.return_value=True;self.bot.unban_chat_member.return_value=True
+        self.assertEqual(self.service.handle("kick",self.msg).outcome,"done")
+        self.bot.ban_chat_member.assert_called_once_with(1,8)
+        self.bot.unban_chat_member.assert_called_once_with(1,8,only_if_banned=True)
+    def test_kick_partial_failure_is_explicit(self):
+        self.bot.ban_chat_member.return_value=True;self.bot.unban_chat_member.return_value=False
+        result=self.service.handle("kick",self.msg)
+        self.assertEqual(result.outcome,"failed");self.assertIn("continua banido",result.message)
+        self.assertEqual(self.audit.record.call_args.args[5],"failed")
+        self.assertEqual(self.service.handle("kick",self.msg).outcome,"refused")
+        self.bot.ban_chat_member.assert_called_once()
+    def test_ban_does_not_unban(self):
+        self.bot.ban_chat_member.return_value=True
+        self.assertEqual(self.service.handle("ban",self.msg).outcome,"done")
+        self.bot.unban_chat_member.assert_not_called()
+    def test_unban_only_banned_member_and_no_automatic_join(self):
+        self.assertEqual(self.service.handle("unban",self.msg).outcome,"refused")
+        self.bot.unban_chat_member.assert_not_called()
+        self.bot.get_chat_member.side_effect=lambda chat,user:N(status="kicked" if user==8 else "administrator",can_restrict_members=True)
+        self.bot.unban_chat_member.return_value=True
+        self.assertEqual(self.service.handle("unban",self.msg).outcome,"done")
+        self.bot.unban_chat_member.assert_called_once_with(1,8,only_if_banned=True)
+    def test_member_or_admin_target_cannot_be_banned(self):
+        self.msg.from_user.id=8
+        self.assertEqual(self.service.handle("ban",self.msg).outcome,"refused")
+        self.msg.from_user.id=7;self.msg.reply_to_message.from_user.id=7
+        self.assertEqual(self.service.handle("ban",self.msg).outcome,"refused")
+        self.bot.ban_chat_member.assert_not_called()
