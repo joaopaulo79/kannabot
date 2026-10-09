@@ -181,3 +181,16 @@ class GovernanceTests(unittest.TestCase):
         self.assertIsInstance(app.kanna_moderation.governance,Governance)
         self.assertIs(app.kanna_review.moderation,app.kanna_moderation)
         bot.get_chat_member.assert_not_called();bot.infinity_polling.assert_not_called()
+
+    def test_partial_kick_persists_failure_without_retry(self):
+        self.bot.unban_chat_member.side_effect=RuntimeError("private response")
+        message=self.message("/kick motivo")
+        result=self.service.handle("kick",message)
+        self.assertEqual(result.outcome,"failed")
+        self.assertIn("continua banido",result.message)
+        with closing(sqlite3.connect(self.path)) as db:
+            self.assertEqual(db.execute("SELECT status FROM sanctions WHERE action='kick'").fetchone()[0],"partial")
+        other=Moderation(self.bot,self.config,Governance(self.path),self.audit,roles=self.roles)
+        self.assertEqual(other.handle("kick",message).outcome,"refused")
+        self.bot.ban_chat_member.assert_called_once()
+        self.bot.unban_chat_member.assert_called_once()
