@@ -121,3 +121,7 @@ Imports não inicializam o bot. Use `python -m kannabot`. `KANNA_HOME` aponta pa
 Configure `LOG_CHAT_ID` no `.env` local com o ID negativo de um grupo privado dedicado aos administradores. Adicione o bot e permita enviar mensagens. Mantenha nesse grupo somente pessoas autorizadas a consultar moderacao; nao configure um grupo publico. Cada registro inclui horario UTC, grupo, autor (ou automacao), alvo, acao, motivo e resultado.
 
 Sem destino configurado, destino publico ou falha de entrega, o registro sanitizado vai para `KANNA_HOME/var/audit.jsonl`. Falhar ao registrar nao repete uma punicao. O arquivo local e ignorado pelo Git; restrinja seu acesso e retenha apenas pelo periodo necessario. Erros registram a classe da excecao, sem payload ou token.
+
+## Advertencias
+
+Admin identificado: responda a mensagem do membro com `/warn motivo`. Consulte com `/warnings` em resposta ao mesmo membro. Historico por grupo/ID fica em `KANNA_HOME/var/moderation.sqlite3`, preservado no reinicio. Consulta mostra total e ultimas 20 entradas. Reentregar o mesmo comando nao duplica advertencia. Administradores sao protegidos; quantidade de advertencias nao aplica outra punicao.
