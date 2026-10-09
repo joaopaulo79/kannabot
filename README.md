@@ -135,3 +135,7 @@ Remocao: `/kick motivo` expulsa e libera retorno voluntario; `/ban motivo` imped
 ## Politicas por grupo e boas-vindas
 
 Copie `config/politicas.example.json` para `data/local/politicas.json`, ajuste o ID real e configure `CAMINHO_POLITICAS=data/local/politicas.json`. Cada grupo autorizado pode ter `welcome.text` e `welcome.rules` (texto ou link, ate 250 caracteres cada). `{user}` e substituido por username ou ID. Uma mensagem por membro em entradas multiplas; reentrega do mesmo evento e ignorada por 10 minutos. Sem politica, boas-vindas ficam desligadas. Falha de envio e auditada e nao repete automaticamente. Reinicie para carregar mudancas do arquivo.
+
+## Antispam em observacao
+
+Opcao por grupo: `spam` com `flood_limit`, `flood_window`, `repeat_limit`, `repeat_window`. Limites inteiros 1..100; janelas em segundos 1..3600. Detecao ao exceder limite; janela (agora-janela, agora]. Repeticao compara texto/legenda NFKC, caixa ignorada, espacos colapsados. Ignora bots, autores anonimos, admins, servico e duplicatas. Logs limitados por regra/usuario/grupo a um/60s. Estado limitado e temporario, reinicio zera contadores. Somente observacao, sem punicoes.

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from telebot import TeleBot
 from kannabot.audit import Audit
+from kannabot.antispam import Antispam, register as register_antispam
 from kannabot.policy import Policy
 from kannabot.welcome import Welcome, register as register_welcome
 from kannabot.storage import WarningStore
@@ -18,6 +19,8 @@ def create_app(configuracao=None, client=None, home=None):
     bot.kanna_audit = Audit(bot, settings.log_chat_id, root / "var/audit.jsonl", secrets=(settings.token,))
     store = WarningStore(root / "var/moderation.sqlite3")
     bot.kanna_moderation = Moderation(bot, settings, store, bot.kanna_audit)
+    bot.kanna_antispam = Antispam(bot, settings, policy, bot.kanna_audit)
+    register_antispam(bot, bot.kanna_antispam)
     register_moderation(bot, bot.kanna_moderation)
     register_welcome(bot, Welcome(bot, settings, policy, bot.kanna_audit))
     register(bot, settings, root / "var")
