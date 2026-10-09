@@ -2,6 +2,7 @@ from collections import OrderedDict
 from functools import partial
 from html import escape
 from threading import RLock
+from telebot.apihelper import ApiTelegramException
 from kannabot._config.mensagem_usuario import Mensagem_Usuario
 from kannabot.emotes.construcao_acoes import Construcao_Acoes
 from kannabot.emotes.open_json import Abrir_Arquivos_Emotes
@@ -21,6 +22,12 @@ CALLBACKS = {
  'Aceitar_Toca_Aqui':('Case_Aceita_Highfive','target'), 'Rejeitar_Toca_Aqui':('Case_Rejeita_Highfive','target'),
  'Aceitar_Lambida':('Case_Revida_Lick','target'), 'Rejeitar_Lambida':('Case_Rejeita_Lick','target'),
  'Acenar_de_Volta':('Case_Devolve_Wave','target'), 'Cumprimentar':('Case_Welcome_Wave','other')}
+
+class UnresolvedTarget(ValueError):
+    pass
+
+class ConfirmedSendFailure(RuntimeError):
+    pass
 
 class Emotes:
     def __init__(self,bot,config):
@@ -43,20 +50,32 @@ class Emotes:
         target=msg.Target()
         reply=getattr(message,'reply_to_message',None)
         target_user=getattr(reply,'from_user',None)
-        if target is None and target_user:
-            target='@'+escape(target_user.username or str(target_user.id))
-        target_id=target_user.id if target_user else None
-        if target_id is None and target:
-            with self.lock:target_id=self.known.get((message.chat.id,target.lstrip('@').casefold()))
+        target_id = None
+        if target_user:
+            reply_target = '@' + escape(target_user.username or str(target_user.id))
+            if target is not None and target.casefold() != reply_target.casefold():
+                self.bot.send_message(message.chat.id, 'O argumento e a resposta indicam pessoas diferentes. Use apenas a resposta à mensagem do alvo.')
+                return
+            target, target_id = reply_target, target_user.id
+        elif target:
+            with self.lock:
+                target_id = self.known.get((message.chat.id, target.lstrip('@').casefold()))
         actions=Construcao_Acoes(self.bot,msg,Abrir_Arquivos_Emotes())
         # Capture the message ID returned by send_animation for callback context.
         owner=message.from_user.id
         class Sender:
             def send_animation(inner,*args,**kwargs):
-                sent=self.bot.send_animation(*args,**kwargs)
                 markup=kwargs.get('reply_markup')
+                buttons={b.callback_data for row in markup.keyboard for b in row} if markup else set()
+                if target_id is None and any(CALLBACKS.get(button, ('', 'target'))[1] == 'target' for button in buttons):
+                    raise UnresolvedTarget()
+                try:
+                    sent=self.bot.send_animation(*args,**kwargs)
+                except ApiTelegramException as error:
+                    if error.error_code in (400, 403, 429):
+                        raise ConfirmedSendFailure() from None
+                    raise
                 if markup:
-                    buttons={b.callback_data for row in markup.keyboard for b in row}
                     self.interactions.put((message.chat.id,sent.message_id),dict(actions=actions,owner=owner,target=target_id,buttons=buttons,roles={k:CALLBACKS[k][1] for k in buttons if k in CALLBACKS}))
                 return sent
         actions.bot=Sender();actions.Arguments(target or 'Vazio')
@@ -70,6 +89,8 @@ class Emotes:
         elif target.casefold()==self.config.bot_username.casefold():method='Case_'+name+'_Me'
         else:method='Case_'+name
         try:getattr(actions,method)()
+        except UnresolvedTarget:
+            self.bot.send_message(message.chat.id, 'Não foi possível identificar o alvo. Responda à mensagem da pessoa para usar este emote.')
         except Exception:self.bot.send_message(message.chat.id,'Não foi possível executar o emote.')
     def callback(self,call):
         status='Interação indisponível, expirada ou não autorizada.'
@@ -81,8 +102,12 @@ class Emotes:
                 method=getattr(value['actions'],CALLBACKS[call.data][0])
                 if call.data=='Cumprimentar':method(escape(call.from_user.username or str(call.from_user.id)))
                 else:method()
+                self.interactions.finish(key, call.from_user.id, value, success=True)
                 status=''
-        except Exception:status='Não foi possível concluir a interação.'
+        except ConfirmedSendFailure:
+            self.interactions.finish(key, call.from_user.id, value, success=False)
+            status='O envio foi recusado. Você pode tentar novamente.'
+        except Exception:status='Resultado do envio não confirmado. A interação permanece bloqueada para evitar duplicidade.'
         finally:
             try:self.bot.answer_callback_query(call.id,text=status)
             except Exception:pass

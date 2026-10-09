@@ -24,7 +24,7 @@ class EmoteAccessTests(unittest.TestCase):
         cfg = Configuracao("123:fake", Path(folder)/"groups.json", (-1001,), "@TesteBot")
         register(bot, cfg, Path(folder)/"var")
         message = N(chat=N(id=-1001), message_id=1, text="/wave @target", sender_chat=None,
-                    from_user=N(id=7, username="member", is_bot=False), reply_to_message=None)
+                    from_user=N(id=7, username="member", is_bot=False), reply_to_message=N(from_user=N(id=8, username="target", is_bot=False)))
         return bot, handlers, message
 
     def test_member_executes_all_registered_emotes(self):
