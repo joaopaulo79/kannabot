@@ -140,7 +140,7 @@ def register(bot, configuracao, state_dir):
           Log.Limpar_Log()
 
           if Checar.grupo_autorizado(Msg.Grupo_Id()):
-              if Checar.is_admin(mensagem):
+              if Checar.emote_autorizado(mensagem):
 
                   if Msg.Target() == None:
                     Erro.Erro_Alvo_Indefinido()
@@ -171,7 +171,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -202,7 +202,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -233,7 +233,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Acoes.Arguments("Vazio")
@@ -264,7 +264,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -295,7 +295,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -326,7 +326,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -357,7 +357,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -388,7 +388,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Acoes.Arguments("Vazio")
@@ -420,7 +420,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -451,7 +451,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -482,7 +482,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -513,7 +513,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -543,7 +543,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -573,7 +573,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Erro.Erro_Alvo_Indefinido()
@@ -603,7 +603,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Acoes.Arguments("Vazio")
@@ -634,7 +634,7 @@ def register(bot, configuracao, state_dir):
         Log.Limpar_Log()
 
         if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.is_admin(mensagem):
+          if Checar.emote_autorizado(mensagem):
 
             if Msg.Target() == None:
               Acoes.Arguments("Vazio")
