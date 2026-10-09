@@ -1,5 +1,6 @@
 import unittest
 import sqlite3
+from contextlib import closing
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import Timeout
 from telebot.apihelper import ApiTelegramException
@@ -41,3 +42,14 @@ class DelwarnTests(unittest.TestCase):
             results=list(pool.map(lambda _:self.store.start_delwarn(1,10,7,9,"teste",rule),range(2)))
         self.assertEqual(sum(value is not None for value in results),1)
         self.assertEqual(self.store.history(1,9)[0],1)
+
+
+    def test_legacy_warning_id_differs_from_infraction_reference(self):
+        self.import_rules()
+        with closing(sqlite3.connect(self.path)) as db,db:
+            db.execute("INSERT INTO warnings(id,chat_id,user_id,author_id,reason,time,event_id) VALUES(100,1,9,7,'legacy','old','legacy')")
+        Governance(self.path)
+        result=self.service.handle("delwarn",self.message("/delwarn R10 teste"))
+        self.assertEqual(result.outcome,"done")
+        self.assertIn("advertência #2",result.message)
+        self.assertEqual(self.admin.handle("unwarn",self.message("/unwarn 2 revisão")).outcome,"done")

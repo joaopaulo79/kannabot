@@ -140,5 +140,5 @@ class Governance(WarningStore):
             claim=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,event,"delwarn",actor,target,rule["code"],rule["version"],reason,"pending","Exclusão ainda não confirmada",utcnow()))
             if claim.rowcount!=1:return None
             warning=db.execute("INSERT INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,target,actor,reason,utcnow(),event))
-            db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"],rule["version"],rule["weight"],json.dumps(rule,ensure_ascii=False)))
-            return claim.lastrowid,warning.lastrowid
+            infraction=db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"],rule["version"],rule["weight"],json.dumps(rule,ensure_ascii=False)))
+            return claim.lastrowid,infraction.lastrowid
