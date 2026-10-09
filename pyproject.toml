@@ -1,5 +1,6 @@
 [tool.poetry]
-name = "python-template"
+name = "kannabot"
+packages = [{include = "kannabot", from = "src"}]
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]

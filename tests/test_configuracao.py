@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 RAIZ = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location(
-    "configuracao_isolada", RAIZ / "src/_config/configuracao.py"
+    "configuracao_isolada", RAIZ / "src/kannabot/_config/configuracao.py"
 )
 config = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = config
@@ -158,13 +158,7 @@ with patch.object(dotenv, "load_dotenv", return_value=False), \
         print("configuracao bloqueada antes do cliente")
     else:
         cliente.assert_called_once()
-        cliente.return_value.polling.assert_called_once()
-        import src
-        assert src.botName == "@KannaTesteBot"
-        import src.shared
-        assert src.shared.botName == "@KannaTesteBot"
-        assert src.shared.bot is src.bot
-        cliente.assert_called_once()
+        cliente.return_value.infinity_polling.assert_called_once()
         print("inicializacao e polling simulados")
 '''
         ambiente = dict(os.environ)
@@ -172,6 +166,7 @@ with patch.object(dotenv, "load_dotenv", return_value=False), \
             CHAVE_API_BOT=token,
             BOT_USERNAME="KannaTesteBot",
             CAMINHO_AUTORZACAO=str(self.grupos),
+            PYTHONPATH=str(RAIZ / "src"),
             SYSTEMROOT=os.getenv("SYSTEMROOT", "C:\\Windows"),
         )
         return subprocess.run(

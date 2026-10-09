@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-RAIZ_PROJETO = Path(__file__).resolve().parents[2]
+RAIZ_PROJETO = Path(__file__).resolve().parents[3]
 
 
 class ErroConfiguracao(ValueError):
@@ -24,9 +24,9 @@ class Configuracao:
     bot_username: str
 
 
-def carregar_configuracao(raiz: Path = RAIZ_PROJETO) -> Configuracao:
+def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
     """Lê apenas o .env do projeto; variáveis do processo têm precedência."""
-    raiz = Path(raiz).resolve()
+    raiz = Path(raiz or os.getenv("KANNA_HOME", RAIZ_PROJETO)).resolve()
     load_dotenv(raiz / ".env", override=False, encoding="utf-8")
 
     token = os.getenv("CHAVE_API_BOT", "").strip()

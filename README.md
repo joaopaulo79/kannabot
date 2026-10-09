@@ -16,7 +16,7 @@ py -3.10 -m venv .venv
 py -3.10 -m venv .tools/poetry
 & .tools/poetry/Scripts/python.exe -m pip install "poetry==1.8.5"
 & .tools/poetry/Scripts/poetry.exe env use .venv/Scripts/python.exe
-& .tools/poetry/Scripts/poetry.exe install --no-root
+& .tools/poetry/Scripts/poetry.exe install
 ```
 
 O Poetry usa `poetry.lock` para instalar as versões registradas. Não use uma
@@ -90,7 +90,7 @@ de produção enquanto testa o desenvolvimento.
 Depois de configurar e confirmar o ambiente de testes:
 
 ```powershell
-& .tools/poetry/Scripts/poetry.exe run python main.py
+& .tools/poetry/Scripts/poetry.exe run python -m kannabot
 ```
 
 Esse comando conecta o bot ao Telegram. Execute na raiz porque os recursos
@@ -112,3 +112,6 @@ Falhas de permissão no Telegram exigem conferir os direitos do bot no grupo.
 Esta preparação não corrige a autorização de administradores nem o estado
 compartilhado dos emotes. Esses problemas precisam ser resolvidos antes de
 habilitar moderação ou usar esta fase do desenvolvimento em produção.
+
+## Pacote e dados
+Imports não inicializam o bot. Use `python -m kannabot`. `KANNA_HOME` aponta para a pasta local de configuração (.env, data/local, var) ao executar fora da raiz. Os recursos estáticos acompanham o pacote; cliques usam var, nunca arquivos rastreados. O estado antigo dos botões é efêmero e não é migrado; o histórico Git permanece intacto.
