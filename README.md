@@ -139,3 +139,5 @@ Copie `config/politicas.example.json` para `data/local/politicas.json`, ajuste o
 ## Antispam em observacao
 
 Opcao por grupo: `spam` com `flood_limit`, `flood_window`, `repeat_limit`, `repeat_window`. Limites inteiros 1..100; janelas em segundos 1..3600. Detecao ao exceder limite; janela (agora-janela, agora]. Repeticao compara texto/legenda NFKC, caixa ignorada, espacos colapsados. Ignora bots, autores anonimos, admins, servico e duplicatas. Logs limitados por regra/usuario/grupo a um/60s. Estado limitado e temporario, reinicio zera contadores. Somente observacao, sem punicoes.
+
+Links: opcao `links` por grupo com `allow` e `deny` (listas de hosts) e `include_subdomains` booleano. Deny prevalece; allow nao vazio exige dominio listado. Subdominios so entram quando a opcao e true, por sufixo `.dominio`, nunca substring. Hosts normalizados IDNA/caixa/ponto final. Esquemas HTTP/HTTPS; URL malformada ou esquema de entidade nao suportado e sinalizado. Texto, legenda e entidades url/text_link sao inspecionados, respeitando offsets UTF-16. Sem visitas, redirects ou reputacao externa. Ainda somente observa.
