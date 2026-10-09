@@ -185,10 +185,10 @@ class Moderation:
                 if self.bot.unban_chat_member(chat_id, target, only_if_banned=True) is not True:
                     raise RuntimeError("Unban not confirmed")
                 return Result("done", "Banimento removido; o membro pode retornar voluntariamente.")
+            previous=self.governance.role(chat_id,target) if command=="ban" and self.governance else "member"
             if self.bot.ban_chat_member(chat_id, target) is not True:
                 raise RuntimeError("Ban not confirmed")
             if command == "ban":
-                previous=self.governance.role(chat_id,target) if self.governance else "member"
                 if previous in ("admin","mod"):
                     try:self.governance.set_role(chat_id,target,"member",actor,cause="confirmed_ban")
                     except Exception:raise BanRoleRevocationFailure() from None
