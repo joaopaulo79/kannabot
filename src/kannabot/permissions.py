@@ -22,6 +22,19 @@ class Permissions:
     def is_admin(self, chat_id, user_id):
         return self.member(chat_id, user_id).status in ("administrator", "creator")
 
+    def emote_actor(self, message):
+        """Allow identified group members to use social commands."""
+        user = getattr(message, "from_user", None)
+        if getattr(message, "sender_chat", None) is not None or user is None or getattr(user, "is_bot", False):
+            raise PermissionDenied("Emote requer membro identificado.")
+        role = self.member(message.chat.id, user.id)
+        allowed = role.status in ("member", "administrator", "creator")
+        if role.status == "restricted":
+            allowed = getattr(role, "is_member", False) is True
+        if not allowed:
+            raise PermissionDenied("Emote requer membro do grupo autorizado.")
+        return user.id
+
     def actor(self, message):
         user = getattr(message, "from_user", None)
         if getattr(message, "sender_chat", None) is not None or user is None or getattr(user, "is_bot", False):
