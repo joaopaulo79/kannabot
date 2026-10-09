@@ -1,657 +1,120 @@
-from kannabot._config.checagem_autorizacao import Checagens_Autorizacao
-from kannabot.emotes.construcao_acoes import Construcao_Acoes
-from kannabot._config.erros_utilizacao import Erros_Utilizacao
+from collections import OrderedDict
+from functools import partial
+from html import escape
+from threading import RLock
+from telebot.apihelper import ApiTelegramException
 from kannabot._config.mensagem_usuario import Mensagem_Usuario
+from kannabot.emotes.construcao_acoes import Construcao_Acoes
 from kannabot.emotes.open_json import Abrir_Arquivos_Emotes
-from kannabot.emotes.verificar_button import Verificar_Button
+from kannabot.permissions import Permissions, PermissionDenied
+from kannabot.interacoes import Interactions
 
-def register(bot, configuracao, state_dir):
-    Msg = Mensagem_Usuario()
-    Abrir = Abrir_Arquivos_Emotes()
-    botName = configuracao.bot_username
-    Checar = Checagens_Autorizacao(bot, configuracao)
-    Acoes = Construcao_Acoes(bot, Msg, Abrir)
-    Erro = Erros_Utilizacao(bot, Msg)
-    Log = Verificar_Button(Msg, str(state_dir / "log_buttons.json"))
-    #Def que analisa todos os cliques em botões de URL
-    @bot.callback_query_handler(func=lambda call: True)
-    def handle_callback(call):
-      user = 0
-      try:
-        if Log.Ja_Clicou(call.from_user.id):
-          print(f"O usuário {call.from_user.username} já clicou no botão.")
-          return
+COMMANDS = "punch slap kiss shy hug cuddle pat push stare highfive poke bite lick bonk tickle wave cry".split()
+CALLBACKS = {
+ 'Pedir_Desculpa_Punch':('Case_Punch_Me_Desculpa','owner'),
+ 'Devolver_Soco':('Case_Revida_Punch','target'),
+ 'Devolver_Tapa':('Case_Revida_Slap','target'),
+ 'Pedir_Desculpa_Slap':('Case_Slap_Me_Desculpa','owner'),
+ 'Rejeitar_Beijo':('Case_Rejeita_Kiss','target'), 'Aceitar_Beijo':('Case_Choque_Kiss','target'),
+ 'Aceitar_Abraço':('Case_Choque_Hug','target'), 'Rejeitar_Abraço':('Case_Rejeita_Hug','target'),
+ 'Aceitar_Carinho':('Case_Choque_Cuddle','target'), 'Rejeitar_Carinho':('Case_Rejeita_Cuddle','target'),
+ 'Aceitar_Cafuné':('Case_Choque_Pat','target'), 'Rejeitar_Cafuné':('Case_Rejeita_Pat','target'),
+ 'Aceitar_Toca_Aqui':('Case_Aceita_Highfive','target'), 'Rejeitar_Toca_Aqui':('Case_Rejeita_Highfive','target'),
+ 'Aceitar_Lambida':('Case_Revida_Lick','target'), 'Rejeitar_Lambida':('Case_Rejeita_Lick','target'),
+ 'Acenar_de_Volta':('Case_Devolve_Wave','target'), 'Cumprimentar':('Case_Welcome_Wave','other')}
 
-        if call.data == "Pedir_Desculpa_Punch":
-          if Log.Case_Username_Username(call.from_user.username, call.from_user.id):
-            Acoes.Case_Punch_Me_Desculpa()
-          else:
-            pass
-        elif call.data == "Devolver_Soco":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Revida_Punch()
-          else:
-            pass
-        elif call.data == "Devolver_Tapa":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Revida_Slap()
-          else:
-            pass
-        elif call.data == "Pedir_Desculpa_Slap":
-          if Log.Case_Username_Username(call.from_user.username, call.from_user.id):
-            Acoes.Case_Slap_Me_Desculpa()
-          else:
-            pass
-        elif call.data == "Rejeitar_Beijo":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Rejeita_Kiss()
-          else:
-            pass
-        elif call.data == "Aceitar_Beijo":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Choque_Kiss()
-          else:
-            pass
-        elif call.data == "Aceitar_Abraço":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Choque_Hug()
-          else:
-            pass
-        elif call.data == "Rejeitar_Abraço":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Rejeita_Hug()
-          else:
-            pass
-        elif call.data == "Aceitar_Carinho":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Choque_Cuddle()
-          else:
-            pass
-        elif call.data == "Rejeitar_Carinho":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Rejeita_Cuddle()
-          else:
-            pass
-        elif call.data == "Aceitar_Cafuné":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Choque_Pat()
-          else:
-            pass
-        elif call.data == "Rejeitar_Cafuné":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Rejeita_Pat()
-          else:
-            pass
-        elif call.data == "Aceitar_Toca_Aqui":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Aceita_Highfive()
-          else:
-            pass
-        elif call.data == "Rejeitar_Toca_Aqui":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Rejeita_Highfive()
-          else:
-            pass
-        elif call.data == "Aceitar_Lambida":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Revida_Lick()
-          else:
-            pass
-        elif call.data == "Rejeitar_Lambida":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Rejeita_Lick()
-          else:
-            pass
-        elif call.data == "Acenar_de_Volta":
-          if Log.Case_Username_TargetUsername(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Devolve_Wave()
-          else:
-            pass
-        elif call.data == "Cumprimentar":
-          if Log.Case_Username_Not_Username(call.from_user.username, call.from_user.id):
-            user += 1
-            Acoes.Case_Welcome_Wave(call.from_user.username)
-          else:
-            pass
-      except:
-        Erro.Erro_Button(user)
+class UnresolvedTarget(ValueError):
+    pass
 
-    #Def que analisa o comando /punch
-    @bot.message_handler(commands=["punch"])
-    def punch(mensagem):
-      try:
-          Erro.Arguments(mensagem)
-          Msg.Arguments(mensagem)
-          Log.Limpar_Log()
+class ConfirmedSendFailure(RuntimeError):
+    pass
 
-          if Checar.grupo_autorizado(Msg.Grupo_Id()):
-              if Checar.emote_autorizado(mensagem):
-
-                  if Msg.Target() == None:
-                    Erro.Erro_Alvo_Indefinido()
-
-                  else:
-                    Acoes.Arguments(Msg.Target())
-
-                    if f"@{Msg.Username()}" == Msg.Target():
-                        Acoes.Case_Auto_Punch()
-                    else:
-                        if Msg.Target() != botName:
-                            Acoes.Case_Punch()
-                        else:
-                            Acoes.Case_Punch_Me()
-              else:
-                  Erro.Erro_Admin()
-          else:
-              Erro.Erro_Grupo()
-      except:
-          Erro.Erro_Comando()
-
-    #Def que analisa o comando /slap
-    @bot.message_handler(commands=["slap"])
-    def slap(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
+class Emotes:
+    def __init__(self,bot,config):
+        self.bot,self.config=bot,config
+        self.permissions=Permissions(bot,config.grupos_id)
+        self.interactions=Interactions()
+        self.known=OrderedDict();self.lock=RLock()
+    def observe(self,message):
+        with self.lock:
+            for user in (getattr(message,'from_user',None),getattr(getattr(message,'reply_to_message',None),'from_user',None)):
+                if user and user.username:
+                    key=(message.chat.id,user.username.casefold());self.known[key]=user.id;self.known.move_to_end(key)
+            while len(self.known)>1000:self.known.popitem(last=False)
+    def command(self,command,message):
+        if not self.permissions.authorized(message.chat.id):return
+        try:self.permissions.emote_actor(message)
+        except PermissionDenied:return
+        self.observe(message)
+        msg=Mensagem_Usuario();msg.Arguments(message)
+        target=msg.Target()
+        reply=getattr(message,'reply_to_message',None)
+        target_user=getattr(reply,'from_user',None)
+        target_id = None
+        if target_user:
+            reply_target = '@' + escape(target_user.username or str(target_user.id))
+            if target is not None and target.casefold() != reply_target.casefold():
+                self.bot.send_message(message.chat.id, 'O argumento e a resposta indicam pessoas diferentes. Use apenas a resposta à mensagem do alvo.')
+                return
+            target, target_id = reply_target, target_user.id
+        elif target:
+            with self.lock:
+                target_id = self.known.get((message.chat.id, target.lstrip('@').casefold()))
+        actions=Construcao_Acoes(self.bot,msg,Abrir_Arquivos_Emotes())
+        # Capture the message ID returned by send_animation for callback context.
+        owner=message.from_user.id
+        class Sender:
+            def send_animation(inner,*args,**kwargs):
+                markup=kwargs.get('reply_markup')
+                buttons={b.callback_data for row in markup.keyboard for b in row} if markup else set()
+                if target_id is None and any(CALLBACKS.get(button, ('', 'target'))[1] == 'target' for button in buttons):
+                    raise UnresolvedTarget()
+                try:
+                    sent=self.bot.send_animation(*args,**kwargs)
+                except ApiTelegramException as error:
+                    if error.error_code in (400, 403, 429):
+                        raise ConfirmedSendFailure() from None
+                    raise
+                if markup:
+                    self.interactions.put((message.chat.id,sent.message_id),dict(actions=actions,owner=owner,target=target_id,buttons=buttons,roles={k:CALLBACKS[k][1] for k in buttons if k in CALLBACKS}))
+                return sent
+        actions.bot=Sender();actions.Arguments(target or 'Vazio')
+        name=command.capitalize()
+        is_self=target_id==owner or target==f'@{msg.Username()}'
+        if target is None or is_self:
+            if command in ('shy','stare','wave','cry') or (is_self and command in ('punch','slap','kiss')):
+                method='Case_Auto_'+name
             else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Acoes.Case_Auto_Slap()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Slap()
-                else:
-                  Acoes.Case_Slap_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /kiss
-    @bot.message_handler(commands=["kiss"])
-    def kiss(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Acoes.Case_Auto_Kiss()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Kiss()
-                else:
-                  Acoes.Case_Kiss_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /shy
-    @bot.message_handler(commands=["shy"])
-    def shy(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Acoes.Arguments("Vazio")
-              Acoes.Case_Auto_Shy()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-              if f"@{Msg.Username()}" == Msg.Target():
-                Acoes.Case_Auto_Shy()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Shy()
-                else:
-                  Acoes.Case_Shy_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /hug
-    @bot.message_handler(commands=["hug"])
-    def hug(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Hug()
-                else:
-                  Acoes.Case_Hug_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /cuddle
-    @bot.message_handler(commands=["cuddle"])
-    def cuddle(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Cuddle()
-                else:
-                  Acoes.Case_Cuddle_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /pat
-    @bot.message_handler(commands=["pat"])
-    def pat(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Pat()
-                else:
-                  Acoes.Case_Pat_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /push
-    @bot.message_handler(commands=["push"])
-    def push(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Push()
-                else:
-                  Acoes.Case_Push_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /stare
-    @bot.message_handler(commands=["stare"])
-    def stare(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Acoes.Arguments("Vazio")
-              Acoes.Case_Auto_Stare()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Stare()
-                else:
-                  Acoes.Case_Stare_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /highfive
-    @bot.message_handler(commands=["highfive"])
-    def highfive(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Highfive()
-                else:
-                  Acoes.Case_Highfive_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /poke
-    @bot.message_handler(commands=["poke"])
-    def poke(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Poke()
-                else:
-                  Acoes.Case_Poke_Me()
-          else:
-              Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /bite
-    @bot.message_handler(commands=["bite"])
-    def bite(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Bite()
-                else:
-                  Acoes.Case_Bite_Me()
-          else:
-              Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /lick
-    @bot.message_handler(commands=["lick"])
-    def lick(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Lick()
-                else:
-                  Acoes.Case_Lick_Me()
-          else:
-              Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /bonk
-    @bot.message_handler(commands=["bonk"])
-    def bonk(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Bonk()
-                else:
-                  Acoes.Case_Bonk_Me()
-          else:
-              Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /tickle
-    @bot.message_handler(commands=["tickle"])
-    def tickle(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Erro.Erro_Alvo_Indefinido()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Tickle()
-                else:
-                  Acoes.Case_Tickle_Me()
-          else:
-              Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /wave
-    @bot.message_handler(commands=["wave"])
-    def wave(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Acoes.Arguments("Vazio")
-              Acoes.Case_Auto_Wave()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-              if f"@{Msg.Username()}" == Msg.Target():
-                Erro.Erro_Alvo_Indefinido()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Wave()
-                else:
-                  Acoes.Case_Wave_Me()
-          else:
-              Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
-
-    #Def que analisa o comando /cry
-    @bot.message_handler(commands=["cry"])
-    def cry(mensagem):
-      try:
-        Erro.Arguments(mensagem)
-        Msg.Arguments(mensagem)
-        Log.Limpar_Log()
-
-        if Checar.grupo_autorizado(Msg.Grupo_Id()):
-          if Checar.emote_autorizado(mensagem):
-
-            if Msg.Target() == None:
-              Acoes.Arguments("Vazio")
-              Acoes.Case_Auto_Cry()
-
-            else:
-              Acoes.Arguments(Msg.Target())
-              if f"@{Msg.Username()}" == Msg.Target():
-                Acoes.Case_Auto_Cry()
-              else:
-                if Msg.Target() != botName:
-                  Acoes.Case_Cry()
-                else:
-                  Acoes.Case_Cry_Me()
-          else:
-            Erro.Erro_Admin()
-        else:
-          Erro.Erro_Grupo()
-      except:
-        Erro.Erro_Comando()
+                self.bot.send_message(message.chat.id,'Responda à mensagem do alvo ou informe @username.');return
+        elif target.casefold()==self.config.bot_username.casefold():method='Case_'+name+'_Me'
+        else:method='Case_'+name
+        try:getattr(actions,method)()
+        except UnresolvedTarget:
+            self.bot.send_message(message.chat.id, 'Não foi possível identificar o alvo. Responda à mensagem da pessoa para usar este emote.')
+        except Exception:self.bot.send_message(message.chat.id,'Não foi possível executar o emote.')
+    def callback(self,call):
+        status='Interação indisponível, expirada ou não autorizada.'
+        try:
+            if not getattr(call,'message',None) or not self.permissions.authorized(call.message.chat.id):return
+            key=(call.message.chat.id,call.message.message_id)
+            value=self.interactions.claim(key,call.from_user.id,call.data)
+            if value and call.data in CALLBACKS:
+                method=getattr(value['actions'],CALLBACKS[call.data][0])
+                if call.data=='Cumprimentar':method(escape(call.from_user.username or str(call.from_user.id)))
+                else:method()
+                self.interactions.finish(key, call.from_user.id, value, success=True)
+                status=''
+        except ConfirmedSendFailure:
+            self.interactions.finish(key, call.from_user.id, value, success=False)
+            status='O envio foi recusado. Você pode tentar novamente.'
+        except Exception:status='Resultado do envio não confirmado. A interação permanece bloqueada para evitar duplicidade.'
+        finally:
+            try:self.bot.answer_callback_query(call.id,text=status)
+            except Exception:pass
+
+def register(bot,config,state_dir):
+    service=Emotes(bot,config)
+    for command in COMMANDS:
+        bot.message_handler(commands=[command])(partial(service.command,command))
+    bot.callback_query_handler(func=lambda call:True)(service.callback)
+    return service
