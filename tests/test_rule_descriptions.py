@@ -38,3 +38,12 @@ class RuleDescriptionTests(unittest.TestCase):
         bot=Mock();send_reply(bot,1,"a"*2000+"\n"+"b"*2000)
         self.assertEqual(bot.send_message.call_count,2)
         self.assertTrue(all(len(c.args[1])<=3500 for c in bot.send_message.call_args_list))
+
+
+    def test_catalog_explains_duration_range_and_undefined_conditions(self):
+        self.import_rules()
+        result=self.admin.handle("catalog",self.message("/catalog R10"))
+        self.assertIn("1 dia a 1 semana",result.message)
+        result=self.admin.handle("catalog",self.message("/catalog R01"))
+        self.assertIn("reincidência",result.message)
+        self.assertIn("não definido",result.message)

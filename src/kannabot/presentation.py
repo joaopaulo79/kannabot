@@ -32,11 +32,20 @@ def brief(rule):
 def rule_text(rule):
     weight=rule["weight"] if rule["weight"] is not None else "não definido"
     actions={"warn":"Advertência","delete":"Exclusão","mute":"Silenciamento","ban":"Banimento"}
+    conditions=[]
+    bounds={"N1":"5 a 59 minutos","N2":"1 a 24 horas","N3":"1 dia a 1 semana"}
+    if "mute" in rule["actions"] and rule["level"] in bounds:
+        conditions.append("Faixa de silenciamento: "+bounds[rule["level"]]+".")
+    if rule["weight"] is None:
+        conditions.append("Peso de advertência não definido; não presumir valor.")
+    if rule["level"]=="N1":
+        conditions.append("Advertência por reincidência depende de critérios e peso definidos pela administração.")
     return (f"📖 {escape(rule['code'])} — {escape(rule['name'])}\n"
             f"Nível: {rule['level']} · Peso: {weight} · Versão: {rule['version']}\n"
             f"Estado: {'ativa' if rule['active'] else 'revogada'}\n\n"
             f"{escape(rule['description'])}\n\n"
             "Ações cadastradas: "+", ".join(actions[a] for a in rule["actions"])+
+            ("\n"+"\n".join(conditions) if conditions else "")+
             "\nA aplicação depende da moderação. Esta consulta não executa punições.")
 
 
