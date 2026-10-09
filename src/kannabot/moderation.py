@@ -1,9 +1,20 @@
 """Moderation services: validation precedes effects; failures are audited."""
+import re
+from telebot.types import ChatPermissions
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from html import escape
 from kannabot.permissions import Permissions, PermissionDenied
 from kannabot.interacoes import Seen
+
+def parse_duration(text):
+    match = re.fullmatch(r"([1-9][0-9]{0,8})([smhd])", text)
+    if match is None:
+        raise ValueError("Use duração como 10m, 2h ou 1d.")
+    seconds = int(match[1]) * {"s":1, "m":60, "h":3600, "d":86400}[match[2]]
+    if not 60 <= seconds <= 365 * 86400:
+        raise ValueError("Duração deve ficar entre 60 segundos e 365 dias.")
+    return seconds
 
 @dataclass(frozen=True)
 class Result:
@@ -35,6 +46,13 @@ class Moderation:
             reply, target = self.reply_target(message)
             parts = message.text.split(maxsplit=1)
             reason = self.audit.clean(parts[1].strip()) if len(parts)>1 else ""
+            duration = None
+            if command == "mute":
+                mute_parts = parts[1].split(maxsplit=1) if len(parts)>1 else []
+                if len(mute_parts) != 2:
+                    raise ValueError("Use /mute duração motivo em resposta.")
+                duration = parse_duration(mute_parts[0])
+                reason = self.audit.clean(mute_parts[1].strip())
             if command == "warnings":
                 total, rows = self.store.history(message.chat.id, target)
                 lines = [f"Advertências: {total} (últimas {len(rows)})."]
@@ -44,7 +62,7 @@ class Moderation:
                 if not reason:
                     raise ValueError("Informe um motivo explícito.")
                 self.permissions.target(message.chat.id, target)
-                result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}")
+                result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration)
         except (PermissionDenied, ValueError) as exc:
             result = Result("refused", str(exc))
         except Exception as exc:
@@ -53,7 +71,24 @@ class Moderation:
         self.audit.record(message.chat.id, actor, target, command, reason, result.outcome, error)
         return result
 
-    def execute(self, command, chat_id, actor, target, message_id, reason, event_id):
+    def execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None):
+        if command == "mute":
+            if type(duration) is not int or not 60 <= duration <= 365 * 86400:
+                raise ValueError("Duração temporária inválida.")
+            if self.bot.get_chat(chat_id).type != "supergroup":
+                raise ValueError("Silêncio temporário requer supergrupo.")
+            self.permissions.bot_right(chat_id, "can_restrict_members")
+            if not self.seen.claim((chat_id, event_id, command)):
+                return Result("refused", "Este silêncio já foi processado.")
+            permissions = ChatPermissions(can_send_messages=False, can_send_audios=False,
+                can_send_documents=False, can_send_photos=False, can_send_videos=False,
+                can_send_video_notes=False, can_send_voice_notes=False, can_send_polls=False,
+                can_send_other_messages=False, can_add_web_page_previews=False)
+            until = int(self.clock().timestamp()) + duration
+            if self.bot.restrict_chat_member(chat_id, target, permissions=permissions,
+                    until_date=until, use_independent_chat_permissions=True) is not True:
+                raise RuntimeError("Restriction not confirmed")
+            return Result("done", f"Membro silenciado por {duration} segundos.")
         if command == "delete":
             self.permissions.bot_right(chat_id, "can_delete_messages")
             if not self.seen.claim((chat_id, message_id, command)):
