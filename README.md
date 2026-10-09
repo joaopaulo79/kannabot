@@ -23,6 +23,13 @@ O Poetry usa `poetry.lock` para instalar as versões registradas. Não use uma
 instalação avulsa de dependências para contornar o lock. `--no-root` instala
 somente as dependências enquanto a estrutura atual não é um pacote distribuível.
 
+No VS Code, selecione o Python da `.venv`: `Ctrl+Shift+P` →
+`Python: Select Interpreter` → `.venv\Scripts\python.exe`. O projeto indica
+`.venv` como ambiente padrão; uma seleção anterior no editor precisa ser
+alterada manualmente. Se `from dotenv import load_dotenv` aparecer como import
+não encontrado, confira essa seleção e recarregue a janela. O pacote instalado
+se chama `python-dotenv`, e seu módulo Python se chama `dotenv`.
+
 ## Configuração local
 
 Crie os arquivos locais apenas se não existirem:

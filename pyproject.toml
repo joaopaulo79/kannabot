@@ -15,7 +15,9 @@ python-dotenv = ">=1.0,<2.0"
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 useLibraryCodeForTypes = true
-exclude = [".cache"]
+venvPath = "."
+venv = ".venv"
+exclude = [".cache", ".venv", ".tools"]
 
 [tool.ruff]
 # https://beta.ruff.rs/docs/configuration/
