@@ -115,3 +115,9 @@ habilitar moderação ou usar esta fase do desenvolvimento em produção.
 
 ## Pacote e dados
 Imports não inicializam o bot. Use `python -m kannabot`. `KANNA_HOME` aponta para a pasta local de configuração (.env, data/local, var) ao executar fora da raiz. Os recursos estáticos acompanham o pacote; cliques usam var, nunca arquivos rastreados. O estado antigo dos botões é efêmero e não é migrado; o histórico Git permanece intacto.
+
+## Auditoria administrativa
+
+Configure `LOG_CHAT_ID` no `.env` local com o ID negativo de um grupo privado dedicado aos administradores. Adicione o bot e permita enviar mensagens. Mantenha nesse grupo somente pessoas autorizadas a consultar moderacao; nao configure um grupo publico. Cada registro inclui horario UTC, grupo, autor (ou automacao), alvo, acao, motivo e resultado.
+
+Sem destino configurado, destino publico ou falha de entrega, o registro sanitizado vai para `KANNA_HOME/var/audit.jsonl`. Falhar ao registrar nao repete uma punicao. O arquivo local e ignorado pelo Git; restrinja seu acesso e retenha apenas pelo periodo necessario. Erros registram a classe da excecao, sem payload ou token.

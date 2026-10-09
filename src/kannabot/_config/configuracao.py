@@ -22,6 +22,7 @@ class Configuracao:
     caminho_autorizacao: Path
     grupos_id: tuple[int, ...]
     bot_username: str
+    log_chat_id: int | None = None
 
 
 def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
@@ -67,4 +68,7 @@ def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
         raise ErroConfiguracao(
             "O JSON de CAMINHO_AUTORZACAO deve conter grupos_id como lista de inteiros."
         )
-    return Configuracao(token, arquivo, tuple(grupos), f"@{username}")
+    log_id = os.getenv("LOG_CHAT_ID", "").strip()
+    if log_id and not re.fullmatch(r"-[1-9][0-9]*", log_id):
+        raise ErroConfiguracao("LOG_CHAT_ID deve ser o ID negativo de um grupo privado.")
+    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None)
