@@ -23,6 +23,7 @@ class Configuracao:
     grupos_id: tuple[int, ...]
     bot_username: str
     log_chat_id: int | None = None
+    policy_path: Path | None = None
 
 
 def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
@@ -71,4 +72,6 @@ def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
     log_id = os.getenv("LOG_CHAT_ID", "").strip()
     if log_id and not re.fullmatch(r"-[1-9][0-9]*", log_id):
         raise ErroConfiguracao("LOG_CHAT_ID deve ser o ID negativo de um grupo privado.")
-    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None)
+    policy_path = os.getenv("CAMINHO_POLITICAS", "").strip()
+    policy_file = (raiz / policy_path).resolve() if policy_path else None
+    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file)

@@ -21,7 +21,7 @@ class AppTests(unittest.TestCase):
             cfg = Configuracao("123:fake", Path(folder)/"g.json", (-1001,), "@TesteBot")
             client = MagicMock()
             create_app(cfg, client, folder)
-            commands = [call.kwargs["commands"][0] for call in client.message_handler.call_args_list]
+            commands = [call.kwargs["commands"][0] for call in client.message_handler.call_args_list if "commands" in call.kwargs]
             self.assertTrue(set("punch slap kiss shy hug cuddle pat push stare highfive poke bite lick bonk tickle wave cry".split()).issubset(set(commands)))
             client.infinity_polling.assert_not_called()
             self.assertTrue((Path(folder)/"var/moderation.sqlite3").exists())
