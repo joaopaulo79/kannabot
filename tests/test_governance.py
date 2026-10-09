@@ -13,6 +13,10 @@ from kannabot.storage import WarningStore
 from kannabot.governance import Governance
 from kannabot.roles import Roles
 from kannabot.moderation import Moderation
+from kannabot.review import Review
+from kannabot.review_store import ReviewStore
+from kannabot.antispam import Detection
+from kannabot.app import create_app
 from kannabot.administration import Administration
 
 class GovernanceTests(unittest.TestCase):
@@ -132,3 +136,48 @@ class GovernanceTests(unittest.TestCase):
         data["actions"]=[{}]
         self.assertEqual(self.admin.handle("rule_set",self.message("/rule_set "+json.dumps(data),actor=1)).outcome,"refused")
         self.assertIsNone(self.store.rule(1,"R20"))
+
+    def make_review(self):
+        queue=ReviewStore(self.path)
+        review=Review(self.service,queue,self.audit)
+        review.observe([Detection("flood",1,9,10)])
+        return review,queue,queue.pending(1)[0][0]
+    def test_real_review_records_weight_only_after_explicit_decision(self):
+        self.import_rules()
+        review,queue,id=self.make_review()
+        self.assertEqual(self.store.points(1,9),0)
+        self.bot.ban_chat_member.assert_not_called()
+        result=review.handle("review",self.message(f"/review {id} warn R10 evidência",actor=8))
+        self.assertEqual(result.outcome,"done")
+        self.assertEqual(self.store.points(1,9),3)
+        self.assertEqual(queue.get(1,id)["status"],"resolved")
+        self.assertEqual(review.handle("review",self.message(f"/review {id} warn R10",actor=8)).outcome,"refused")
+        self.assertEqual(self.store.history(1,9)[0],1)
+        self.bot.ban_chat_member.assert_not_called()
+    def test_review_enforces_mod_capability_and_target_hierarchy(self):
+        self.import_rules()
+        review,queue,id=self.make_review()
+        self.assertEqual(review.handle("review",self.message(f"/review {id} ban R16",actor=8)).outcome,"refused")
+        self.bot.ban_chat_member.assert_not_called()
+        review.observe([Detection("flood",1,7,11)])
+        id=queue.pending(1)[0][0]
+        self.assertEqual(review.handle("review",self.message(f"/review {id} warn R10",actor=8,event=21)).outcome,"refused")
+        self.assertEqual(self.store.points(1,7),0)
+    def test_review_revoked_rule_and_revoked_actor_leave_no_effect(self):
+        self.import_rules()
+        review,queue,id=self.make_review()
+        self.admin.handle("rule_disable",self.message("/rule_disable R10",actor=1))
+        self.assertEqual(review.handle("review",self.message(f"/review {id} warn R10",actor=8)).outcome,"refused")
+        self.assertEqual(queue.get(1,id)["status"],"pending")
+        self.roles.assign(1,1,8,"member")
+        self.assertEqual(review.handle("dismiss",self.message(f"/dismiss {id} falso positivo",actor=8)).outcome,"refused")
+        self.assertEqual(self.store.history(1,9)[0],0)
+    def test_application_registers_review_and_administration_without_network(self):
+        cfg=Configuracao("123:fake",Path("x"),(1,2),"@TesteBot")
+        bot=Mock();bot.message_handler.side_effect=lambda **kwargs:lambda fn:fn
+        app=create_app(configuracao=cfg,client=bot,home=Path(self.folder.name)/"application")
+        commands={command for call in bot.message_handler.call_args_list for command in call.kwargs.get("commands",[])}
+        self.assertTrue({"review","detections","dismiss","role","rule_set","rules_import","unwarn","hug","ban"}<=commands)
+        self.assertIsInstance(app.kanna_moderation.governance,Governance)
+        self.assertIs(app.kanna_review.moderation,app.kanna_moderation)
+        bot.get_chat_member.assert_not_called();bot.infinity_polling.assert_not_called()
