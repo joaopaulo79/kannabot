@@ -46,3 +46,26 @@ class ModerationTests(unittest.TestCase):
         result=self.service.handle("warnings",self.msg)
         self.assertIn("&lt;reason&gt;",result.message)
         self.msg.from_user.id=8;self.assertEqual(self.service.handle("warnings",self.msg).outcome,"refused")
+
+    def test_delete_targets_reply_once(self):
+        self.bot.delete_message.return_value=True
+        result=self.service.handle("delete",self.msg)
+        self.assertEqual(result.outcome,"done")
+        self.bot.delete_message.assert_called_once_with(1,10)
+        self.msg.message_id=21
+        self.assertEqual(self.service.handle("delete",self.msg).outcome,"refused")
+        self.bot.delete_message.assert_called_once()
+    def test_delete_false_or_missing_right_does_not_succeed(self):
+        self.bot.delete_message.return_value=False
+        self.assertEqual(self.service.handle("delete",self.msg).outcome,"failed")
+        self.bot.delete_message.reset_mock()
+        self.bot.get_chat_member.side_effect=lambda chat,user:N(status="administrator" if user in (7,99) else "member",can_delete_messages=False)
+        self.msg.reply_to_message.message_id=11
+        self.assertEqual(self.service.handle("delete",self.msg).outcome,"refused")
+        self.bot.delete_message.assert_not_called()
+    def test_delete_without_reply_or_non_admin_sends_nothing(self):
+        self.msg.from_user.id=8
+        self.assertEqual(self.service.handle("delete",self.msg).outcome,"refused")
+        self.msg.from_user.id=7;self.msg.reply_to_message=None
+        self.assertEqual(self.service.handle("delete",self.msg).outcome,"refused")
+        self.bot.delete_message.assert_not_called()

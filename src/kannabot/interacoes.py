@@ -34,3 +34,22 @@ class Interactions:
             entry[3].remove(user_id)
             if success:
                 entry[2].add(user_id)
+
+class Seen:
+    """Bounded atomic event claims; replay suppression is temporary."""
+    def __init__(self, ttl=600, capacity=10000, clock=monotonic):
+        self.ttl, self.capacity, self.clock = ttl, capacity, clock
+        self.items = OrderedDict()
+        self.lock = RLock()
+    def claim(self, key):
+        with self.lock:
+            now = self.clock()
+            for old in list(self.items):
+                if self.items[old] <= now:
+                    del self.items[old]
+            if key in self.items:
+                return False
+            self.items[key] = now + self.ttl
+            while len(self.items) > self.capacity:
+                self.items.popitem(last=False)
+            return True
