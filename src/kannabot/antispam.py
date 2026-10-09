@@ -74,8 +74,9 @@ class Antispam:
                 self.audit.record(chat,None,user,"spam_observe",detection.rule,"done")
         return detections
 
-def register(bot,service):
+def register(bot,service,on_detection=None):
     def observe(message):
-        service.handle(message)
+        detections=service.handle(message)
+        if on_detection is not None:on_detection(detections)
         return ContinueHandling()
     bot.message_handler(func=lambda message:True,content_types=["text","audio","document","photo","sticker","video","video_note","voice","animation","location","contact","poll","dice","venue"])(observe)
