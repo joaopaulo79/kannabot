@@ -18,11 +18,17 @@ class Roles:
         return self.store.role(chat,user)
     def authorize(self,chat,user,action):
         role=self.role(chat,user)
-        if action not in CAPABILITIES[role]:raise PermissionDenied("Seu cargo interno não permite esta ação.")
+        if action not in CAPABILITIES[role]:
+            from kannabot.presentation import ROLE_NAMES
+            raise PermissionDenied(f"🛡️ Seu cargo na Kanna é {ROLE_NAMES[role]} e não permite esta ação.")
         return role
-    def target(self,chat,actor,target):
-        if RANK[self.role(chat,actor)]<=RANK[self.role(chat,target)]:
-            raise PermissionDenied("Não é permitido sancionar cargo igual ou superior.")
+    def target(self,chat,actor,target,action=None):
+        actor_role=self.role(chat,actor);target_role=self.role(chat,target)
+        if RANK[actor_role]<=RANK[target_role]:
+            from kannabot.presentation import ROLE_NAMES
+            verb={"ban":"banir","mute":"silenciar","kick":"expulsar","warn":"advertir","delete":"apagar uma mensagem de"}.get(action,"sancionar")
+            if target_role=="owner":raise PermissionDenied(f"Você não pode {verb} o Dono! 😤")
+            raise PermissionDenied(f"🛡️ Você não pode {verb} um {ROLE_NAMES[target_role]}: cargo igual ou superior ao seu.")
     def assign(self,chat,actor,target,role):
         actor_role=self.role(chat,actor)
         if actor_role not in ("owner","admin"):raise PermissionDenied("🛡️ Somente Dono ou Admin gerencia cargos.")

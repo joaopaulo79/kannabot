@@ -47,10 +47,10 @@ class Permissions:
             raise PermissionDenied("Comando exclusivo de administradores.")
         return user.id
 
-    def target(self, chat_id, user_id, actor_id=None):
+    def target(self, chat_id, user_id, actor_id=None, action=None):
         if self.roles is not None:
             if actor_id is None:raise PermissionDenied("Autor necessário para validar hierarquia.")
-            self.roles.target(chat_id, actor_id, user_id)
+            self.roles.target(chat_id, actor_id, user_id, action=action)
             return user_id
         if self.is_admin(chat_id, user_id):
             raise PermissionDenied("Administradores estão protegidos.")

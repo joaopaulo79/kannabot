@@ -108,7 +108,7 @@ class Moderation:
             else:
                 if not reason:
                     raise ValueError("Informe um motivo explícito.")
-                self.permissions.target(message.chat.id, target, actor)
+                self.permissions.target(message.chat.id, target, actor, action=command)
                 if command == "delete" and self.evidence is not None:
                     self.permissions.bot_right(message.chat.id,"can_delete_messages")
                     evidence_id,evidence_state=self.evidence.capture(message.chat.id,reply,f"manual:{message.message_id}",command)
@@ -169,7 +169,7 @@ class Moderation:
         return result
 
     def _execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None, rule=None):
-        self.permissions.target(chat_id, target, actor)
+        self.permissions.target(chat_id, target, actor, action=command)
         if command in ("mute","kick","ban"):
             if self.permissions.member(chat_id,target).status in ("creator","administrator"):
                 raise PermissionDenied("🛡️ O alvo é Administrador ou Dono no Telegram. A ação não foi executada; o cargo nativo precisa ser tratado pela administração.")
@@ -196,7 +196,7 @@ class Moderation:
                     return Result("done","Membro banido. Cargo interno de "+ROLE_NAMES[previous]+" revogado.")
                 return Result("done", "Membro banido.")
             try:
-                self.permissions.target(chat_id, target, actor)
+                self.permissions.target(chat_id, target, actor, action=command)
                 self.permissions.bot_right(chat_id, "can_restrict_members")
                 if self.bot.unban_chat_member(chat_id, target, only_if_banned=True) is not True:
                     raise RuntimeError("Unban not confirmed")

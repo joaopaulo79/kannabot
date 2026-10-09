@@ -42,3 +42,11 @@ class RoleManagementTests(unittest.TestCase):
     def test_native_admin_refused_without_api_effect(self):
         self.assertEqual(self.service.handle("mute",self.message("/mute 1m teste",target=10)).outcome,"refused")
         self.bot.restrict_chat_member.assert_not_called()
+
+
+    def test_owner_refusal_uses_kanna_voice_without_baka(self):
+        result=self.service.handle("ban",self.message("/ban teste",target=1))
+        self.assertEqual(result.outcome,"refused")
+        self.assertIn("Você não pode banir o Dono!",result.message)
+        self.assertNotIn("baka",result.message.lower())
+        self.bot.ban_chat_member.assert_not_called()
