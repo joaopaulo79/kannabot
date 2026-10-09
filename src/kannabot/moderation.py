@@ -35,6 +35,7 @@ class Moderation:
         self.bot, self.store, self.audit = bot, store, audit
         self.roles = roles
         self.identities = None
+        self.evidence = None
         self.governance = store if isinstance(store, Governance) else None
         self.permissions = Permissions(bot, config.grupos_id, roles)
         self.seen = Seen()
@@ -105,6 +106,10 @@ class Moderation:
                 if not reason:
                     raise ValueError("Informe um motivo explícito.")
                 self.permissions.target(message.chat.id, target, actor)
+                if command == "delete" and self.evidence is not None:
+                    self.permissions.bot_right(message.chat.id,"can_delete_messages")
+                    evidence_id,evidence_state=self.evidence.capture(message.chat.id,reply,f"manual:{message.message_id}",command)
+                    context_data.update(evidence_id=evidence_id,evidence_status=evidence_state)
                 result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration, rule=rule)
         except (PermissionDenied, ValueError) as exc:
             result = Result("refused", str(exc))
@@ -267,6 +272,9 @@ class Moderation:
                 argument=tokens[1]
             reason=self.audit.clean(argument)
             if not reason.strip():raise ValueError("Informe um motivo explícito.")
+            if self.evidence is not None:
+                evidence_id,evidence_state=self.evidence.capture(message.chat.id,reply,f"manual:{message.message_id}","delwarn")
+                metadata.update(evidence_id=evidence_id,evidence_status=evidence_state)
             operation=self.governance.start_delwarn(message.chat.id,reply.message_id,actor,target,reason,rule)
             if operation is None:raise ValueError("Esta mensagem já possui um delwarn registrado; ação não repetida.")
             claim,warning=operation
