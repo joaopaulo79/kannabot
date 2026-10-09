@@ -17,7 +17,8 @@ class EmoteAccessTests(unittest.TestCase):
         handlers = {}
         def decorator(**kwargs):
             def save(handler):
-                handlers[kwargs["commands"][0]] = handler
+                if "commands" in kwargs:
+                    handlers[kwargs["commands"][0]] = handler
                 return handler
             return save
         bot.message_handler.side_effect = decorator
