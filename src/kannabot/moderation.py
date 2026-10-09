@@ -21,6 +21,9 @@ class Result:
     outcome: str
     message: str
 
+class PartialFailure(RuntimeError):
+    pass
+
 class Moderation:
     def __init__(self, bot, config, store, audit, clock=None):
         self.bot, self.store, self.audit = bot, store, audit
@@ -65,6 +68,9 @@ class Moderation:
                 result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration)
         except (PermissionDenied, ValueError) as exc:
             result = Result("refused", str(exc))
+        except PartialFailure as exc:
+            error = exc
+            result = Result("failed", "Membro removido, mas a liberação falhou: continua banido. Use /unban após verificar permissões.")
         except Exception as exc:
             error = exc
             result = Result("failed", "Não foi possível concluir a ação.")
@@ -72,6 +78,31 @@ class Moderation:
         return result
 
     def execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None):
+        self.permissions.target(chat_id, target)
+        if command in ("kick", "ban", "unban"):
+            self.permissions.bot_right(chat_id, "can_restrict_members")
+            if command in ("kick", "unban") and self.bot.get_chat(chat_id).type != "supergroup":
+                raise ValueError("Expulsão com retorno e remoção de banimento requerem supergrupo.")
+            if command == "unban" and self.permissions.member(chat_id, target).status != "kicked":
+                return Result("refused", "Este membro não está banido.")
+            if not self.seen.claim((chat_id, event_id, command)):
+                return Result("refused", "Esta ação já foi processada.")
+            if command == "unban":
+                if self.bot.unban_chat_member(chat_id, target, only_if_banned=True) is not True:
+                    raise RuntimeError("Unban not confirmed")
+                return Result("done", "Banimento removido; o membro pode retornar voluntariamente.")
+            if self.bot.ban_chat_member(chat_id, target) is not True:
+                raise RuntimeError("Ban not confirmed")
+            if command == "ban":
+                return Result("done", "Membro banido.")
+            try:
+                self.permissions.target(chat_id, target)
+                self.permissions.bot_right(chat_id, "can_restrict_members")
+                if self.bot.unban_chat_member(chat_id, target, only_if_banned=True) is not True:
+                    raise RuntimeError("Unban not confirmed")
+            except Exception:
+                raise PartialFailure() from None
+            return Result("done", "Membro expulso; retorno voluntário permitido.")
         if command == "mute":
             if type(duration) is not int or not 60 <= duration <= 365 * 86400:
                 raise ValueError("Duração temporária inválida.")

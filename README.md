@@ -129,3 +129,5 @@ Admin identificado: responda a mensagem do membro com `/warn motivo`. Consulte c
 Exclusao: admin responde a mensagem com `/delete motivo`. O bot precisa de permissao de apagar mensagens. Somente a mensagem respondida e apagada; repeticao do mesmo alvo por 10 minutos e recusada. Limites/erros Telegram geram falha, sem sucesso presumido.
 
 Silencio: `/mute 10m motivo` em resposta ao membro. Duracoes aceitam inteiro + `s`, `m`, `h` ou `d`, entre 60 segundos e 365 dias. Somente supergrupo e bot com direito de restringir membros. A data de termino fica no Telegram; nao depende de timer local nem de manter o processo ligado. Intervalo conserva margem dos limites de permanencia da API: https://core.telegram.org/bots/api#restrictchatmember.
+
+Remocao: `/kick motivo` expulsa e libera retorno voluntario; `/ban motivo` impede retorno; `/unban motivo` em resposta a uma mensagem antiga do membro remove banimento sem adiciona-lo. Kick/unban requerem supergrupo; bot precisa de `can_restrict_members`. Se a segunda etapa de kick falhar, o retorno informa que o membro continua banido; nao ha retry automatico. Consulte auditoria e use unban depois de corrigir a permissao.
