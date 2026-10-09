@@ -13,3 +13,10 @@ class Checagens_Autorizacao:
             return True
         except PermissionDenied:
             return False
+
+    def emote_autorizado(self, mensagem):
+        try:
+            self.permissions.emote_actor(mensagem)
+            return True
+        except PermissionDenied:
+            return False

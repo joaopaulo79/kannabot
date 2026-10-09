@@ -36,7 +36,7 @@ class Emotes:
             while len(self.known)>1000:self.known.popitem(last=False)
     def command(self,command,message):
         if not self.permissions.authorized(message.chat.id):return
-        try:self.permissions.actor(message)
+        try:self.permissions.emote_actor(message)
         except PermissionDenied:return
         self.observe(message)
         msg=Mensagem_Usuario();msg.Arguments(message)
