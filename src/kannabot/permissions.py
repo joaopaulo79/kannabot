@@ -4,8 +4,9 @@ class PermissionDenied(ValueError):
     pass
 
 class Permissions:
-    def __init__(self, bot, groups):
+    def __init__(self, bot, groups, roles=None):
         self.bot = bot
+        self.roles = roles
         self.groups = frozenset(groups)
 
     def authorized(self, chat_id):
@@ -35,15 +36,22 @@ class Permissions:
             raise PermissionDenied("Emote requer membro do grupo autorizado.")
         return user.id
 
-    def actor(self, message):
+    def actor(self, message, action="warn"):
         user = getattr(message, "from_user", None)
         if getattr(message, "sender_chat", None) is not None or user is None or getattr(user, "is_bot", False):
             raise PermissionDenied("Comando requer administrador identificado.")
+        if self.roles is not None:
+            self.roles.authorize(message.chat.id, user.id, action)
+            return user.id
         if not self.is_admin(message.chat.id, user.id):
             raise PermissionDenied("Comando exclusivo de administradores.")
         return user.id
 
-    def target(self, chat_id, user_id):
+    def target(self, chat_id, user_id, actor_id=None):
+        if self.roles is not None:
+            if actor_id is None:raise PermissionDenied("Autor necessário para validar hierarquia.")
+            self.roles.target(chat_id, actor_id, user_id)
+            return user_id
         if self.is_admin(chat_id, user_id):
             raise PermissionDenied("Administradores estão protegidos.")
         return user_id

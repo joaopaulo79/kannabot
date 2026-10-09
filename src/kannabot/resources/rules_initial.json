@@ -1,0 +1,240 @@
+[
+  {
+    "code": "R01",
+    "name": "Assunto do grupo",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Assunto do grupo. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N1",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R02",
+    "name": "Menções desnecessárias",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Menções desnecessárias. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N1",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R03",
+    "name": "Spoilers",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Spoilers. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N1",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R04",
+    "name": "Spam de enquetes — revogada",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Spam de enquetes — revogada. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N2",
+    "weight": 2,
+    "active": false,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R05",
+    "name": "Propagandas e divulgação",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Propagandas e divulgação. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N2",
+    "weight": 2,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R06",
+    "name": "Poluição sonora",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Poluição sonora. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N2",
+    "weight": 2,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R07",
+    "name": "Respeito ao espaço pessoal",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Respeito ao espaço pessoal. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N2",
+    "weight": 2,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R08",
+    "name": "Discussões acirradas",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Discussões acirradas. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N2",
+    "weight": 2,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R09",
+    "name": "Nome de usuário — Especial",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Nome de usuário — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N2",
+    "weight": null,
+    "active": true,
+    "actions": []
+  },
+  {
+    "code": "R10",
+    "name": "Flood e spam",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Flood e spam. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N3",
+    "weight": 3,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R11",
+    "name": "Bom comportamento",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Bom comportamento. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N3",
+    "weight": 3,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R12",
+    "name": "Fake news e desinformação",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Fake news e desinformação. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N3",
+    "weight": 3,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R13",
+    "name": "Pirataria",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Pirataria. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N3",
+    "weight": 3,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute"
+    ]
+  },
+  {
+    "code": "R14",
+    "name": "Conversa em privado — Especial",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Conversa em privado — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N3",
+    "weight": 3,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute",
+      "ban"
+    ]
+  },
+  {
+    "code": "R15",
+    "name": "Informações pessoais — Especial",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Informações pessoais — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N3",
+    "weight": 3,
+    "active": true,
+    "actions": [
+      "warn",
+      "delete",
+      "mute",
+      "ban"
+    ]
+  },
+  {
+    "code": "R16",
+    "name": "Arquivos inapropriados",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Arquivos inapropriados. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N4",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "ban"
+    ]
+  },
+  {
+    "code": "R17",
+    "name": "Comportamento criminoso",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Comportamento criminoso. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N4",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "ban"
+    ]
+  },
+  {
+    "code": "R18",
+    "name": "Conteúdos perigosos para epiléticos",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Conteúdos perigosos para epiléticos. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N4",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "ban"
+    ]
+  },
+  {
+    "code": "R19",
+    "name": "Ação de má-fé — Especial",
+    "description": "Referência ao livro de regras fornecido pelo Dono: Ação de má-fé — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "level": "N4",
+    "weight": null,
+    "active": true,
+    "actions": [
+      "delete",
+      "ban"
+    ]
+  }
+]

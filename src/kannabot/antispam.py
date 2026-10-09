@@ -20,8 +20,9 @@ def normalize(text):
     return " ".join(unicodedata.normalize("NFKC",text).casefold().split())
 
 class Antispam:
-    def __init__(self,bot,config,policy,audit,clock=monotonic,capacity=1000):
+    def __init__(self,bot,config,policy,audit,clock=monotonic,capacity=1000,roles=None):
         self.bot,self.policy,self.audit=bot,policy,audit
+        self.roles=roles
         self.permissions=Permissions(bot,config.grupos_id)
         self.clock,self.capacity=clock,capacity
         self.users=OrderedDict();self.lock=RLock()
@@ -38,6 +39,7 @@ class Antispam:
         try:
             self.permissions.emote_actor(message)
             if self.permissions.is_admin(chat,user.id):return []
+            if self.roles and self.roles.role(chat,user.id)!="member":return []
         except PermissionDenied:
             return []
         if not self.seen.claim((chat,message.message_id)):

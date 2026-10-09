@@ -93,8 +93,7 @@ Depois de configurar e confirmar o ambiente de testes:
 & .tools/poetry/Scripts/poetry.exe run python -m kannabot
 ```
 
-Esse comando conecta o bot ao Telegram. Execute na raiz porque os recursos
-de emotes ainda usam caminhos relativos. Pare com `Ctrl+C`.
+Esse comando conecta o bot ao Telegram. Os recursos acompanham o pacote; configure `KANNA_HOME` ao executar fora da raiz. Pare com `Ctrl+C`.
 
 Token vazio ou com formato inválido, username inválido, caminho ausente ou
 JSON inválido interrompem a inicialização com mensagem sanitizada. A validação
@@ -106,12 +105,10 @@ Falhas de permissão no Telegram exigem conferir os direitos do bot no grupo.
 - `main`: versão preservada.
 - `develop`: integração do MVP.
 - Branch da issue: `<tipo>/<número>`, por exemplo `chore/1`.
-- Commits: `#<número>-<descrição-curta>`.
+- Commits: `#<número> - <descrição-curta>`.
 - PRs direcionados a `develop`, com `Refs #1` para esta tarefa.
 
-Esta preparação não corrige a autorização de administradores nem o estado
-compartilhado dos emotes. Esses problemas precisam ser resolvidos antes de
-habilitar moderação ou usar esta fase do desenvolvimento em produção.
+As etapas posteriores separam autorização administrativa dos emotes e isolam o estado das interações. A validação real no Telegram continua pendente.
 
 ## Pacote e dados
 Imports não inicializam o bot. Use `python -m kannabot`. `KANNA_HOME` aponta para a pasta local de configuração (.env, data/local, var) ao executar fora da raiz. Os recursos estáticos acompanham o pacote; cliques usam var, nunca arquivos rastreados. O estado antigo dos botões é efêmero e não é migrado; o histórico Git permanece intacto.
@@ -144,4 +141,49 @@ Links: opcao `links` por grupo com `allow` e `deny` (listas de hosts) e `include
 
 ## Revisao humana das deteccoes
 
-Antispam nao aplica sancoes. Deteccoes ficam no SQLite por grupo/mensagem, agregando flood/repeticao/links. `/detections` lista ate20 pendentes; `/dismiss ID motivo` descarta com auditoria; `/review ID warn R10 motivo` escolhe advertencia explicitamente; mute: `/review ID mute 1d R10 motivo`. Resolucao exige catalogo disponivel (ligado pela #15), regra ativa e permissao atual do autor. Antes disso, apenas consulta/descarte funcionam. Uma reserva persistida impede decisoes simultaneas/repetidas. Falha/resultado incerto nao retorna automaticamente a fila; conferir logs antes de nova acao manual. Notificacao limitada a uma por usuario/grupo a cada60s.
+Antispam nao aplica sancoes. Deteccoes ficam no SQLite por grupo/mensagem, agregando flood/repeticao/links. `/detections` lista ate20 pendentes; `/dismiss ID motivo` descarta com auditoria; `/review ID warn R10 motivo` escolhe advertencia explicitamente; mute: `/review ID mute 1d R10 motivo`. Resolucao exige catalogo disponivel (ligado pela #15), regra ativa e permissao atual do autor. Com o catálogo importado explicitamente pelo Dono, a decisão usa os cargos internos e as ações previstas na regra. Uma reserva persistida impede decisoes simultaneas/repetidas. Falha/resultado incerto nao retorna automaticamente a fila; conferir logs antes de nova acao manual. Notificacao limitada a uma por usuario/grupo a cada60s.
+
+## Cargos internos e catálogo manual (#15)
+
+O Dono é o proprietário real do grupo (`creator` no Telegram). Somente ele atribui
+Admin/Mod internos, por ID e por grupo. Quem não tem atribuição é participante comum,
+mesmo quando possui um título cosmético no Telegram. Títulos não concedem privilégios
+no bot; aparecem nos registros para auditoria. Os emotes continuam disponíveis aos membros.
+
+| Cargo | Ações internas |
+| --- | --- |
+| Dono | Todas as ações abaixo e administração de cargos/regras |
+| Admin | Warn, consulta/cancelamento de advertências, exclusão, mute, kick, ban, unban e revisão |
+| Mod | Warn, consulta, exclusão, mute e revisão; sem kick, ban ou unban |
+
+Nenhuma sanção alcança cargo igual ou superior. O bot verifica também seus próprios
+privilégios no Telegram. Um título cosmético não elimina as limitações reais da API:
+um administrador nativo do Telegram pode exigir intervenção do Dono antes da sanção.
+As consultas de identidade falham sem conceder autorização.
+
+Comandos de administração:
+
+- `/role admin` ou `/role mod`, em resposta ao alvo, e `/role_remove`: somente Dono.
+- `/rules_import`: Dono importa explicitamente as 19 entradas resumidas do livro recebido;
+  não sobrescreve regras existentes. Enquetes (R04) permanece revogada.
+- `/rule_set JSON`: Dono cria uma versão imutável com os campos `code`, `name`,
+  `description`, `level`, `weight`, `active` e `actions`. Exemplo:
+  `{"code":"R20","name":"Nova regra","description":"Descrição","level":"N2","weight":2,"active":true,"actions":["warn","delete","mute"]}`.
+- `/rule_disable R20`: nova versão revogada; ocorrências antigas mantêm seus dados.
+- `/catalog` ou `/catalog R10`: consulta da Staff (lista limitada a 20 entradas).
+- `/warn R10 motivo`, em resposta: registra uma infração com código, versão e peso.
+- `/mute 1d R10 motivo`, em resposta: executa somente o silêncio solicitado, dentro da faixa do nível.
+- `/unwarn ID motivo`: Admin/Dono cancela uma infração sem apagar seu histórico, respeitando a hierarquia.
+
+O banco local `var/moderation.sqlite3` guarda cargos, regras, infrações e tentativas/resultados
+de sanções. A migração preserva advertências antigas com peso indefinido. Não versionar o banco.
+O registro persistente antecede a chamada ao Telegram; duplicatas não repetem efeitos,
+mesmo após reinício. Timeout conserva resultado incerto, e uma expulsão incompleta registra
+resultado parcial. Esses casos exigem inspeção humana, sem repetição automática.
+
+Quatro pontos apenas indicam revisão humana. Não há ban automático, nem execução de um
+pacote de punições ao escolher um nível. N1 não recebe peso inventado; regras especiais
+sem condições definidas ficam indisponíveis para as ações indefinidas. Expiração de pontos,
+reincidência de N1, duração para nome de usuário especial e escolha entre ban de 30 dias ou
+permanente continuam dependendo de uma decisão do Dono. Comandos legados com motivo livre
+continuam manuais e não adicionam peso presumido.
