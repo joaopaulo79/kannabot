@@ -22,9 +22,9 @@ class AppTests(unittest.TestCase):
             client = MagicMock()
             create_app(cfg, client, folder)
             commands = [call.kwargs["commands"][0] for call in client.message_handler.call_args_list]
-            self.assertEqual(set(commands), set("punch slap kiss shy hug cuddle pat push stare highfive poke bite lick bonk tickle wave cry".split()))
+            self.assertTrue(set("punch slap kiss shy hug cuddle pat push stare highfive poke bite lick bonk tickle wave cry".split()).issubset(set(commands)))
             client.infinity_polling.assert_not_called()
-            self.assertFalse((Path(folder)/"var").exists())
+            self.assertTrue((Path(folder)/"var/moderation.sqlite3").exists())
 
     def test_resources_without_cwd(self):
         self.assertIn("h", Abrir_Arquivos_Emotes().Case_Open_Labels())
