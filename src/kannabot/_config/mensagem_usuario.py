@@ -20,7 +20,7 @@ class Mensagem_Usuario:
         return self.target
     else:
         return None
-      
+
   def TargetUsername(self):
     self.targetusername = self.mensagem.text.split(" @")[1]
     return self.targetusername

@@ -1,12 +1,12 @@
 import json, os
-from src import Msg
 
 # Caminho do arquivo de log
-log_path = "./data/arquivos_json/log_files/log_buttons.json"
+log_path = None
 
 # Classe para gerenciar os cliques em botões
 class Verificar_Button:
-    def __init__(self, caminho=log_path):
+    def __init__(self, Msg, caminho):
+        self.Msg = Msg
         self.caminho = caminho
         self._Carregar_Log()
 
@@ -18,6 +18,7 @@ class Verificar_Button:
             self.log = {}
 
     def _Salvar_Log(self):
+        os.makedirs(os.path.dirname(self.caminho), exist_ok=True)
         with open(self.caminho, "w", encoding="utf-8") as f:
             json.dump(self.log, f, ensure_ascii=False, indent=2)
 
@@ -33,24 +34,22 @@ class Verificar_Button:
         self._Salvar_Log()
 
     def Case_Username_Username(self, username: str, user_id: str):
-        if username == Msg.Username():
-            Log.Registrar_Clique(user_id)
+        if username == self.Msg.Username():
+            self.Registrar_Clique(user_id)
             return True
         else:
             return False
 
     def Case_Username_Not_Username(self, username: str, user_id: str):
-        if username != Msg.Username():
-            Log.Registrar_Clique(user_id)
+        if username != self.Msg.Username():
+            self.Registrar_Clique(user_id)
             return True
         else:
             return False
 
     def Case_Username_TargetUsername(self, username: str, user_id: str):
-        if username == Msg.TargetUsername():
-            Log.Registrar_Clique(user_id)
+        if username == self.Msg.TargetUsername():
+            self.Registrar_Clique(user_id)
             return True
         else:
             return False
-
-Log = Verificar_Button()
