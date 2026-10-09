@@ -14,7 +14,7 @@ class AuditTests(unittest.TestCase):
         args=bot.send_message.call_args
         self.assertEqual(args.args[0],-1009)
         self.assertIn("&lt;x&gt;",args.args[1]);self.assertNotIn("123:fake",args.args[1])
-        for item in ("time:","actor: 7","target: 8","outcome: failed","RuntimeError"):
+        for item in ("Data/hora:","Usuário 7","Usuário 8","Resultado: Falha confirmada","RuntimeError"):
             self.assertIn(item,args.args[1])
     def test_delivery_failure_has_single_local_fallback(self):
         with tempfile.TemporaryDirectory() as folder:

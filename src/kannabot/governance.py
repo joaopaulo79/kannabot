@@ -22,18 +22,18 @@ def validate_rule(rule):
     if not isinstance(rule,dict) or set(rule)!=keys:
         raise ValueError("Regra requer code, name, description, level, weight, active e actions.")
     if not isinstance(rule["code"],str) or not re.fullmatch(r"R[0-9]{2,4}",rule["code"]):
-        raise ValueError("CÃ³digo deve seguir R01 atÃ© R9999.")
+        raise ValueError("Código deve seguir R01 até R9999.")
     for key in ("name","description"):
         if not isinstance(rule[key],str) or not rule[key].strip() or len(rule[key])>1000:
-            raise ValueError("Nome/descriÃ§Ã£o invÃ¡lidos ou longos demais.")
+            raise ValueError("Nome/descrição inválidos ou longos demais.")
     if rule["level"] not in ("N1","N2","N3","N4") or type(rule["active"]) is not bool:
-        raise ValueError("NÃ­vel/estado invÃ¡lidos.")
+        raise ValueError("Nível/estado inválidos.")
     weight=rule["weight"]
     if weight is not None and (type(weight) is not int or not 0<=weight<=4):
         raise ValueError("Peso deve ser inteiro 0..4 ou null quando indefinido.")
     actions=rule["actions"]
     if not isinstance(actions,list) or any(not isinstance(action,str) for action in actions) or len(actions)!=len(set(actions)) or any(action not in ("warn","delete","mute","ban") for action in actions):
-        raise ValueError("AÃ§Ãµes de regra invÃ¡lidas.")
+        raise ValueError("Ações de regra inválidas.")
     if rule["level"] == "N4" and "mute" in actions:
         raise ValueError("N4 não define duração de mute; use uma ação prevista no nível.")
     return dict(rule)
@@ -57,7 +57,7 @@ class Governance(WarningStore):
             return row[0] if row else "member"
 
     def set_role(self,chat,user,role,actor):
-        if role not in ("admin","mod","member"):raise ValueError("Cargo invÃ¡lido.")
+        if role not in ("admin","mod","member"):raise ValueError("Cargo inválido.")
         with closing(sqlite3.connect(self.path)) as db, db:
             if role=="member":db.execute("DELETE FROM roles WHERE chat_id=? AND user_id=?",(chat,user))
             else:db.execute("INSERT INTO roles VALUES(?,?,?,?,?) ON CONFLICT(chat_id,user_id) DO UPDATE SET role=excluded.role,actor_id=excluded.actor_id,time=excluded.time",(chat,user,role,actor,utcnow()))
@@ -110,14 +110,20 @@ class Governance(WarningStore):
 
     def begin(self,chat,event,action,actor,target,reason,rule=None):
         with closing(sqlite3.connect(self.path)) as db, db:
-            cursor=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,str(event),action,actor,target,rule["code"] if rule else None,rule["version"] if rule else None,reason,"pending","Resultado ainda nÃ£o confirmado",utcnow()))
+            cursor=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,str(event),action,actor,target,rule["code"] if rule else None,rule["version"] if rule else None,reason,"pending","Resultado ainda não confirmado",utcnow()))
             return cursor.lastrowid if cursor.rowcount==1 else None
 
     def finish(self,id,status,detail):
-        if status not in ("done","refused","failed","partial","uncertain"):raise ValueError("Resultado invÃ¡lido.")
+        if status not in ("done","refused","failed","partial","uncertain"):raise ValueError("Resultado inválido.")
         with closing(sqlite3.connect(self.path)) as db, db:
             db.execute("UPDATE sanctions SET status=?,detail=? WHERE id=? AND status='pending'",(status,detail,id))
 
     def entries(self,chat,user):
         with closing(sqlite3.connect(self.path)) as db:
             return db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,w.reason,i.cancel_time FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user)).fetchall()
+
+
+    def detailed_entries(self,chat,user):
+        with closing(sqlite3.connect(self.path)) as db:
+            db.row_factory=sqlite3.Row
+            return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]

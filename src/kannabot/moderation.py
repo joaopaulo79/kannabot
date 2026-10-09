@@ -1,5 +1,9 @@
 """Moderation services: validation precedes effects; failures are audited."""
 import re
+import json
+import sqlite3
+from contextlib import closing
+from kannabot.presentation import context, user_mention, mention, brief
 from telebot.types import ChatPermissions
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -44,7 +48,8 @@ class Moderation:
         return reply, user.id
 
     def handle(self, command, message):
-        actor = target = None
+        actor, context_data = context(message)
+        target = None
         reason = ""
         error = None
         rule = None
@@ -78,9 +83,18 @@ class Moderation:
                 lines += [escape(f"{time} | autor {author}: {text}") for author,text,time in rows]
                 if self.governance:
                     points=self.governance.points(message.chat.id,target)
-                    lines=[f"Advertências válidas: {total}; pontos definidos: {points}."]
+                    lines=[f"📋 Histórico de advertências de {user_mention(reply.from_user)}",
+                           f"Advertências válidas: {total} · Pontos: {points}."]
                     if points>=4:lines.append("Limite de 4 pontos atingido: revisão humana necessária, sem banimento automático.")
-                    lines += [escape(f"ID {id} | {code or 'legado'} v{version} | peso {weight} | {'cancelada' if cancelled else 'válida'} | {text[:80]}") for id,code,version,weight,text,cancelled in self.governance.entries(message.chat.id,target)]
+                    for entry in self.governance.detailed_entries(message.chat.id,target):
+                        snapshot=json.loads(entry["snapshot"]) if entry["snapshot"] else None
+                        lines.extend(["",f"#{entry['id']} — {'Cancelada' if entry['cancel_time'] else 'Válida'}"])
+                        if snapshot:
+                            lines.extend([escape(f"{snapshot['code']} — {snapshot['name']} · {snapshot['level']} · v{entry['rule_version']}"),"Descrição: "+brief(snapshot)])
+                        lines.extend([f"Peso aplicado: {entry['weight'] if entry['weight'] is not None else 'não definido'}",
+                                      "Motivo: "+escape(entry["reason"]), "Aplicada por: "+mention(entry["author_id"]), "Data: "+escape(entry["time"])])
+                        if entry["cancel_time"]:lines.extend(["Cancelada por: "+mention(entry["cancel_actor"]),"Motivo do cancelamento: "+escape(entry["cancel_reason"])])
+                    if not self.governance.detailed_entries(message.chat.id,target):lines.append("Nenhuma advertência registrada neste grupo.")
                 result = Result("done", "\n".join(lines))
             else:
                 if not reason:
@@ -95,9 +109,19 @@ class Moderation:
         except Exception as exc:
             error = exc
             result = Result("failed", "Não foi possível concluir a ação.")
+        if result.outcome=="done" and command!="warnings":
+            result=Result("done",self.feedback(command,message,target,reason,duration,rule,result.message))
         metadata=self.roles.metadata(message.chat.id,actor,target) if self.roles else {}
+        context_data.update(metadata)
+        metadata=context_data
         if rule:metadata.update(rule_code=rule["code"],rule_version=rule["version"])
-        metadata["detail"]=result.message[:180]
+        if command=="warn" and result.outcome=="done" and self.governance:
+            entry=next((e for e in self.governance.detailed_entries(message.chat.id,target) if e["event_id"]==f"manual:{message.message_id}"),None)
+            if entry:metadata.update(warning_id=entry["id"],weight=entry["weight"],valid_count=self.governance.history(message.chat.id,target)[0],points=self.governance.points(message.chat.id,target))
+        status=self.operation_status(message,command,locals().get("reply"))
+        if result.outcome=="failed" and status in ("partial","uncertain"):
+            result=Result(status,result.message if status=="partial" else "⚠️ Não consegui confirmar o resultado da ação. Confira o registro antes de tentar novamente.")
+        metadata["detail"]=result.message[:300]
         self.audit.record(message.chat.id, actor, target, command, reason, result.outcome, error, metadata=metadata)
         return result
 
@@ -180,3 +204,35 @@ class Moderation:
         else:
             created = self.store.add(chat_id, target, actor, reason, self.clock().isoformat(), event_id)
         return Result("done", "Advertência registrada.") if created else Result("refused", "Esta advertência já foi registrada.")
+
+
+    def feedback(self,command,message,target,reason,duration,rule,original):
+        label=user_mention(message.reply_to_message.from_user)
+        reason_text=reason
+        if rule and reason.startswith(rule["name"]+": "):reason_text=reason[len(rule["name"])+2:]
+        suffix="\nMotivo: "+escape(reason_text)
+        if command=="warn" and self.governance:
+            entry=next((e for e in self.governance.detailed_entries(message.chat.id,target) if e["event_id"]==f"manual:{message.message_id}"),None)
+            if not entry:return original
+            lines=[f"⚠️ Advertência #{entry['id']} registrada", "Alvo: "+label]
+            if rule:lines.extend([escape(f"Regra: {rule['code']} — {rule['name']} · {rule['level']}"),"Descrição: "+brief(rule)])
+            lines.extend([f"Peso: +{entry['weight']} pontos" if entry["weight"] is not None else "Peso: não definido","Motivo: "+escape(reason_text),f"Situação atual: {self.governance.history(message.chat.id,target)[0]} advertência(s) válida(s) · {self.governance.points(message.chat.id,target)} pontos."])
+            return "\n".join(lines)
+        if command=="delete":return f"🧹 Mensagem de {label} apagada!"+suffix+"\nNenhuma advertência foi adicionada."
+        if command=="mute":
+            unit=next((f"{duration//size} {name}" for size,name in ((86400,"dia(s)"),(3600,"hora(s)"),(60,"minuto(s)")) if duration%size==0),f"{duration} segundos")
+            return f"🔇 Hora de uma pausa, {label}.\nSilenciamento aplicado por {unit}."+suffix
+        if command=="kick":return f"🚪 {label} foi removido do grupo."+suffix+"\nO retorno está permitido, sujeito ao acesso ao grupo."
+        if command=="ban":return f"⛔ {label} foi banido do grupo."+suffix+"\nBanimento sem prazo definido."
+        if command=="unban":return f"✅ Banimento de {label} removido!"+suffix+"\nO usuário pode retornar; este comando não o adiciona novamente."
+        return original
+
+
+    def operation_status(self,message,command,reply):
+        if not self.governance or command=="warnings":return None
+        event=f"delete:{reply.message_id}" if command=="delete" and reply else f"manual:{message.message_id}"
+        try:
+            with closing(sqlite3.connect(self.governance.path)) as db:
+                row=db.execute("SELECT status FROM sanctions WHERE chat_id=? AND event_id=? AND action=?",(message.chat.id,event,command)).fetchone()
+                return row[0] if row else None
+        except sqlite3.Error:return None
