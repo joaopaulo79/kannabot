@@ -125,3 +125,5 @@ Sem destino configurado, destino publico ou falha de entrega, o registro sanitiz
 ## Advertencias
 
 Admin identificado: responda a mensagem do membro com `/warn motivo`. Consulte com `/warnings` em resposta ao mesmo membro. Historico por grupo/ID fica em `KANNA_HOME/var/moderation.sqlite3`, preservado no reinicio. Consulta mostra total e ultimas 20 entradas. Reentregar o mesmo comando nao duplica advertencia. Administradores sao protegidos; quantidade de advertencias nao aplica outra punicao.
+
+Exclusao: admin responde a mensagem com `/delete motivo`. O bot precisa de permissao de apagar mensagens. Somente a mensagem respondida e apagada; repeticao do mesmo alvo por 10 minutos e recusada. Limites/erros Telegram geram falha, sem sucesso presumido.

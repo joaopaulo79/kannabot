@@ -1,6 +1,6 @@
 from functools import partial
 
-COMMANDS = ("warn", "warnings")
+COMMANDS = ("warn", "warnings", "delete")
 
 def register(bot, service):
     def handle(command, message):

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from html import escape
 from kannabot.permissions import Permissions, PermissionDenied
+from kannabot.interacoes import Seen
 
 @dataclass(frozen=True)
 class Result:
@@ -13,6 +14,7 @@ class Moderation:
     def __init__(self, bot, config, store, audit, clock=None):
         self.bot, self.store, self.audit = bot, store, audit
         self.permissions = Permissions(bot, config.grupos_id)
+        self.seen = Seen()
         self.clock = clock or (lambda: datetime.now(timezone.utc))
 
     def reply_target(self, message):
@@ -52,6 +54,13 @@ class Moderation:
         return result
 
     def execute(self, command, chat_id, actor, target, message_id, reason, event_id):
+        if command == "delete":
+            self.permissions.bot_right(chat_id, "can_delete_messages")
+            if not self.seen.claim((chat_id, message_id, command)):
+                return Result("refused", "Esta mensagem já foi processada; exclusão não repetida.")
+            if self.bot.delete_message(chat_id, message_id) is not True:
+                raise RuntimeError("Deletion not confirmed")
+            return Result("done", "Mensagem apagada.")
         if command != "warn":
             raise ValueError("Comando não suportado.")
         created = self.store.add(chat_id, target, actor, reason, self.clock().isoformat(), event_id)
