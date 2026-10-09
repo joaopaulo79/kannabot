@@ -1,4 +1,4 @@
-import json, os
+from src import configuracao
 from telebot import TeleBot
 
 class Checagens_Autorizacao: 
@@ -7,10 +7,7 @@ class Checagens_Autorizacao:
         self.carregar_grupos_autorizados()
 
     def carregar_grupos_autorizados(self):
-        caminho_grupos_autorizados = str(os.getenv("CAMINHO_AUTORZACAO"))
-        with open(caminho_grupos_autorizados) as arquivo:
-            dados_autorizacao = json.load(arquivo)
-        self.id_autorizacao = dados_autorizacao["grupos_id"]
+        self.id_autorizacao = list(configuracao.grupos_id)
 
     def grupo_autorizado(self, grupo_id: int) -> bool:
         grupo_id_formatado = int(str(grupo_id).replace("-100", "-"))

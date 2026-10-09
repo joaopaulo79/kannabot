@@ -1,5 +1,5 @@
 import json, os
-from src.__init__ import Msg
+from src import Msg
 
 # Caminho do arquivo de log
 log_path = "./data/arquivos_json/log_files/log_buttons.json"
