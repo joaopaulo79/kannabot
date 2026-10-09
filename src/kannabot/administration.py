@@ -16,7 +16,7 @@ class Administration:
     def handle(self,command,message):
         actor,context_data=context(message);target=None;reason="";error=None
         try:
-            action="roles" if command in ("role","role_remove","rule_set","rule_disable","rules_import") else "unwarn" if command=="unwarn" else "catalog"
+            action="roles" if command in ("role","role_remove") else "rules" if command in ("rule_set","rule_disable","rules_import") else "unwarn" if command=="unwarn" else "catalog"
             actor=self.moderation.permissions.actor(message,action)
             if command in ("role","role_remove","unwarn") and self.moderation.identities is not None:
                 message=self.moderation.identities.prepare(message,command)

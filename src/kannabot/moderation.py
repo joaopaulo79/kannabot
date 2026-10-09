@@ -30,6 +30,9 @@ class Result:
 class PartialFailure(RuntimeError):
     pass
 
+class BanRoleRevocationFailure(PartialFailure):
+    pass
+
 class Moderation:
     def __init__(self, bot, config, store, audit, clock=None, roles=None):
         self.bot, self.store, self.audit = bot, store, audit
@@ -113,6 +116,9 @@ class Moderation:
                 result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration, rule=rule)
         except (PermissionDenied, ValueError) as exc:
             result = Result("refused", str(exc))
+        except BanRoleRevocationFailure as exc:
+            error=exc
+            result=Result("partial","⚠️ Banimento confirmado, mas a revogação do cargo interno falhou. A administração precisa corrigir o cargo antes de liberar o retorno.")
         except PartialFailure as exc:
             error = exc
             result = Result("failed", "Membro removido, mas a liberação falhou: continua banido. Use /unban após verificar permissões.")
@@ -155,13 +161,18 @@ class Moderation:
         except Exception as exc:
             if claim:
                 status="partial" if isinstance(exc,PartialFailure) else "refused" if isinstance(exc,(PermissionDenied,ValueError)) else "uncertain"
-                self.governance.finish(claim,status,type(exc).__name__)
+                try:self.governance.finish(claim,status,type(exc).__name__)
+                except sqlite3.Error:
+                    self.audit.record(chat_id,actor,target,command,reason,status,exc,metadata={"stage":"Persistência do resultado","detail":"Resultado externo requer conferência; ledger indisponível."})
             raise
         if claim:self.governance.finish(claim,result.outcome,result.message)
         return result
 
     def _execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None, rule=None):
         self.permissions.target(chat_id, target, actor)
+        if command in ("mute","kick","ban"):
+            if self.permissions.member(chat_id,target).status in ("creator","administrator"):
+                raise PermissionDenied("🛡️ O alvo é Administrador ou Dono no Telegram. A ação não foi executada; o cargo nativo precisa ser tratado pela administração.")
         if command in ("kick", "ban", "unban"):
             self.permissions.bot_right(chat_id, "can_restrict_members")
             if command in ("kick", "unban") and self.bot.get_chat(chat_id).type != "supergroup":
@@ -177,6 +188,12 @@ class Moderation:
             if self.bot.ban_chat_member(chat_id, target) is not True:
                 raise RuntimeError("Ban not confirmed")
             if command == "ban":
+                previous=self.governance.role(chat_id,target) if self.governance else "member"
+                if previous in ("admin","mod"):
+                    try:self.governance.set_role(chat_id,target,"member",actor,cause="confirmed_ban")
+                    except Exception:raise BanRoleRevocationFailure() from None
+                    from kannabot.presentation import ROLE_NAMES
+                    return Result("done","Membro banido. Cargo interno de "+ROLE_NAMES[previous]+" revogado.")
                 return Result("done", "Membro banido.")
             try:
                 self.permissions.target(chat_id, target, actor)
@@ -236,7 +253,7 @@ class Moderation:
             unit=next((f"{duration//size} {name}" for size,name in ((86400,"dia(s)"),(3600,"hora(s)"),(60,"minuto(s)")) if duration%size==0),f"{duration} segundos")
             return f"🔇 Hora de uma pausa, {label}.\nSilenciamento aplicado por {unit}."+suffix
         if command=="kick":return f"🚪 {label} foi removido do grupo."+suffix+"\nO retorno está permitido, sujeito ao acesso ao grupo."
-        if command=="ban":return f"⛔ {label} foi banido do grupo."+suffix+"\nBanimento sem prazo definido."
+        if command=="ban":return f"⛔ {label} foi banido do grupo."+suffix+"\nBanimento sem prazo definido."+("\n🛡️ "+escape(original.split("Membro banido. ",1)[1]) if "Cargo interno" in original else "")
         if command=="unban":return f"✅ Banimento de {label} removido!"+suffix+"\nO usuário pode retornar; este comando não o adiciona novamente."
         return original
 

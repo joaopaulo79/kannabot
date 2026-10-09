@@ -24,7 +24,10 @@ class Roles:
         if RANK[self.role(chat,actor)]<=RANK[self.role(chat,target)]:
             raise PermissionDenied("Não é permitido sancionar cargo igual ou superior.")
     def assign(self,chat,actor,target,role):
-        if self.role(chat,actor)!="owner":raise PermissionDenied("Somente o Dono define cargos.")
+        actor_role=self.role(chat,actor)
+        if actor_role not in ("owner","admin"):raise PermissionDenied("🛡️ Somente Dono ou Admin gerencia cargos.")
+        if actor_role=="admin" and (role not in ("mod","member") or self.role(chat,target) in ("admin","owner")):
+            raise PermissionDenied("🛡️ Admin pode atribuir ou remover Mod, mas não alterar Admin ou Dono.")
         member=self.member(chat,target)
         if member.status=="creator" or member.status not in ("member","administrator","restricted") or (member.status=="restricted" and getattr(member,"is_member",False) is not True):
             raise PermissionDenied("Alvo não pode receber esta atribuição.")

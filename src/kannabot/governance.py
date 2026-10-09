@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 from kannabot.storage import WarningStore
 
 CAPABILITIES = {
-    "owner": frozenset(("warn","warnings","delete","mute","kick","ban","unban","unwarn","roles","catalog","review")),
-    "admin": frozenset(("warn","warnings","delete","mute","kick","ban","unban","unwarn","catalog","review")),
+    "owner": frozenset(("warn","warnings","delete","mute","kick","ban","unban","unwarn","roles","rules","catalog","review")),
+    "admin": frozenset(("warn","warnings","delete","mute","kick","ban","unban","unwarn","roles","catalog","review")),
     "mod": frozenset(("warn","warnings","delete","mute","catalog","review")),
     "member": frozenset(),
 }
@@ -58,18 +58,23 @@ class Governance(WarningStore):
             db.execute("CREATE VIEW IF NOT EXISTS catalogo_regras AS SELECT r.chat_id AS grupo_id,r.code AS codigo,r.version AS versao,json_extract(r.snapshot,'$.name') AS nome,json_extract(r.snapshot,'$.description') AS descricao,json_extract(r.snapshot,'$.level') AS nivel,json_extract(r.snapshot,'$.weight') AS peso,json_extract(r.snapshot,'$.active') AS ativa,json_extract(r.snapshot,'$.actions') AS acoes,r.time AS criada_em FROM rules r WHERE r.version=(SELECT MAX(x.version) FROM rules x WHERE x.chat_id=r.chat_id AND x.code=r.code)")
             db.execute("CREATE VIEW IF NOT EXISTS historico_advertencias AS SELECT i.id AS registro,w.chat_id AS grupo_id,w.user_id AS alvo_id,w.target_username AS alvo_username,w.author_id AS autor_id,w.actor_username AS autor_username,w.time AS aplicada_em,i.rule_code AS regra,i.rule_version AS versao,json_extract(i.snapshot,'$.name') AS nome_regra,json_extract(i.snapshot,'$.description') AS descricao_aplicada,i.weight AS peso,w.reason AS motivo,CASE WHEN i.cancel_time IS NULL THEN 'valida' ELSE 'cancelada' END AS estado,i.cancel_time AS cancelada_em,i.cancel_actor AS cancelada_por,i.cancel_reason AS motivo_cancelamento FROM warnings w JOIN infractions i ON w.id=i.warning_id")
             db.execute("CREATE VIEW IF NOT EXISTS acoes_moderacao AS SELECT id AS registro,chat_id AS grupo_id,actor_id AS autor_id,actor_username AS autor_username,target_id AS alvo_id,target_username AS alvo_username,action AS acao,reason AS motivo,status AS resultado,detail AS detalhe,time AS data FROM sanctions")
-            db.execute("PRAGMA user_version=2")
+            db.execute("CREATE TABLE IF NOT EXISTS role_changes(id INTEGER PRIMARY KEY,chat_id INTEGER NOT NULL,user_id INTEGER NOT NULL,actor_id INTEGER NOT NULL,previous_role TEXT NOT NULL,new_role TEXT NOT NULL,cause TEXT NOT NULL,time TEXT NOT NULL)")
+            db.execute("PRAGMA user_version=3")
 
     def role(self,chat,user):
         with closing(sqlite3.connect(self.path)) as db:
             row=db.execute("SELECT role FROM roles WHERE chat_id=? AND user_id=?",(chat,user)).fetchone()
             return row[0] if row else "member"
 
-    def set_role(self,chat,user,role,actor):
+    def set_role(self,chat,user,role,actor,cause="assignment"):
         if role not in ("admin","mod","member"):raise ValueError("Cargo inválido.")
-        with closing(sqlite3.connect(self.path)) as db, db:
+        with closing(sqlite3.connect(self.path)) as db,db:
+            db.execute("BEGIN IMMEDIATE")
+            previous=db.execute("SELECT role FROM roles WHERE chat_id=? AND user_id=?",(chat,user)).fetchone()
+            previous=previous[0] if previous else "member"
             if role=="member":db.execute("DELETE FROM roles WHERE chat_id=? AND user_id=?",(chat,user))
             else:db.execute("INSERT INTO roles VALUES(?,?,?,?,?) ON CONFLICT(chat_id,user_id) DO UPDATE SET role=excluded.role,actor_id=excluded.actor_id,time=excluded.time",(chat,user,role,actor,utcnow()))
+            if previous!=role:db.execute("INSERT INTO role_changes(chat_id,user_id,actor_id,previous_role,new_role,cause,time) VALUES(?,?,?,?,?,?,?)",(chat,user,actor,previous,role,cause,utcnow()))
 
     def put_rule(self,chat,rule,actor):
         rule=validate_rule(rule)
