@@ -1,4 +1,4 @@
-from kannabot.evidence import Evidence, register as register_evidence
+from kannabot.evidence import Evidence
 import os
 from kannabot.identities import Identities, register as register_identities
 from pathlib import Path
@@ -31,7 +31,6 @@ def create_app(configuracao=None, client=None, home=None):
     bot.kanna_moderation.identities = bot.kanna_identities
     bot.kanna_evidence = Evidence(store.path,bot.kanna_audit.clean)
     bot.kanna_moderation.evidence = bot.kanna_evidence
-    register_evidence(bot,bot.kanna_evidence,bot.kanna_moderation)
     bot.kanna_administration = Administration(bot.kanna_moderation, store, bot.kanna_roles, bot.kanna_audit)
     bot.kanna_antispam = Antispam(bot, settings, policy, bot.kanna_audit, roles=bot.kanna_roles)
     bot.kanna_review = Review(bot.kanna_moderation, ReviewStore(root / "var/moderation.sqlite3"), bot.kanna_audit)

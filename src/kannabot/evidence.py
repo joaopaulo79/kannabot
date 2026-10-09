@@ -3,8 +3,6 @@ import json
 import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
-from kannabot.permissions import PermissionDenied
-from kannabot.presentation import context, send_reply
 
 class Evidence:
     def __init__(self,path,clean):
@@ -67,33 +65,3 @@ class Evidence:
             row=db.execute('SELECT id,availability FROM evidence WHERE chat_id=? AND message_id=?',(chat,message.message_id)).fetchone()
             db.execute('INSERT OR IGNORE INTO evidence_actions VALUES(?,?,?)',(row[0],event,action))
             return row
-
-    def remove(self,chat,reference,actor,reason):
-        reason=self.clean(reason)
-        if not reason.strip():raise ValueError('Informe o motivo da exclusão da evidência.')
-        with closing(sqlite3.connect(self.path)) as db,db:
-            changed=db.execute("UPDATE evidence SET payload=NULL,username=NULL,availability='removed',removed_at=?,removed_by=?,removal_reason=? WHERE chat_id=? AND id=? AND removed_at IS NULL",
-                (datetime.now(timezone.utc).isoformat(),actor,reason,chat,reference)).rowcount
-            if not changed:raise ValueError('Evidência inexistente neste grupo ou já removida.')
-
-    def handle_remove(self,service,message):
-        actor,metadata=context(message);reason='';error=None
-        try:
-            service.permissions.actor(message,'delete')
-            if service.roles is None or service.roles.role(message.chat.id,actor) not in ('owner','admin'):
-                raise PermissionDenied('Somente o Dono ou um Admin pode remover evidências.')
-            parts=message.text.split(maxsplit=2)
-            if len(parts)!=3 or not parts[1].isdigit():raise ValueError('Use /evidence_remove ID motivo.')
-            reason=self.clean(parts[2]);self.remove(message.chat.id,int(parts[1]),actor,reason)
-            outcome,text='done','🗂️ Evidência removida. Histórico e advertências preservados.'
-            metadata['evidence_id']=int(parts[1])
-        except (ValueError,PermissionDenied) as exc:outcome,text='refused',self.clean(str(exc))
-        except Exception as exc:error=exc;outcome,text='failed','Não foi possível remover a evidência.'
-        metadata['detail']=text
-        service.audit.record(message.chat.id,actor,None,'evidence_remove',reason,outcome,error,metadata=metadata)
-        return text
-
-def register(bot,evidence,service):
-    @bot.message_handler(commands=['evidence_remove'])
-    def remove(message):
-        send_reply(bot,message.chat.id,evidence.handle_remove(service,message))
