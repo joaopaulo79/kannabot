@@ -14,8 +14,17 @@ class Policy:
                 valid = str(int(group))==group
             except (TypeError,ValueError):
                 valid=False
-            if not valid or not isinstance(options,dict) or set(options)-{"welcome"}:
+            if not valid or not isinstance(options,dict) or set(options)-{"welcome", "spam"}:
                 raise ErroConfiguracao("Grupo ou opção de política inválido.")
+            spam=options.get("spam")
+            if spam is not None:
+                keys={"flood_limit","flood_window","repeat_limit","repeat_window"}
+                if not isinstance(spam,dict) or set(spam)!=keys:
+                    raise ErroConfiguracao("Spam requer limites e janelas de flood e repetição.")
+                for key,value in spam.items():
+                    maximum=100 if key.endswith("limit") else 3600
+                    if type(value) is not int or not 1<=value<=maximum:
+                        raise ErroConfiguracao("Limites e janelas de spam fora do intervalo.")
             welcome=options.get("welcome")
             if welcome is not None:
                 if not isinstance(welcome,dict) or set(welcome)!={"text","rules"} or any(not isinstance(value,str) or not value.strip() or len(value)>250 for value in welcome.values()):
