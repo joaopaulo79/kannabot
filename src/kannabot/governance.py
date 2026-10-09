@@ -19,12 +19,12 @@ def utcnow():
 
 def validate_rule(rule):
     keys={"code","name","description","level","weight","active","actions"}
-    if not isinstance(rule,dict) or set(rule)!=keys:
+    if not isinstance(rule,dict) or not keys.issubset(rule) or set(rule)-keys-{"summary"}:
         raise ValueError("Regra requer code, name, description, level, weight, active e actions.")
     if not isinstance(rule["code"],str) or not re.fullmatch(r"R[0-9]{2,4}",rule["code"]):
         raise ValueError("Código deve seguir R01 até R9999.")
     for key in ("name","description"):
-        if not isinstance(rule[key],str) or not rule[key].strip() or len(rule[key])>1000:
+        if not isinstance(rule[key],str) or not rule[key].strip() or len(rule[key])>(3000 if key=="description" else 200):
             raise ValueError("Nome/descrição inválidos ou longos demais.")
     if rule["level"] not in ("N1","N2","N3","N4") or type(rule["active"]) is not bool:
         raise ValueError("Nível/estado inválidos.")
@@ -36,6 +36,8 @@ def validate_rule(rule):
         raise ValueError("Ações de regra inválidas.")
     if rule["level"] == "N4" and "mute" in actions:
         raise ValueError("N4 não define duração de mute; use uma ação prevista no nível.")
+    if "summary" in rule and (not isinstance(rule["summary"],str) or not rule["summary"].strip() or len(rule["summary"])>500):
+        raise ValueError("Resumo inválido ou longo demais.")
     return dict(rule)
 
 class Governance(WarningStore):

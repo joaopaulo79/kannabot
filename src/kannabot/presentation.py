@@ -38,3 +38,20 @@ def rule_text(rule):
             f"{escape(rule['description'])}\n\n"
             "Ações cadastradas: "+", ".join(actions[a] for a in rule["actions"])+
             "\nA aplicação depende da moderação. Esta consulta não executa punições.")
+
+
+def send_reply(bot,chat,text):
+    """Keep replies within Telegram limits without truncating history or rule text."""
+    from html import unescape
+    pages=[];current=""
+    for line in text.splitlines():
+        if len(line)>3000:
+            # Long rule descriptions contain escaped plain text, not generated mention tags.
+            raw=unescape(line)
+            pieces=[escape(raw[i:i+1500]) for i in range(0,len(raw),1500)]
+        else:pieces=[line]
+        for piece in pieces:
+            if current and len(current)+len(piece)+1>3500:pages.append(current);current=""
+            current+=("\n" if current else "")+piece
+    if current:pages.append(current)
+    for page in pages:bot.send_message(chat,page,parse_mode="HTML")

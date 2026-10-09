@@ -2,43 +2,46 @@
   {
     "code": "R01",
     "name": "Assunto do grupo",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Assunto do grupo. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Este grupo é focado em animes e mangás. Evite discutir temas como games, política, religião, ideologias, esportes, investimentos, conspirações, entre outros. Não compartilhe vídeos, imagens, áudios ou links sobre esses assuntos sem autorização prévia, incluindo fotos e vídeos pessoais.\n§ 1° — Existem tópicos livres, que podem ser compartilhados no grupo sem autorização prévia.\nTópicos livres: https://t.me/febreotaku_topicoslivres/3",
     "level": "N1",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Respeite o foco em animes e mangás; assuntos externos exigem autorização, exceto os tópicos livres definidos."
   },
   {
     "code": "R02",
     "name": "Menções desnecessárias",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Menções desnecessárias. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Nosso sistema permite mencionar @admin para encaminhar uma publicação à Staff, mas use esse recurso com seriedade. Além disso, menções diretas aos administradores para relatar possíveis infrações devem ser feitas de forma responsável, evitando repetições desnecessárias. Sempre que possível, denuncie infrações diretamente em privado a um membro da Staff para evitar confusões no grupo.",
     "level": "N1",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Use menções à Staff com responsabilidade, sem repetições desnecessárias."
   },
   {
     "code": "R03",
     "name": "Spoilers",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Spoilers. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Evite enviar mensagens, imagens ou vídeos com grande potencial de conter spoilers para outros membros. Haverá certa tolerância, mas é altamente recomendável usar a tag de Spoiler do Telegram com disclaimer do conteúdo (definir de qual obra se trata, e de qual capítulo/episódio), para proteger quem ainda não viu.",
     "level": "N1",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Proteja spoilers com a marcação do Telegram e informe obra e capítulo/episódio."
   },
   {
     "code": "R04",
     "name": "Spam de enquetes — revogada",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Spam de enquetes — revogada. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Não fique criando diversas enquetes em sequência, irrita bastante além de deixar o chat poluído! Apenas deixe essa ferramenta para os administradores.\nRegra revogada em 20/03/2023. Não aplicar a novas ocorrências.",
     "level": "N2",
     "weight": 2,
     "active": false,
@@ -46,12 +49,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Regra revogada: não aplicar punição por esta regra."
   },
   {
     "code": "R05",
     "name": "Propagandas e divulgação",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Propagandas e divulgação. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "É proibido compartilhar arquivos ou textos para promover a si mesmo, terceiros, outros grupos, causas ou empreendimentos, sem autorização prévia. O grupo Febre Otaku é voltado para discussões sobre animes e mangás, não para divulgação. Respeite essa norma.",
     "level": "N2",
     "weight": 2,
     "active": true,
@@ -59,12 +63,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Divulgação de pessoas, grupos, causas ou empreendimentos exige autorização prévia."
   },
   {
     "code": "R06",
     "name": "Poluição sonora",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Poluição sonora. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "É proibido compartilhar áudios ou vídeos com gritos, sons desconfortáveis ou áudio estourado. Isso inclui mensagens de voz, arquivos mp3 e chamadas de voz no grupo ou por outros meios.",
     "level": "N2",
     "weight": 2,
     "active": true,
@@ -72,12 +77,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Não compartilhe áudios ou vídeos com gritos, sons desconfortáveis ou áudio estourado."
   },
   {
     "code": "R07",
     "name": "Respeito ao espaço pessoal",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Respeito ao espaço pessoal. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Mantenha o respeito ao espaço pessoal dos membros. Comentários invasivos ou indagações sobre a vida privada de outros participantes não são permitidos. Respeite os limites e a privacidade de cada indivíduo.",
     "level": "N2",
     "weight": 2,
     "active": true,
@@ -85,12 +91,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Respeite o espaço pessoal e a privacidade dos membros."
   },
   {
     "code": "R08",
     "name": "Discussões acirradas",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Discussões acirradas. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Debates e discussões são permitidos, mas devem ser conduzidos de forma civilizada. Se uma discussão sair do controle e se tornar agressiva ou hostil, ela será interrompida, e os envolvidos poderão ser punidos.",
     "level": "N2",
     "weight": 2,
     "active": true,
@@ -98,21 +105,23 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Discussões devem ser civilizadas; agressividade e hostilidade podem resultar em punição."
   },
   {
     "code": "R09",
     "name": "Nome de usuário — Especial",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Nome de usuário — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Usuários sem @username, com nomes excessivamente longos, compostos apenas por caracteres especiais (!@#$%&*.) ou por caracteres chineses ou japoneses, serão automaticamente silenciados pelo bot. Esses nomes não são permitidos no grupo. Alterações para esses formatos serão penalizadas imediatamente.\nCondição especial pendente na Kanna: critérios objetivos de comprimento/formato e duração ainda não definidos. O texto do livro não habilita aplicação automática na implementação atual.",
     "level": "N2",
     "weight": null,
     "active": true,
-    "actions": []
+    "actions": [],
+    "summary": "Exigências de username e formato do nome possuem condições especiais ainda pendentes de definição."
   },
   {
     "code": "R10",
     "name": "Flood e spam",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Flood e spam. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "É estritamente proibido enviar repetidamente mensagens semelhantes, arquivos, figurinhas, links em sequência, ou textos desnecessariamente longos. A punição pode ser aplicada imediatamente, se detectada pelo nosso sistema de automação.",
     "level": "N3",
     "weight": 3,
     "active": true,
@@ -120,12 +129,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Não envie repetidamente mensagens semelhantes, arquivos, figurinhas ou links em sequência, nem textos desnecessariamente longos."
   },
   {
     "code": "R11",
     "name": "Bom comportamento",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Bom comportamento. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Valorizamos a liberdade de expressão, desde que respeite as normas do grupo e não cause confusão. Mantemos um espaço de diálogo civilizado, sem brigas, ofensas ou tumultos. A formação de grupos de ataque contra indivíduos, empresas, páginas/blogs ou outros grupos é estritamente proibida. Todos os envolvidos serão punidos.",
     "level": "N3",
     "weight": 3,
     "active": true,
@@ -133,12 +143,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Não provoque brigas, ofensas, tumultos ou organize ataques contra pessoas e grupos."
   },
   {
     "code": "R12",
     "name": "Fake news e desinformação",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Fake news e desinformação. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Evite compartilhar informações falsas ou não verificadas no grupo. Espalhar fake news, teorias da conspiração ou desinformação intencional será punido com mute e, em casos graves, banimento.",
     "level": "N3",
     "weight": 3,
     "active": true,
@@ -146,12 +157,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Não espalhe informações falsas, não verificadas ou desinformação intencional."
   },
   {
     "code": "R13",
     "name": "Pirataria",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Pirataria. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Você pode compartilhar no grupo os meios por onde consome animes e mangás, mas usar o grupo como canal para pirataria é estritamente proibido.",
     "level": "N3",
     "weight": 3,
     "active": true,
@@ -159,12 +171,13 @@
       "warn",
       "delete",
       "mute"
-    ]
+    ],
+    "summary": "Não use o grupo como canal para pirataria; citar meios de consumo é permitido."
   },
   {
     "code": "R14",
     "name": "Conversa em privado — Especial",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Conversa em privado — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Não incomode outros membros em chats privados para qualquer finalidade, seja para divulgar conteúdo ou qualquer outro motivo. Qualquer forma de assédio será tratada com extrema seriedade. Dependendo da gravidade da infração, o usuário pode ser banido imediatamente, sem aviso prévio.",
     "level": "N3",
     "weight": 3,
     "active": true,
@@ -173,12 +186,13 @@
       "delete",
       "mute",
       "ban"
-    ]
+    ],
+    "summary": "Não incomode ou assedie outros membros em chats privados."
   },
   {
     "code": "R15",
     "name": "Informações pessoais — Especial",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Informações pessoais — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Não compartilhe dados pessoais, seus ou de terceiros, em nosso grupo. Isso inclui números de telefone, RG, CPF, endereços, senhas, chaves Pix, e-mails ou logins de qualquer plataforma. Dependendo da gravidade, a infração pode resultar em banimento permanente.",
     "level": "N3",
     "weight": 3,
     "active": true,
@@ -187,54 +201,59 @@
       "delete",
       "mute",
       "ban"
-    ]
+    ],
+    "summary": "Não compartilhe dados pessoais seus ou de terceiros, incluindo documentos, contatos e credenciais."
   },
   {
     "code": "R16",
     "name": "Arquivos inapropriados",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Arquivos inapropriados. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "É estritamente proibido compartilhar qualquer conteúdo +18 no grupo, incluindo imagens, vídeos, links ou qualquer outro tipo de mídia. Isso abrange sites de apostas, pornografia, conteúdo extremamente violento ou repulsivo, e produtos voltados para adultos. Mantemos uma comunidade limpa e organizada!",
     "level": "N4",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "ban"
-    ]
+    ],
+    "summary": "Não compartilhe conteúdo +18, apostas, pornografia ou conteúdo extremamente violento ou repulsivo."
   },
   {
     "code": "R17",
     "name": "Comportamento criminoso",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Comportamento criminoso. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "É proibido cometer ou incentivar qualquer crime previsto na legislação brasileira em nosso grupo. Temos tolerância zero para agressões verbais preconceituosas contra grupos ou minorias. Comentários homofóbicos, racistas, xenofóbicos, de intolerância religiosa ou política, assédio ou incitação ao suicídio serão punidos com banimento permanente. Não permitimos qualquer envolvimento com crimes em nossa comunidade.",
     "level": "N4",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "ban"
-    ]
+    ],
+    "summary": "Não cometa ou incentive crimes, preconceito, assédio ou incitação ao suicídio."
   },
   {
     "code": "R18",
     "name": "Conteúdos perigosos para epiléticos",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Conteúdos perigosos para epiléticos. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "É estritamente proibido compartilhar conteúdos que possam desencadear crises epiléticas, como vídeos, GIFs ou imagens com luzes piscantes, padrões visuais intensos ou qualquer tipo de estímulo visual que possa ser perigoso para pessoas com epilepsia. A violação dessa regra resultará em banimento permanente. Preservamos a segurança de todos os membros do grupo.",
     "level": "N4",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "ban"
-    ]
+    ],
+    "summary": "Não compartilhe conteúdos com estímulos visuais que possam desencadear crises epiléticas."
   },
   {
     "code": "R19",
     "name": "Ação de má-fé — Especial",
-    "description": "Referência ao livro de regras fornecido pelo Dono: Ação de má-fé — Especial. Aplicação depende de avaliação humana; exceções exigem decisão explícita.",
+    "description": "Qualquer tentativa de burlar as regras do grupo, incluindo a criação de contas alternativas para contornar punições ou a manipulação do sistema de moderação, será tratada com extrema seriedade. A infração resultará em banimento permanente. Garantimos a integridade e o cumprimento das regras para todos os membros.\n§ 1° — Caso encontre alguma brecha nas regras, esta pode, e deve ser compartilhada com algum membro da Staff em chat privado, para que as devidas providências sejam tomadas.",
     "level": "N4",
     "weight": null,
     "active": true,
     "actions": [
       "delete",
       "ban"
-    ]
+    ],
+    "summary": "Não burle regras ou punições nem manipule a moderação. Informe brechas à Staff em privado."
   }
 ]

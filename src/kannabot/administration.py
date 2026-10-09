@@ -1,3 +1,4 @@
+from kannabot.presentation import send_reply
 """Explicit human commands for assignments, catalogs and cancellations."""
 import json
 from kannabot.presentation import context, mention, user_mention, rule_text, ROLE_NAMES
@@ -29,8 +30,8 @@ class Administration:
             elif command=="rule_set":
                 rule=json.loads(argument)
                 if isinstance(rule,dict):
-                    for key in ("name","description"):
-                        if isinstance(rule.get(key),str):rule[key]=self.audit.clean(rule[key])
+                    for key in ("name","description","summary"):
+                        if isinstance(rule.get(key),str):rule[key]=self.audit.clean(rule[key],limit=4000)
                 version=self.store.put_rule(message.chat.id,rule,actor)
                 result=Result("done",f"📚 Regra {rule['code']} salva na versão {version}. Histórico anterior preservado.")
                 reason="Cadastro/edição de regra"
@@ -42,9 +43,16 @@ class Administration:
                 result=Result("done",f"📚 Regra {argument} revogada para novas aplicações. Histórico preservado.")
             elif command=="rules_import":
                 rules=json.loads((Path(__file__).parent/"resources/rules_initial.json").read_text(encoding="utf-8"))
+                if argument not in ("","atualizar"):raise ValueError("Use /rules_import ou /rules_import atualizar.")
+                created=updated=preserved=0
                 for rule in rules:
-                    if self.store.rule(message.chat.id,rule["code"]) is None:self.store.put_rule(message.chat.id,rule,actor)
-                result=Result("done","📚 Catálogo inicial importado! Regras existentes preservadas. Condições pendentes não foram presumidas.")
+                    existing=self.store.rule(message.chat.id,rule["code"])
+                    if existing is None:
+                        self.store.put_rule(message.chat.id,rule,actor);created+=1
+                    elif argument=="atualizar" and existing["description"]==f"Referência ao livro de regras fornecido pelo Dono: {existing['name']}. Aplicação depende de avaliação humana; exceções exigem decisão explícita." and all(existing[key]==rule[key] for key in ("name","level","weight","active","actions")):
+                        self.store.put_rule(message.chat.id,rule,actor);updated+=1
+                    else:preserved+=1
+                result=Result("done",f"📚 Catálogo atualizado!\nNovas regras: {created}.\nRedações genéricas atualizadas: {updated}.\nRegras existentes preservadas: {preserved}.\nCondições pendentes não foram presumidas.")
             elif command=="unwarn":
                 parts=argument.split(maxsplit=1)
                 if len(parts)!=2 or not parts[0].isdigit():raise ValueError("Use /unwarn ID motivo.")
@@ -73,6 +81,6 @@ class Administration:
 def register(bot,service):
     def handle(command,message):
         result=service.handle(command,message)
-        try:bot.send_message(message.chat.id,result.message,parse_mode="HTML")
+        try:send_reply(bot,message.chat.id,result.message)
         except Exception:service.audit.record(message.chat.id,None,None,"admin_feedback","Falha de retorno","failed")
     for command in COMMANDS:bot.message_handler(commands=[command])(partial(handle,command))

@@ -16,11 +16,11 @@ class Audit:
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.lock = RLock()
 
-    def clean(self, text):
+    def clean(self, text, limit=300):
         text = str(text)
         for secret in self.secrets:
             text = text.replace(secret, "[redacted]")
-        return re.sub(r"[0-9]+:[A-Za-z0-9_-]+", "[redacted]", text)[:300]
+        return re.sub(r"[0-9]+:[A-Za-z0-9_-]+", "[redacted]", text)[:limit]
 
     def record(self, chat_id, actor_id, target_id, action, reason, outcome, error=None, metadata=None):
         if outcome not in ("done", "refused", "failed", "partial", "uncertain"):
