@@ -32,7 +32,7 @@ class RuleRefusalTests(unittest.TestCase):
             with self.subTest(command=command):
                 result = self.service.handle(command, self.message(f"/{command} R01 teste"))
                 self.assertEqual(result.outcome, "refused")
-                for text in ("R01", "Assunto do grupo", "reincidência", "critérios", "peso", "/catalog R01", "Nenhuma"):
+                for text in ("R01", "Assunto do grupo", "reincidência", "critérios", "peso", "/rule R01", "Nenhuma"):
                     self.assertIn(text, result.message)
                 if command == "delwarn":
                     self.assertIn("nenhuma mensagem foi apagada", result.message)

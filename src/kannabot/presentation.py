@@ -3,7 +3,7 @@ from html import escape
 
 ROLE_NAMES = {"owner":"Dono","admin":"Admin","mod":"Mod","member":"Membro"}
 NATIVE_NAMES = {"creator":"Proprietário","administrator":"Administrador","member":"Membro","restricted":"Restrito","left":"Ausente","kicked":"Banido"}
-ACTION_NAMES = {"help":"Consulta de ajuda","help_feedback":"Retorno da ajuda","warn":"Advertência","warnings":"Consulta de advertências","unwarn":"Cancelamento de advertência","delete":"Exclusão de mensagem","delwarn":"Exclusão com advertência","mute":"Silenciamento","kick":"Expulsão","ban":"Banimento","unban":"Remoção de banimento","role":"Atribuição de cargo","role_remove":"Remoção de cargo","rules_import":"Importação de regras","rule_set":"Edição de regra","rule_disable":"Desativação de regra","catalog":"Consulta de regras","detections":"Consulta de detecções","review":"Revisão de detecção","dismiss":"Descarte de detecção","review_pending":"Detecção aguardando revisão","spam_observe":"Observação de antispam"}
+ACTION_NAMES = {"help":"Consulta de ajuda","help_feedback":"Retorno da ajuda","warn":"Advertência","warnings":"Consulta de advertências","unwarn":"Cancelamento de advertência","delete":"Exclusão de mensagem","delwarn":"Exclusão com advertência","mute":"Silenciamento","kick":"Expulsão","ban":"Banimento","unban":"Remoção de banimento","role":"Atribuição de cargo","role_remove":"Remoção de cargo","rules_import":"Importação de regras","rule_set":"Edição de regra","rule_disable":"Desativação de regra","catalog":"Consulta de regras","rules":"Consulta de regras","rule":"Consulta de regra","detections":"Consulta de detecções","review":"Revisão de detecção","dismiss":"Descarte de detecção","review_pending":"Detecção aguardando revisão","spam_observe":"Observação de antispam"}
 OUTCOME_NAMES = {"done":"Concluída","refused":"Recusada","failed":"Falha confirmada","partial":"Parcial","uncertain":"Resultado incerto"}
 def mention(user_id, username=None):
     if isinstance(username,str) and username.strip():
@@ -85,6 +85,6 @@ def catalog_text(rules):
         lines.extend(["","🗂️ <b>Regras revogadas</b>"])
         lines.extend(f"{escape(rule['code'])} — {escape(rule['name'].removesuffix(' — revogada'))}" for rule in sorted(revoked,key=lambda rule:rule["code"]))
         lines.append("Não se aplicam a novas ocorrências.")
-    lines.extend(["","🔎 Para ler uma regra, use <code>/catalog R10</code>.",
+    lines.extend(["","🔎 Para ler uma regra, use <code>/rule R10</code>.",
                   "A consulta detalhada mostra descrição, pontuação, condições e versão."])
     return "\n".join(lines)

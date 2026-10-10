@@ -12,7 +12,7 @@ class HelpTests(unittest.TestCase):
     def test_mod_has_only_its_commands(self):
         helper=Help(self.service);self.assertEqual(self.get(8).outcome,'done')
         allowed=helper.allowed('mod')
-        for command in ('warn','warnings','delete','delwarn','mute','catalog','detections','dismiss','review'):self.assertIn(command,allowed)
+        for command in ('warn','warnings','delete','delwarn','mute','rules','rule','detections','dismiss','review'):self.assertIn(command,allowed)
         for command in ('ban','kick','unban','unwarn','role','rules_import','rule_set'):self.assertNotIn(command,allowed)
         self.assertNotIn('p2',''.join(helper.render('mod',page) for page in allowed))
     def test_admin_and_owner_commands_follow_capabilities(self):
