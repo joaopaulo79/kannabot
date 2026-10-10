@@ -97,7 +97,7 @@ class Moderation:
                         if snapshot:
                             lines.extend([escape(f"{snapshot['code']} — {snapshot['name']} · {snapshot['level']} · v{entry['rule_version']}"),"Descrição: "+brief(snapshot)])
                         lines.extend([f"Peso aplicado: {entry['weight'] if entry['weight'] is not None else 'não definido'}",
-                                      "Motivo: "+escape(entry["reason"]), "Aplicada por: "+mention(entry["author_id"]), "Data: "+escape(entry["time"])])
+                                      "Motivo: "+escape(entry["reason"]), "Aplicada por: "+mention(entry["author_id"],entry.get("actor_username")), "Data: "+escape(entry["time"])])
                         if entry["cancel_time"]:lines.extend(["Cancelada por: "+mention(entry["cancel_actor"]),"Motivo do cancelamento: "+escape(entry["cancel_reason"])])
                     if not self.governance.detailed_entries(message.chat.id,target):lines.append("Nenhuma advertência registrada neste grupo.")
                 result = Result("done", "\n".join(lines))

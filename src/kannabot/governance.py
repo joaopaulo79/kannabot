@@ -49,7 +49,14 @@ class Governance(WarningStore):
                 "CREATE TABLE IF NOT EXISTS sanctions(id INTEGER PRIMARY KEY,chat_id INTEGER NOT NULL,event_id TEXT NOT NULL,action TEXT NOT NULL,actor_id INTEGER NOT NULL,target_id INTEGER NOT NULL,rule_code TEXT,rule_version INTEGER,reason TEXT NOT NULL,status TEXT NOT NULL,detail TEXT NOT NULL,time TEXT NOT NULL,UNIQUE(chat_id,event_id,action))",
             ):db.execute(statement)
             db.execute("INSERT OR IGNORE INTO infractions(warning_id) SELECT id FROM warnings")
-            db.execute("PRAGMA user_version=1")
+            for table in ("warnings","sanctions"):
+                columns={row[1] for row in db.execute(f"PRAGMA table_info({table})")}
+                for column in ("actor_username","target_username"):
+                    if column not in columns:db.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
+            db.execute("CREATE VIEW IF NOT EXISTS catalogo_regras AS SELECT r.chat_id AS grupo_id,r.code AS codigo,r.version AS versao,json_extract(r.snapshot,'$.name') AS nome,json_extract(r.snapshot,'$.description') AS descricao,json_extract(r.snapshot,'$.level') AS nivel,json_extract(r.snapshot,'$.weight') AS peso,json_extract(r.snapshot,'$.active') AS ativa,json_extract(r.snapshot,'$.actions') AS acoes,r.time AS criada_em FROM rules r WHERE r.version=(SELECT MAX(x.version) FROM rules x WHERE x.chat_id=r.chat_id AND x.code=r.code)")
+            db.execute("CREATE VIEW IF NOT EXISTS historico_advertencias AS SELECT i.id AS registro,w.chat_id AS grupo_id,w.user_id AS alvo_id,w.target_username AS alvo_username,w.author_id AS autor_id,w.actor_username AS autor_username,w.time AS aplicada_em,i.rule_code AS regra,i.rule_version AS versao,json_extract(i.snapshot,'$.name') AS nome_regra,json_extract(i.snapshot,'$.description') AS descricao_aplicada,i.weight AS peso,w.reason AS motivo,CASE WHEN i.cancel_time IS NULL THEN 'valida' ELSE 'cancelada' END AS estado,i.cancel_time AS cancelada_em,i.cancel_actor AS cancelada_por,i.cancel_reason AS motivo_cancelamento FROM warnings w JOIN infractions i ON w.id=i.warning_id")
+            db.execute("CREATE VIEW IF NOT EXISTS acoes_moderacao AS SELECT id AS registro,chat_id AS grupo_id,actor_id AS autor_id,actor_username AS autor_username,target_id AS alvo_id,target_username AS alvo_username,action AS acao,reason AS motivo,status AS resultado,detail AS detalhe,time AS data FROM sanctions")
+            db.execute("PRAGMA user_version=2")
 
     def role(self,chat,user):
         with closing(sqlite3.connect(self.path)) as db:
@@ -85,6 +92,7 @@ class Governance(WarningStore):
         with closing(sqlite3.connect(self.path)) as db, db:
             cursor=db.execute("INSERT OR IGNORE INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,user,actor,reason,time,str(event_id)))
             if cursor.rowcount!=1:return False
+            self.snapshot_identity(db,"warnings",cursor.lastrowid,chat,actor,user)
             db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(cursor.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else None,json.dumps(rule,ensure_ascii=False) if rule else None))
             return True
 
@@ -111,7 +119,10 @@ class Governance(WarningStore):
     def begin(self,chat,event,action,actor,target,reason,rule=None):
         with closing(sqlite3.connect(self.path)) as db, db:
             cursor=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,str(event),action,actor,target,rule["code"] if rule else None,rule["version"] if rule else None,reason,"pending","Resultado ainda não confirmado",utcnow()))
-            return cursor.lastrowid if cursor.rowcount==1 else None
+            if cursor.rowcount==1:
+                self.snapshot_identity(db,"sanctions",cursor.lastrowid,chat,actor,target)
+                return cursor.lastrowid
+            return None
 
     def finish(self,id,status,detail):
         if status not in ("done","refused","failed","partial","uncertain"):raise ValueError("Resultado inválido.")
@@ -126,7 +137,7 @@ class Governance(WarningStore):
     def detailed_entries(self,chat,user):
         with closing(sqlite3.connect(self.path)) as db:
             db.row_factory=sqlite3.Row
-            return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]
+            return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id,w.actor_username,w.target_username FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]
 
 
     def start_delwarn(self,chat,message,actor,target,reason,rule=None):
@@ -134,7 +145,7 @@ class Governance(WarningStore):
         with closing(sqlite3.connect(self.path)) as db,db:
             db.execute("BEGIN IMMEDIATE")
             if rule is not None:
-                latest=db.execute("SELECT version FROM rules WHERE chat_id=? AND code=? ORDER BY version DESC LIMIT 1",(chat,rule["code"] if rule else None)).fetchone()
+                latest=db.execute("SELECT version FROM rules WHERE chat_id=? AND code=? ORDER BY version DESC LIMIT 1",(chat,rule["code"])).fetchone()
                 if not latest or latest[0]!=rule["version"]:raise ValueError("Regra mudou; revise antes de executar.")
             prior=db.execute("SELECT status FROM sanctions WHERE chat_id=? AND event_id=? AND action='delete'",(chat,f"delete:{message}")).fetchone()
             if prior:raise ValueError("A mensagem já possui uma operação de exclusão registrada.")
@@ -142,4 +153,16 @@ class Governance(WarningStore):
             if claim.rowcount!=1:return None
             warning=db.execute("INSERT INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,target,actor,reason,utcnow(),event))
             infraction=db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else None,json.dumps(rule,ensure_ascii=False) if rule else None))
+            self.snapshot_identity(db,"sanctions",claim.lastrowid,chat,actor,target)
+            self.snapshot_identity(db,"warnings",warning.lastrowid,chat,actor,target)
             return claim.lastrowid,infraction.lastrowid
+
+
+    @staticmethod
+    def snapshot_identity(db,table,record,chat,actor,target):
+        if table not in ("warnings","sanctions"):raise ValueError("Unsupported snapshot table")
+        if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='identities'").fetchone():return
+        def username(user):
+            row=db.execute("SELECT username FROM identities WHERE chat_id=? AND user_id=?",(chat,user)).fetchone()
+            return row[0] if row else None
+        db.execute(f"UPDATE {table} SET actor_username=?,target_username=? WHERE id=?",(username(actor),username(target),record))
