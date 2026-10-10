@@ -17,6 +17,8 @@ class Administration:
         try:
             action="roles" if command in ("role","role_remove","rule_set","rule_disable","rules_import") else "unwarn" if command=="unwarn" else "catalog"
             actor=self.moderation.permissions.actor(message,action)
+            if command in ("role","role_remove","unwarn") and self.moderation.identities is not None:
+                message=self.moderation.identities.prepare(message,command)
             argument=message.text.split(maxsplit=1)[1].strip() if len(message.text.split(maxsplit=1))>1 else ""
             if command in ("role","role_remove"):
                 _,target=self.moderation.reply_target(message)
@@ -48,7 +50,10 @@ class Administration:
                 if len(parts)!=2 or not parts[0].isdigit():raise ValueError("Use /unwarn ID motivo.")
                 row=self.store.infraction(message.chat.id,int(parts[0]))
                 if not row:raise ValueError("Infração inexistente neste grupo.")
-                target=row[0];self.roles.target(message.chat.id,actor,target)
+                target=row[0]
+                supplied=getattr(getattr(message,"reply_to_message",None),"from_user",None)
+                if supplied is not None and supplied.id!=target:raise ValueError("A advertência não pertence ao alvo indicado.")
+                self.roles.target(message.chat.id,actor,target)
                 reason=self.audit.clean(parts[1])
                 if not reason.strip():raise ValueError("Motivo obrigatório.")
                 changed=self.store.cancel(message.chat.id,int(parts[0]),actor,reason)
