@@ -100,7 +100,7 @@ class Governance(WarningStore):
             cursor=db.execute("INSERT OR IGNORE INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,user,actor,reason,time,str(event_id)))
             if cursor.rowcount!=1:return False
             self.snapshot_identity(db,"warnings",cursor.lastrowid,chat,actor,user)
-            db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(cursor.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else None,json.dumps(rule,ensure_ascii=False) if rule else None))
+            db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(cursor.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else 0,json.dumps(rule,ensure_ascii=False) if rule else None))
             return True
 
     def history(self,chat,user):

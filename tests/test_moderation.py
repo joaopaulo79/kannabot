@@ -34,8 +34,8 @@ class ModerationTests(unittest.TestCase):
     def test_invalid_reply_and_reason_no_partial_record(self):
         self.msg.reply_to_message.chat.id=2
         self.assertEqual(self.service.handle("warn",self.msg).outcome,"refused")
-        self.msg.reply_to_message.chat.id=1;self.msg.text="/warn"
-        self.assertEqual(self.service.handle("warn",self.msg).outcome,"refused")
+        self.msg.reply_to_message.chat.id=1;self.msg.text="/delete"
+        self.assertEqual(self.service.handle("delete",self.msg).outcome,"refused")
         self.assertEqual(self.service.store.history(1,8)[0],0)
     def test_storage_failure_is_not_success(self):
         self.service.store=Mock();self.service.store.add.side_effect=OSError("secret")
