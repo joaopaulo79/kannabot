@@ -44,7 +44,7 @@ def rule_text(rule):
         elif action=='mute':lines.append("• Silenciamento: de "+bounds[rule['level']]+"." if rule['level'] in bounds else "• Silenciamento, conforme condições definidas pela administração.")
         elif action=='ban':lines.append("• Banimento.")
     if not rule['actions']:lines.append("Nenhuma ação definida para esta regra.")
-    if rule['level']=='N1':lines.extend(["","⚠️ <b>Condição para advertência</b>","Advertência por reincidência depende de critérios definidos pela administração; peso não definido."])
+    if rule['level']=='N1' and rule['weight'] is None:lines.extend(["","⚠️ <b>Condição para advertência</b>","Advertência por reincidência depende de critérios definidos pela administração; peso não definido."])
     elif 'warn' in rule['actions'] and rule['weight'] is None:
         lines.extend(["","⚠️ O peso ainda precisa ser definido pela administração; não presumir pontuação."])
     lines.extend(["","🛡️ A aplicação exige decisão da moderação, respeitando permissões e condições da regra.",

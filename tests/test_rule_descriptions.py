@@ -77,3 +77,10 @@ class RuleDescriptionTests(unittest.TestCase):
         self.assertIn("• Banimento.",result.message);self.assertNotIn("peso não definido",result.message)
         result=self.admin.handle("catalog",self.message("/catalog R04"))
         self.assertIn("Regra revogada",result.message);self.assertIn("Não se aplica a novas ocorrências",result.message)
+
+    def test_custom_n1_defined_weight_is_not_reported_as_undefined(self):
+        self.import_rules();rule=self.store.rule(1,"R01");rule.pop("version")
+        rule['weight']=1;rule['actions'].append('warn');self.store.put_rule(1,rule,1)
+        result=self.admin.handle("catalog",self.message("/catalog R01"))
+        self.assertIn("Advertência: +1 ponto",result.message)
+        self.assertNotIn("peso não definido",result.message)
