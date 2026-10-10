@@ -129,16 +129,17 @@ class Governance(WarningStore):
             return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]
 
 
-    def start_delwarn(self,chat,message,actor,target,reason,rule):
+    def start_delwarn(self,chat,message,actor,target,reason,rule=None):
         event=f"delwarn:{message}"
         with closing(sqlite3.connect(self.path)) as db,db:
             db.execute("BEGIN IMMEDIATE")
-            latest=db.execute("SELECT version FROM rules WHERE chat_id=? AND code=? ORDER BY version DESC LIMIT 1",(chat,rule["code"])).fetchone()
-            if not latest or latest[0]!=rule["version"]:raise ValueError("Regra mudou; revise antes de executar.")
+            if rule is not None:
+                latest=db.execute("SELECT version FROM rules WHERE chat_id=? AND code=? ORDER BY version DESC LIMIT 1",(chat,rule["code"] if rule else None)).fetchone()
+                if not latest or latest[0]!=rule["version"]:raise ValueError("Regra mudou; revise antes de executar.")
             prior=db.execute("SELECT status FROM sanctions WHERE chat_id=? AND event_id=? AND action='delete'",(chat,f"delete:{message}")).fetchone()
             if prior:raise ValueError("A mensagem já possui uma operação de exclusão registrada.")
-            claim=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,event,"delwarn",actor,target,rule["code"],rule["version"],reason,"pending","Exclusão ainda não confirmada",utcnow()))
+            claim=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,event,"delwarn",actor,target,rule["code"] if rule else None,rule["version"] if rule else None,reason,"pending","Exclusão ainda não confirmada",utcnow()))
             if claim.rowcount!=1:return None
             warning=db.execute("INSERT INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,target,actor,reason,utcnow(),event))
-            infraction=db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"],rule["version"],rule["weight"],json.dumps(rule,ensure_ascii=False)))
+            infraction=db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else None,json.dumps(rule,ensure_ascii=False) if rule else None))
             return claim.lastrowid,infraction.lastrowid

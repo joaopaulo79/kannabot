@@ -53,3 +53,16 @@ class DelwarnTests(unittest.TestCase):
         self.assertEqual(result.outcome,"done")
         self.assertIn("advertência #2",result.message)
         self.assertEqual(self.admin.handle("unwarn",self.message("/unwarn 2 revisão")).outcome,"done")
+
+    def test_manual_without_rule_records_without_points(self):
+        result=self.service.handle("delwarn",self.message("/delwarn Tô só testando"))
+        self.assertEqual(result.outcome,"done");self.assertIn("não definido",result.message)
+        self.assertEqual(self.store.history(1,9)[0],1);self.assertEqual(self.store.points(1,9),0)
+        with closing(sqlite3.connect(self.path)) as db:
+            self.assertEqual(db.execute("SELECT rule_code,rule_version,weight,snapshot FROM infractions").fetchone(),(None,None,None,None))
+        self.bot.delete_message.assert_called_once_with(1,10)
+        self.assertEqual(self.service.handle("delwarn",self.message("/delwarn outro motivo",event=22)).outcome,"refused")
+    def test_missing_reason_and_unknown_rule_have_no_effects(self):
+        for text in ("/delwarn", "/delwarn R10", "/delwarn R999 teste"):
+            self.assertEqual(self.service.handle("delwarn",self.message(text)).outcome,"refused")
+        self.bot.delete_message.assert_not_called();self.assertEqual(self.store.history(1,9)[0],0)

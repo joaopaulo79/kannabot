@@ -255,24 +255,30 @@ class Moderation:
             reply,target=self.reply_target(message)
             self.permissions.target(message.chat.id,target,actor)
             self.permissions.bot_right(message.chat.id,"can_delete_messages")
-            parts=message.text.split(maxsplit=2)
-            if len(parts)!=3 or not parts[2].strip():raise ValueError("Use /delwarn R10 motivo em resposta à mensagem.")
-            if not self.governance:raise ValueError("Catálogo indisponível; nenhuma ação executada.")
-            rule=self.governance.rule(message.chat.id,parts[1])
-            if not rule or not rule["active"] or "warn" not in rule["actions"] or rule["weight"] is None:
-                raise ValueError("Regra inválida, revogada ou sem advertência/peso definido.")
-            reason=self.audit.clean(parts[2])
+            parts=message.text.split(maxsplit=1)
+            if len(parts)!=2 or not parts[1].strip():raise ValueError("Use /delwarn motivo ou /delwarn R10 motivo em resposta à mensagem.")
+            if not self.governance:raise ValueError("Histórico indisponível; nenhuma ação executada.")
+            argument=parts[1].strip();tokens=argument.split(maxsplit=1);rule=None
+            if re.fullmatch(r"R[0-9]+",tokens[0]):
+                if len(tokens)!=2:raise ValueError("Informe o motivo após o código da regra.")
+                rule=self.governance.rule(message.chat.id,tokens[0])
+                if not rule or not rule["active"] or "warn" not in rule["actions"] or rule["weight"] is None:
+                    raise ValueError("Regra inválida, revogada ou sem advertência/peso definido.")
+                argument=tokens[1]
+            reason=self.audit.clean(argument)
             if not reason.strip():raise ValueError("Informe um motivo explícito.")
             operation=self.governance.start_delwarn(message.chat.id,reply.message_id,actor,target,reason,rule)
             if operation is None:raise ValueError("Esta mensagem já possui um delwarn registrado; ação não repetida.")
             claim,warning=operation
-            metadata.update(warning_id=warning,rule_code=rule["code"],rule_version=rule["version"],weight=rule["weight"])
+            metadata.update(warning_id=warning)
+            if rule:metadata.update(rule_code=rule["code"],rule_version=rule["version"],weight=rule["weight"])
             # Snapshot persistence precedes the irreversible external effect.
             self.permissions.target(message.chat.id,target,actor)
             self.permissions.bot_right(message.chat.id,"can_delete_messages")
             if self.bot.delete_message(message.chat.id,reply.message_id) is not True:
                 raise RuntimeError("Deletion not confirmed")
-            result=Result("done",f"🧹⚠️ Mensagem apagada e advertência #{warning} registrada.\nAlvo: {user_mention(reply.from_user)}\nRegra: {escape(rule['code'])} — {escape(rule['name'])} · {rule['level']}\nDescrição: {brief(rule)}\nPeso: +{rule['weight']} pontos\nMotivo: {escape(reason)}")
+            rule_info=(f"Regra: {escape(rule['code'])} — {escape(rule['name'])} · {rule['level']}\nDescrição: {brief(rule)}\nPeso: +{rule['weight']} pontos" if rule else "Tipo: advertência manual, sem regra vinculada.\nPeso: não definido; não acrescenta pontos.")
+            result=Result("done",f"🧹⚠️ Mensagem apagada e advertência #{warning} registrada.\nAlvo: {user_mention(reply.from_user)}\n{rule_info}\nMotivo: {escape(reason)}")
             self.governance.finish(claim,"done","Advertência registrada; exclusão confirmada")
         except (PermissionDenied,ValueError) as exc:
             error=exc
