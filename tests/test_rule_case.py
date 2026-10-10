@@ -49,10 +49,10 @@ class RuleCaseTests(unittest.TestCase):
     def test_short_code_is_not_interpreted_as_manual_reason(self):
         self.import_rules()
         for command in ("warn","delwarn"):
-            for code in ("R1","r1"):
+            for code in ("R9","r9"):
                 result=self.service.handle(command,self.message(f"/{command} {code} teste"))
                 self.assertEqual(result.outcome,"refused")
-                self.assertIn("R01",result.message)
+                self.assertIn("R09",result.message)
         self.assertEqual(self.store.history(1,9)[0],0)
         self.assertEqual(self.admin.handle("catalog",self.message("/catalog r1")).outcome,"done")
         self.bot.delete_message.assert_not_called()

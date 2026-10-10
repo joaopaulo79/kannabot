@@ -8,11 +8,11 @@ class N1ZeroTests(unittest.TestCase):
 
     def test_n1_without_additional_reason_counts_but_has_no_points(self):
         self.import_rules()
-        for event,code in enumerate(("R01","R02","R03"),30):
+        for event,code in enumerate(("r1","R2","r03"),30):
             result=self.service.handle("warn",self.message(f"/warn {code}",event=event))
             self.assertEqual(result.outcome,"done")
             self.assertIn("Peso: 0 pontos",result.message)
-            self.assertEqual(self.store.rule(1,code)["weight"],0)
+            self.assertEqual(self.store.rule(1,"R"+code[1:].zfill(2))["weight"],0)
         self.assertEqual(self.store.history(1,9)[0],3);self.assertEqual(self.store.points(1,9),0)
         self.assertTrue(all(e["weight"]==0 for e in self.store.detailed_entries(1,9)))
         self.bot.ban_chat_member.assert_not_called()
