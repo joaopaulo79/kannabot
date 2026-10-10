@@ -31,7 +31,7 @@ class Audit:
                      actor=actor_id if actor_id is not None else "automation", target=target_id,
                      action=self.clean(action), reason=self.clean(reason), outcome=outcome)
         for key,value in (metadata or {}).items():
-            if key in ("actor_role","target_role","actor_title","target_title","actor_native","target_native","actor_username","target_username","rule_code","rule_version","detail","origin","command","command_message","chat_title","warning_id","weight","valid_count","points","stage","evidence_status") and value is not None:
+            if key in ("actor_role","target_role","actor_title","target_title","actor_native","target_native","actor_username","target_username","rule_code","rule_version","detail","origin","command","command_message","chat_title","warning_id","weight","valid_count","points","stage","evidence_id","evidence_status") and value is not None:
                 event[key] = self.clean(value)
         if error is not None:
             event["error"] = type(error).__name__
@@ -85,7 +85,7 @@ class Audit:
                 item=event.get(prefix+key)
                 if item:lines.append(field+": "+safe(mapping.get(item,item)))
         lines+=["","Ação"]
-        for key,label in (("reason","Motivo"),("warning_id","Advertência"),("rule_code","Regra"),("rule_version","Versão da regra"),("weight","Peso aplicado"),("valid_count","Advertências válidas"),("points","Pontos acumulados"),("detail","Detalhes"),("stage","Etapa"),("evidence_status","Evidência"),("error","Erro"),("error_code","Código Telegram"),("error_description","Descrição Telegram")):
+        for key,label in (("reason","Motivo"),("warning_id","Advertência"),("rule_code","Regra"),("rule_version","Versão da regra"),("weight","Peso aplicado"),("valid_count","Advertências válidas"),("points","Pontos acumulados"),("detail","Detalhes"),("stage","Etapa"),("evidence_id","Registro da evidência"),("evidence_status","Disponibilidade da evidência"),("error","Erro"),("error_code","Código Telegram"),("error_description","Descrição Telegram")):
             if key in event and event[key]!="":lines.append(label+": "+safe(event[key]))
         return "\n".join(lines)
 

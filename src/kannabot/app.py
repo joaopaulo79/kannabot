@@ -1,3 +1,4 @@
+from kannabot.evidence import Evidence
 import os
 from kannabot.identities import Identities, register as register_identities
 from pathlib import Path
@@ -28,6 +29,8 @@ def create_app(configuracao=None, client=None, home=None):
     bot.kanna_roles = Roles(bot, settings.grupos_id, store)
     bot.kanna_moderation = Moderation(bot, settings, store, bot.kanna_audit, roles=bot.kanna_roles)
     bot.kanna_moderation.identities = bot.kanna_identities
+    bot.kanna_evidence = Evidence(store.path,bot.kanna_audit.clean)
+    bot.kanna_moderation.evidence = bot.kanna_evidence
     bot.kanna_administration = Administration(bot.kanna_moderation, store, bot.kanna_roles, bot.kanna_audit)
     bot.kanna_antispam = Antispam(bot, settings, policy, bot.kanna_audit, roles=bot.kanna_roles)
     bot.kanna_review = Review(bot.kanna_moderation, ReviewStore(root / "var/moderation.sqlite3"), bot.kanna_audit)
