@@ -1,3 +1,4 @@
+from kannabot.help import Help, register as register_help
 from kannabot.evidence import Evidence
 import os
 from kannabot.identities import Identities, register as register_identities
@@ -36,6 +37,8 @@ def create_app(configuracao=None, client=None, home=None):
     bot.kanna_review = Review(bot.kanna_moderation, ReviewStore(root / "var/moderation.sqlite3"), bot.kanna_audit)
     register_antispam(bot, bot.kanna_antispam, bot.kanna_review.observe)
     register_review(bot, bot.kanna_review)
+    bot.kanna_help = Help(bot.kanna_moderation)
+    register_help(bot,bot.kanna_help)
     register_moderation(bot, bot.kanna_moderation)
     register_administration(bot, bot.kanna_administration)
     register_welcome(bot, Welcome(bot, settings, policy, bot.kanna_audit))
