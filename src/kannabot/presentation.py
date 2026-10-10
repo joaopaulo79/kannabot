@@ -30,23 +30,26 @@ def context(message):
 def brief(rule):
     return escape(rule.get("summary") or rule["description"])
 def rule_text(rule):
-    weight=rule["weight"] if rule["weight"] is not None else "não definido"
-    actions={"warn":"Advertência","delete":"Exclusão","mute":"Silenciamento","ban":"Banimento"}
-    conditions=[]
+    """Show the actual policy as readable prose, without implying an action ran."""
+    lines=[f"📖 <b>{escape(rule['code'])} — {escape(rule['name'].removesuffix(' — revogada'))}</b>",
+           f"Nível {escape(rule['level'][1:])}"]
+    if not rule['active']:lines.extend(["","🚫 <b>Regra revogada</b>","Não se aplica a novas ocorrências. O histórico permanece preservado."])
+    lines.extend(["","<b>Descrição</b>",escape(rule['description']),"","<b>Aplicação prevista</b>"])
     bounds={"N1":"5 a 59 minutos","N2":"1 a 24 horas","N3":"1 dia a 1 semana"}
-    if "mute" in rule["actions"] and rule["level"] in bounds:
-        conditions.append("Faixa de silenciamento: "+bounds[rule["level"]]+".")
-    if rule["weight"] is None:
-        conditions.append("Peso de advertência não definido; não presumir valor.")
-    if rule["level"]=="N1":
-        conditions.append("Advertência por reincidência depende de critérios e peso definidos pela administração.")
-    return (f"📖 {escape(rule['code'])} — {escape(rule['name'])}\n"
-            f"Nível: {rule['level']} · Peso: {weight} · Versão: {rule['version']}\n"
-            f"Estado: {'ativa' if rule['active'] else 'revogada'}\n\n"
-            f"{escape(rule['description'])}\n\n"
-            "Ações cadastradas: "+", ".join(actions[a] for a in rule["actions"])+
-            ("\n"+"\n".join(conditions) if conditions else "")+
-            "\nA aplicação depende da moderação. Esta consulta não executa punições.")
+    for action in rule['actions']:
+        if action=='warn':
+            weight=rule['weight']
+            lines.append(f"• Advertência: +{weight} {'ponto' if weight==1 else 'pontos'}." if weight is not None else "• Advertência: peso não definido.")
+        elif action=='delete':lines.append("• Exclusão da mensagem.")
+        elif action=='mute':lines.append("• Silenciamento: de "+bounds[rule['level']]+"." if rule['level'] in bounds else "• Silenciamento, conforme condições definidas pela administração.")
+        elif action=='ban':lines.append("• Banimento.")
+    if not rule['actions']:lines.append("Nenhuma ação definida para esta regra.")
+    if rule['level']=='N1' and rule['weight'] is None:lines.extend(["","⚠️ <b>Condição para advertência</b>","Advertência por reincidência depende de critérios definidos pela administração; peso não definido."])
+    elif 'warn' in rule['actions'] and rule['weight'] is None:
+        lines.extend(["","⚠️ O peso ainda precisa ser definido pela administração; não presumir pontuação."])
+    lines.extend(["","🛡️ A aplicação exige decisão da moderação, respeitando permissões e condições da regra.",
+                  "Esta consulta não aplica nenhuma punição.","",f"Revisão da regra: {escape(str(rule['version']))}."])
+    return "\n".join(lines)
 
 
 def send_reply(bot,chat,text):
@@ -64,3 +67,24 @@ def send_reply(bot,chat,text):
             current+=("\n" if current else "")+piece
     if current:pages.append(current)
     for page in pages:bot.send_message(chat,page,parse_mode="HTML")
+
+
+def catalog_text(rules):
+    """Readable index; full policy data remains in the per-rule view."""
+    active=[rule for rule in rules if rule["active"]]
+    revoked=[rule for rule in rules if not rule["active"]]
+    active_label="ativa" if len(active)==1 else "ativas"
+    revoked_label="revogada" if len(revoked)==1 else "revogadas"
+    lines=["📚 <b>Regras do grupo</b>",f"{len(active)} {active_label} · {len(revoked)} {revoked_label}"]
+    for level in ("N1","N2","N3","N4"):
+        entries=sorted((rule for rule in active if rule["level"]==level),key=lambda rule:rule["code"])
+        if entries:
+            lines.extend(["",f"<b>Nível {level[1:]}</b>"])
+            lines.extend(f"{escape(rule['code'])} — {escape(rule['name'])}" for rule in entries)
+    if revoked:
+        lines.extend(["","🗂️ <b>Regras revogadas</b>"])
+        lines.extend(f"{escape(rule['code'])} — {escape(rule['name'].removesuffix(' — revogada'))}" for rule in sorted(revoked,key=lambda rule:rule["code"]))
+        lines.append("Não se aplicam a novas ocorrências.")
+    lines.extend(["","🔎 Para ler uma regra, use <code>/catalog R10</code>.",
+                  "A consulta detalhada mostra descrição, pontuação, condições e versão."])
+    return "\n".join(lines)

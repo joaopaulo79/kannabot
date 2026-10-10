@@ -1,7 +1,7 @@
 from kannabot.presentation import send_reply
 """Explicit human commands for assignments, catalogs and cancellations."""
 import json
-from kannabot.presentation import context, mention, user_mention, rule_text, ROLE_NAMES
+from kannabot.presentation import context, mention, user_mention, rule_text, catalog_text, ROLE_NAMES
 from functools import partial
 from html import escape
 from pathlib import Path
@@ -69,8 +69,7 @@ class Administration:
             else:
                 rules=[self.store.rule(message.chat.id,argument)] if argument else self.store.catalog(message.chat.id)
                 if not rules or any(rule is None for rule in rules):raise ValueError("Catálogo vazio ou regra inexistente.")
-                text="\n".join(f"{rule['code']} v{rule['version']} | {rule['name'][:80]} | {rule['level']} | peso {rule['weight']} | {'ativa' if rule['active'] else 'revogada'}" for rule in rules[:20])
-                result=Result("done",rule_text(rules[0]) if argument else "📚 Catálogo de regras\n"+escape(text)+"\nUse /catalog R10 para consultar os detalhes.")
+                result=Result("done",rule_text(rules[0]) if argument else catalog_text(rules))
         except (PermissionDenied,ValueError,TypeError) as exc:
             result=Result("refused",self.audit.clean(str(exc)))
         except Exception as exc:
