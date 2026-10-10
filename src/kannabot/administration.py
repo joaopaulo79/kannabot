@@ -11,6 +11,17 @@ from kannabot.permissions import PermissionDenied
 
 COMMANDS=("role","role_remove","rules_import","rule_set","rule_disable","catalog","unwarn")
 
+def revised_initial_rule(existing, initial):
+    """Replace known legacy prose, retaining policy and customized wording."""
+    revised=dict(existing);revised.pop("version")
+    generic=f"Referência ao livro de regras fornecido pelo Dono: {existing['name']}. Aplicação depende de avaliação humana; exceções exigem decisão explícita."
+    if existing["description"]==generic:
+        revised["description"]=initial["description"]
+        if "summary" in initial:revised["summary"]=initial["summary"]
+    if initial["level"]=="N1" and existing["level"]=="N1" and existing["name"]==initial["name"] and existing["weight"] is None and set(existing["actions"])=={"delete","mute"}:
+        revised["weight"]=0;revised["actions"]=existing["actions"]+["warn"]
+    return revised
+
 class Administration:
     def __init__(self,moderation,store,roles,audit):
         self.moderation,self.store,self.roles,self.audit=moderation,store,roles,audit
@@ -53,12 +64,12 @@ class Administration:
                     existing=self.store.rule(message.chat.id,rule["code"])
                     if existing is None:
                         self.store.put_rule(message.chat.id,rule,actor);created+=1
-                    elif argument=="atualizar" and rule["level"]=="N1" and existing["level"]=="N1" and existing["name"]==rule["name"] and existing["weight"] is None and set(existing["actions"])=={"delete","mute"}:
-                        revised=dict(existing);revised.pop("version")
-                        revised["weight"]=0;revised["actions"]=existing["actions"]+["warn"]
-                        self.store.put_rule(message.chat.id,revised,actor);updated+=1
-                    elif argument=="atualizar" and existing["description"]==f"Referência ao livro de regras fornecido pelo Dono: {existing['name']}. Aplicação depende de avaliação humana; exceções exigem decisão explícita." and all(existing[key]==rule[key] for key in ("name","level","weight","active","actions")):
-                        self.store.put_rule(message.chat.id,rule,actor);updated+=1
+                    elif argument=="atualizar":
+                        revised=revised_initial_rule(existing,rule)
+                        current=dict(existing);current.pop("version")
+                        if revised!=current:
+                            self.store.put_rule(message.chat.id,revised,actor);updated+=1
+                        else:preserved+=1
                     else:preserved+=1
                 result=Result("done",f"📚 Catálogo atualizado!\nNovas regras: {created}.\nRegras atualizadas: {updated}.\nRegras existentes preservadas: {preserved}.\nCondições pendentes não foram presumidas.")
             elif command=="unwarn":
