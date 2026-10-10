@@ -25,3 +25,11 @@ def validate_rule_action(rule, code, action):
     else:
         return
     raise RuleRefusal("⚠️ Ação recusada\n" + explanation + "\n\n" + effect)
+
+
+def normalize_rule_code(code):
+    """Accept r1/R1 as R01 while retaining existing longer canonical codes."""
+    code=code.upper()
+    if len(code)==2 and code[0]=="R" and code[1] in "0123456789":
+        return "R0"+code[1]
+    return code
