@@ -105,6 +105,8 @@ class Moderation:
                     if not self.governance.detailed_entries(message.chat.id,target):lines.append("Nenhuma advertência registrada neste grupo.")
                 result = Result("done", "\n".join(lines))
             else:
+                if not reason and command == "warn":
+                    reason = "não informado"
                 if not reason:
                     raise ValueError("Informe um motivo explícito.")
                 self.permissions.target(message.chat.id, target, actor, action=command)
@@ -245,7 +247,8 @@ class Moderation:
             if not entry:return original
             lines=[f"⚠️ Advertência #{entry['id']} registrada", "Alvo: "+label]
             if rule:lines.extend([escape(f"Regra: {rule['code']} — {rule['name']} · {rule['level']}"),"Descrição: "+brief(rule)])
-            lines.extend([f"Peso: +{entry['weight']} pontos" if entry["weight"] is not None else "Peso: não definido","Motivo: "+escape(reason_text),f"Situação atual: {self.governance.history(message.chat.id,target)[0]} advertência(s) válida(s) · {self.governance.points(message.chat.id,target)} pontos."])
+            else:lines.append("Tipo: advertência manual, sem regra vinculada.")
+            lines.extend(["Peso: 0 pontos; não acrescenta pontos." if entry["weight"] == 0 else f"Peso: +{entry['weight']} pontos" if entry["weight"] is not None else "Peso: não definido","Motivo: "+escape(reason_text),f"Situação atual: {self.governance.history(message.chat.id,target)[0]} advertência(s) válida(s) · {self.governance.points(message.chat.id,target)} pontos."])
             return "\n".join(lines)
         if command=="delete":return f"🧹 Mensagem de {label} apagada!"+suffix+"\nNenhuma advertência foi adicionada."
         if command=="mute":

@@ -92,8 +92,8 @@ class RuleRefusalTests(unittest.TestCase):
 
     def test_reason_policy_is_unchanged(self):
         self.import_rules()
-        self.assertEqual(self.service.handle("warn", self.message("/warn")).outcome, "refused")
-        self.assertEqual(self.service.handle("warn", self.message("/warn R10")).outcome, "done")
+        self.assertEqual(self.service.handle("warn", self.message("/warn")).outcome, "done")
+        self.assertEqual(self.service.handle("warn", self.message("/warn R10", event=22)).outcome, "done")
         self.assertEqual(self.service.handle("delwarn", self.message("/delwarn R10", event=21)).outcome, "refused")
         self.bot.delete_message.assert_not_called()
 

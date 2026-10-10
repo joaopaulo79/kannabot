@@ -16,7 +16,7 @@ from kannabot.presentation import ROLE_NAMES, context
 PAGES = {
  'warn':('warn','warnings','⚠️ Aplicar advertência','/warn R10 envio repetido de figurinhas',
     'Registra uma advertência no histórico do alvo. Não apaga a mensagem.',
-    'Com regra, aplica o peso do catálogo. /warn motivo registra advertência manual sem peso definido, sem acrescentar pontos. Mostra registro e saldo atual.',
+    'Com regra, aplica o peso do catálogo. /warn ou /warn motivo registra advertência manual com peso 0, sem acrescentar pontos. Sem motivo, registra “não informado”. Mostra registro e saldo atual.',
     'Responda à mensagem do alvo ou use /warn @usuario R10 motivo. A hierarquia é respeitada; o limite de pontos exige revisão humana, sem ban automático.'),
  'warnings':('warnings','warnings','📋 Consultar histórico','/warnings @usuario',
     'Consulta advertências do alvo, incluindo cancelamentos.',
