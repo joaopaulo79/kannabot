@@ -12,7 +12,7 @@ from html import escape
 from kannabot.permissions import Permissions, PermissionDenied
 from kannabot.interacoes import Seen
 from kannabot.governance import Governance
-from kannabot.rule_validation import RuleRefusal, validate_rule_action
+from kannabot.rule_validation import RuleRefusal, validate_rule_action, normalize_rule_code
 
 def parse_duration(text):
     match = re.fullmatch(r"([1-9][0-9]{0,8})([smhd])", text)
@@ -77,7 +77,7 @@ class Moderation:
                 reason = self.audit.clean(mute_parts[1].strip())
             if self.governance and command != "warnings":
                 reason_parts=reason.split(maxsplit=1)
-                code=reason_parts[0] if reason_parts else ""
+                code=normalize_rule_code(reason_parts[0]) if reason_parts else ""
                 if re.fullmatch(r"R[0-9]{2,4}",code):
                     rule=self.governance.rule(message.chat.id,code)
                     validate_rule_action(rule,code,command)
@@ -283,10 +283,11 @@ class Moderation:
             if len(parts)!=2 or not parts[1].strip():raise ValueError("Use /delwarn motivo ou /delwarn R10 motivo em resposta à mensagem.")
             if not self.governance:raise ValueError("Histórico indisponível; nenhuma ação executada.")
             argument=parts[1].strip();tokens=argument.split(maxsplit=1);rule=None
-            if re.fullmatch(r"R[0-9]+",tokens[0]):
+            code=normalize_rule_code(tokens[0])
+            if re.fullmatch(r"R[0-9]+",code):
                 if len(tokens)!=2:raise ValueError("Informe o motivo após o código da regra.")
-                rule=self.governance.rule(message.chat.id,tokens[0])
-                validate_rule_action(rule,tokens[0],"delwarn")
+                rule=self.governance.rule(message.chat.id,code)
+                validate_rule_action(rule,code,"delwarn")
                 argument=tokens[1]
             reason=self.audit.clean(argument)
             if not reason.strip():raise ValueError("Informe um motivo explícito.")

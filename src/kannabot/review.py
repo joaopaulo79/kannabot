@@ -1,3 +1,4 @@
+from kannabot.rule_validation import normalize_rule_code
 from kannabot.presentation import send_reply
 """Detection does not sanction; only an explicit authorized decision may do so."""
 import re
@@ -53,6 +54,7 @@ class Review:
                     action,payload=decision
                     code_parts=payload.split()
                     code=code_parts[1] if action=="mute" and len(code_parts)>1 else code_parts[0]
+                    code=normalize_rule_code(code)
                     if not re.fullmatch(r"R[0-9]{2,4}",code):raise ValueError("A revisão requer um código de regra.")
                     catalog=getattr(self.moderation,"governance",None)
                     if catalog is None:raise ValueError("Catálogo ainda indisponível; revisão não aplica sanção.")
