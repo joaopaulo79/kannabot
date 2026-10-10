@@ -21,7 +21,7 @@ class DelwarnTests(unittest.TestCase):
         self.assertEqual(self.store.history(1,9)[0],1);self.bot.delete_message.assert_called_once_with(1,10)
     def test_invalid_rule_and_storage_do_not_delete(self):
         self.import_rules()
-        self.assertEqual(self.service.handle("delwarn",self.message("/delwarn R01 teste")).outcome,"refused")
+        self.assertEqual(self.service.handle("delwarn",self.message("/delwarn R09 teste")).outcome,"refused")
         self.store.start_delwarn=lambda *args: (_ for _ in ()).throw(sqlite3.OperationalError("locked"))
         self.assertEqual(self.service.handle("delwarn",self.message("/delwarn R10 teste")).outcome,"failed")
         self.bot.delete_message.assert_not_called()

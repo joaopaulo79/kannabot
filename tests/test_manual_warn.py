@@ -51,7 +51,7 @@ class ManualWarnTests(unittest.TestCase):
         self.import_rules()
         self.assertEqual(self.service.handle("warn",self.message("/warn R10")).outcome,"done")
         self.assertEqual(self.store.points(1,9),3)
-        self.assertEqual(self.service.handle("warn",self.message("/warn R01",event=21)).outcome,"refused")
+        self.assertEqual(self.service.handle("warn",self.message("/warn R09",event=21)).outcome,"refused")
         with closing(sqlite3.connect(self.path)) as db,db:
             db.execute("UPDATE infractions SET weight=NULL")
         Governance(self.path)

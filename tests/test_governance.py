@@ -73,7 +73,7 @@ class GovernanceTests(unittest.TestCase):
         self.assertFalse(self.store.rule(1,"R04")["active"])
         self.assertEqual(self.store.rule(1,"R10")["version"],1)
         self.assertEqual(self.service.handle("warn",self.message("/warn R04")).outcome,"refused")
-        self.assertEqual(self.service.handle("warn",self.message("/warn R01")).outcome,"refused")
+        self.assertEqual(self.service.handle("warn",self.message("/warn R01")).outcome,"done")
         self.assertEqual(self.service.handle("mute",self.message("/mute 1h R09")).outcome,"refused")
     def test_rule_versions_points_cancellation_and_no_auto_ban(self):
         self.import_rules()
