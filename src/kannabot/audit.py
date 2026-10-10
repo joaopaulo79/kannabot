@@ -2,7 +2,7 @@
 import json
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from html import escape
 from pathlib import Path
 from kannabot.presentation import mention, ROLE_NAMES, NATIVE_NAMES, ACTION_NAMES, OUTCOME_NAMES
@@ -66,7 +66,7 @@ class Audit:
     def render(self,event):
         safe=lambda value: escape(str(value))
         lines=["AÇÃO — "+safe(ACTION_NAMES.get(event["action"],event["action"])),
-               "Resultado: "+OUTCOME_NAMES[event["outcome"]],"Data/hora: "+safe(event["time"]),
+               "Resultado: "+OUTCOME_NAMES[event["outcome"]],"Data/hora: "+safe(self.display_time(event["time"])),
                "", "Origem", "Grupo: "+safe(event.get("chat_title","nome não disponível")),
                "ID do grupo: "+str(event["chat_id"])]
         for key,label in (("command","Comando"),("command_message","Mensagem do comando")):
@@ -88,3 +88,12 @@ class Audit:
         for key,label in (("reason","Motivo"),("warning_id","Advertência"),("rule_code","Regra"),("rule_version","Versão da regra"),("weight","Peso aplicado"),("valid_count","Advertências válidas"),("points","Pontos acumulados"),("detail","Detalhes"),("stage","Etapa"),("evidence_id","Registro da evidência"),("evidence_status","Disponibilidade da evidência"),("error","Erro"),("error_code","Código Telegram"),("error_description","Descrição Telegram")):
             if key in event and event[key]!="":lines.append(label+": "+safe(event[key]))
         return "\n".join(lines)
+
+    @staticmethod
+    def display_time(value):
+        try:
+            instant=datetime.fromisoformat(str(value).replace("Z","+00:00"))
+            if instant.tzinfo is None:return str(value)
+            local=instant.astimezone(timezone(timedelta(hours=-3)))
+            return local.strftime("%d/%m/%Y às %H:%M:%S")+" — horário de Brasília (UTC−3)"
+        except (TypeError,ValueError):return str(value)

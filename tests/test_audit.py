@@ -37,3 +37,12 @@ class AuditTests(unittest.TestCase):
         with self.assertRaises(ValueError):audit.record(-1,7,8,"x","r","success")
         with self.assertLogs("kannabot.audit",level="ERROR"):
             self.assertFalse(audit.record(-1,7,8,"x","r","failed"))
+
+    def test_display_time_converts_day_and_preserves_event(self):
+        audit=Audit(Mock())
+        event=dict(time="2026-10-10T00:22:57.506407+00:00",chat_id=1,actor=7,target=None,action="help",reason="consulta",outcome="done")
+        text=audit.render(event)
+        self.assertIn("09/10/2026 às 21:22:57 — horário de Brasília (UTC−3)",text)
+        self.assertEqual(event['time'],"2026-10-10T00:22:57.506407+00:00")
+        self.assertIn("21:22:57",audit.display_time("2026-10-09T21:22:57-03:00"))
+        self.assertEqual(audit.display_time("unknown"),"unknown")
