@@ -37,7 +37,11 @@ class Roles:
                 member=self.member(chat,user)
                 result[prefix+"_role"]=self.role(chat,user)
                 title=getattr(member,"custom_title",None)
-                result[prefix+"_title"]=title if isinstance(title,str) else "sem título"
+                result[prefix+"_native"]=member.status
+                if isinstance(title,str) and title:result[prefix+"_title"]=title
+                user_info=getattr(member,"user",None)
+                username=getattr(user_info,"username",None)
+                if isinstance(username,str):result[prefix+"_username"]=username
             except Exception:
                 result[prefix+"_role"]="não confirmado"
                 result[prefix+"_title"]="não confirmado"

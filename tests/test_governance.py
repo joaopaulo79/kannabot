@@ -101,12 +101,12 @@ class GovernanceTests(unittest.TestCase):
         self.assertEqual(other.handle("ban",self.message("/ban motivo")).outcome,"refused")
         self.bot.ban_chat_member.assert_called_once()
         self.bot.ban_chat_member.side_effect=Timeout("123:fake")
-        self.assertEqual(self.service.handle("ban",self.message("/ban motivo",event=21)).outcome,"failed")
+        self.assertEqual(self.service.handle("ban",self.message("/ban motivo",event=21)).outcome,"uncertain")
         with closing(sqlite3.connect(self.path)) as db:
             self.assertEqual(db.execute("SELECT status FROM sanctions WHERE event_id='manual:21'").fetchone()[0],"uncertain")
     def test_audit_includes_cosmetic_title_without_identity_confusion(self):
         self.assertEqual(self.service.handle("warn",self.message(target=10)).outcome,"done")
-        event=json.loads((Path(self.folder.name)/"audit.jsonl").read_text().splitlines()[-1])
+        event=json.loads((Path(self.folder.name)/"audit.jsonl").read_text(encoding="utf-8").splitlines()[-1])
         self.assertEqual(event["target_role"],"member");self.assertEqual(event["target_title"],"VIP <tag>")
         self.assertEqual(event["actor_role"],"admin")
     def test_rule_edit_disable_and_invalid_input(self):
@@ -186,7 +186,7 @@ class GovernanceTests(unittest.TestCase):
         self.bot.unban_chat_member.side_effect=RuntimeError("private response")
         message=self.message("/kick motivo")
         result=self.service.handle("kick",message)
-        self.assertEqual(result.outcome,"failed")
+        self.assertEqual(result.outcome,"partial")
         self.assertIn("continua banido",result.message)
         with closing(sqlite3.connect(self.path)) as db:
             self.assertEqual(db.execute("SELECT status FROM sanctions WHERE action='kick'").fetchone()[0],"partial")

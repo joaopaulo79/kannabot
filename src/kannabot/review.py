@@ -1,5 +1,6 @@
 """Detection does not sanction; only an explicit authorized decision may do so."""
 import re
+from kannabot.presentation import context
 from functools import partial
 from html import escape
 from types import SimpleNamespace
@@ -24,14 +25,14 @@ class Review:
             return self.moderation.permissions.actor(message,"review")
         return self.moderation.permissions.actor(message)
     def handle(self,command,message):
-        actor=target=None;reason="";error=None
+        actor,context_data=context(message);target=None;reason="";error=None
         try:
             actor=self.guard(message)
             arguments=message.text.split(maxsplit=1)[1] if len(message.text.split(maxsplit=1))>1 else ""
             if command=="detections":
                 rows=self.store.pending(message.chat.id)
                 text="\n".join(f"ID {id} | mensagem {msg} | membro {user} | {rules}" for id,msg,user,rules in rows)
-                result=Result("done",escape(text) if text else "Nenhuma detecção pendente.")
+                result=Result("done","🔎 Detecções pendentes de revisão\n"+escape(text)+"\nNenhuma punição foi aplicada automaticamente." if text else "🔎 Nenhuma detecção pendente.")
             else:
                 parts=arguments.split(maxsplit=1)
                 if len(parts)!=2 or not parts[0].isdigit():raise ValueError("Informe ID e decisão/motivo.")
@@ -43,7 +44,7 @@ class Review:
                     if not reason.strip():raise ValueError("Motivo obrigatório.")
                     if not self.store.reserve(message.chat.id,id,actor):raise ValueError("Detecção já reservada.")
                     self.store.finish(message.chat.id,id,actor,"dismissed",reason,status="dismissed")
-                    result=Result("done","Detecção descartada, sem sanção.")
+                    result=Result("done",f"✅ Detecção #{id} descartada.\nMotivo: {escape(reason)}\nNenhuma sanção foi aplicada.")
                 else:
                     decision=parts[1].split(maxsplit=1)
                     if len(decision)!=2 or decision[0] not in ("warn","delete","mute","ban"):
@@ -69,7 +70,7 @@ class Review:
             result=Result("refused",str(exc))
         except Exception as exc:
             error=exc;result=Result("failed","Não foi possível concluir a revisão; não haverá repetição automática.")
-        self.audit.record(message.chat.id,actor,target,command,reason,result.outcome,error)
+        self.audit.record(message.chat.id,actor,target,command,reason,result.outcome,error,metadata=context_data)
         return result
 
 def register(bot,service):

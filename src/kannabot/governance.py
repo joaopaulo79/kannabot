@@ -121,3 +121,9 @@ class Governance(WarningStore):
     def entries(self,chat,user):
         with closing(sqlite3.connect(self.path)) as db:
             return db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,w.reason,i.cancel_time FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user)).fetchall()
+
+
+    def detailed_entries(self,chat,user):
+        with closing(sqlite3.connect(self.path)) as db:
+            db.row_factory=sqlite3.Row
+            return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]
