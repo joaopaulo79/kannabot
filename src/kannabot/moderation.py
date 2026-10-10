@@ -12,6 +12,7 @@ from html import escape
 from kannabot.permissions import Permissions, PermissionDenied
 from kannabot.interacoes import Seen
 from kannabot.governance import Governance
+from kannabot.rule_validation import RuleRefusal, validate_rule_action
 
 def parse_duration(text):
     match = re.fullmatch(r"([1-9][0-9]{0,8})([smhd])", text)
@@ -79,9 +80,7 @@ class Moderation:
                 code=reason_parts[0] if reason_parts else ""
                 if re.fullmatch(r"R[0-9]{2,4}",code):
                     rule=self.governance.rule(message.chat.id,code)
-                    if not rule or not rule["active"]:raise ValueError("Regra inexistente ou revogada.")
-                    if command not in rule["actions"]:raise ValueError("Ação não prevista nesta regra; condições especiais precisam de definição.")
-                    if command=="warn" and rule["weight"] is None:raise ValueError("Peso desta regra ainda não definido.")
+                    validate_rule_action(rule,code,command)
                     if command=="mute":
                         minimum,maximum={"N1":(300,3540),"N2":(3600,86400),"N3":(86400,604800)}[rule["level"]]
                         if not minimum<=duration<=maximum:raise ValueError("Duração fora da faixa do nível da regra.")
@@ -115,7 +114,7 @@ class Moderation:
                     context_data.update(evidence_id=evidence_id,evidence_status=evidence_state)
                 result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration, rule=rule)
         except (PermissionDenied, ValueError) as exc:
-            result = Result("refused", str(exc))
+            result = Result("refused", escape(self.audit.clean(str(exc), limit=3500) if isinstance(exc,RuleRefusal) else str(exc)))
         except BanRoleRevocationFailure as exc:
             error=exc
             result=Result("partial","⚠️ Banimento confirmado, mas a revogação do cargo interno falhou. A administração precisa corrigir o cargo antes de liberar o retorno.")
@@ -284,8 +283,7 @@ class Moderation:
             if re.fullmatch(r"R[0-9]+",tokens[0]):
                 if len(tokens)!=2:raise ValueError("Informe o motivo após o código da regra.")
                 rule=self.governance.rule(message.chat.id,tokens[0])
-                if not rule or not rule["active"] or "warn" not in rule["actions"] or rule["weight"] is None:
-                    raise ValueError("Regra inválida, revogada ou sem advertência/peso definido.")
+                validate_rule_action(rule,tokens[0],"delwarn")
                 argument=tokens[1]
             reason=self.audit.clean(argument)
             if not reason.strip():raise ValueError("Informe um motivo explícito.")
@@ -306,8 +304,8 @@ class Moderation:
             result=Result("done",f"🧹⚠️ Mensagem apagada e advertência #{warning} registrada.\nAlvo: {user_mention(reply.from_user)}\n{rule_info}\nMotivo: {escape(reason)}")
             self.governance.finish(claim,"done","Advertência registrada; exclusão confirmada")
         except (PermissionDenied,ValueError) as exc:
-            error=exc
-            result=Result("partial" if warning else "refused", ("⚠️ Advertência registrada, mas a exclusão foi recusada.\n" if warning else "")+escape(self.audit.clean(str(exc))))
+            error=None if isinstance(exc,RuleRefusal) and warning is None else exc
+            result=Result("partial" if warning else "refused", ("⚠️ Advertência registrada, mas a exclusão foi recusada.\n" if warning else "")+escape(self.audit.clean(str(exc), limit=3500) if isinstance(exc,RuleRefusal) else self.audit.clean(str(exc))))
         except Exception as exc:
             error=exc
             confirmed=isinstance(exc,ApiTelegramException) and exc.error_code in (400,401,403,429)
