@@ -66,3 +66,14 @@ class RuleDescriptionTests(unittest.TestCase):
         self.assertIn("R44 — Regra &lt;teste&gt; 44",result.message)
         self.assertNotIn("<teste>",result.message)
         self.assertIn("43 ativas · 1 revogada",result.message)
+
+    def test_rule_detail_explains_actions_without_internal_field_line(self):
+        self.import_rules();result=self.admin.handle("catalog",self.message("/catalog R10"))
+        self.assertIn("<b>Descrição</b>",result.message);self.assertIn("<b>Aplicação prevista</b>",result.message)
+        self.assertIn("Advertência: +3 pontos",result.message);self.assertIn("1 dia a 1 semana",result.message)
+        self.assertNotIn("· Peso:",result.message);self.assertNotIn("Ações cadastradas",result.message)
+        self.assertIn("não aplica nenhuma punição",result.message)
+        result=self.admin.handle("catalog",self.message("/catalog R16"))
+        self.assertIn("• Banimento.",result.message);self.assertNotIn("peso não definido",result.message)
+        result=self.admin.handle("catalog",self.message("/catalog R04"))
+        self.assertIn("Regra revogada",result.message);self.assertIn("Não se aplica a novas ocorrências",result.message)
