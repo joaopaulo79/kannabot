@@ -194,3 +194,10 @@ class GovernanceTests(unittest.TestCase):
         self.assertEqual(other.handle("kick",message).outcome,"refused")
         self.bot.ban_chat_member.assert_called_once()
         self.bot.unban_chat_member.assert_called_once()
+
+    def test_refused_role_and_catalog_errors_have_correct_accents(self):
+        result=self.service.handle("warn",self.message(actor=9))
+        self.assertEqual(result.message,"Seu cargo interno n\u00e3o permite esta a\u00e7\u00e3o.")
+        data=dict(code="invalid",name="Regra",description="Regra",level="N2",weight=2,active=True,actions=["warn"])
+        result=self.admin.handle("rule_set",self.message("/rule_set "+json.dumps(data),actor=1))
+        self.assertEqual(result.message,"C\u00f3digo deve seguir R01 at\u00e9 R9999.")
