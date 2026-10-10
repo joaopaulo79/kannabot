@@ -1,3 +1,4 @@
+from kannabot.presentation import send_reply
 """Detection does not sanction; only an explicit authorized decision may do so."""
 import re
 from kannabot.presentation import context
@@ -76,7 +77,7 @@ class Review:
 def register(bot,service):
     def handle(command,message):
         result=service.handle(command,message)
-        try:bot.send_message(message.chat.id,result.message,parse_mode="HTML")
+        try:send_reply(bot,message.chat.id,result.message)
         except Exception:service.audit.record(message.chat.id,None,None,"review_feedback","Falha de retorno","failed")
     for command in ("detections","dismiss","review"):
         bot.message_handler(commands=[command])(partial(handle,command))
