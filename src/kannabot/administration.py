@@ -52,10 +52,14 @@ class Administration:
                     existing=self.store.rule(message.chat.id,rule["code"])
                     if existing is None:
                         self.store.put_rule(message.chat.id,rule,actor);created+=1
+                    elif argument=="atualizar" and rule["level"]=="N1" and existing["level"]=="N1" and existing["name"]==rule["name"] and existing["weight"] is None and set(existing["actions"])=={"delete","mute"}:
+                        revised=dict(existing);revised.pop("version")
+                        revised["weight"]=0;revised["actions"]=existing["actions"]+["warn"]
+                        self.store.put_rule(message.chat.id,revised,actor);updated+=1
                     elif argument=="atualizar" and existing["description"]==f"Referência ao livro de regras fornecido pelo Dono: {existing['name']}. Aplicação depende de avaliação humana; exceções exigem decisão explícita." and all(existing[key]==rule[key] for key in ("name","level","weight","active","actions")):
                         self.store.put_rule(message.chat.id,rule,actor);updated+=1
                     else:preserved+=1
-                result=Result("done",f"📚 Catálogo atualizado!\nNovas regras: {created}.\nRedações genéricas atualizadas: {updated}.\nRegras existentes preservadas: {preserved}.\nCondições pendentes não foram presumidas.")
+                result=Result("done",f"📚 Catálogo atualizado!\nNovas regras: {created}.\nRegras atualizadas: {updated}.\nRegras existentes preservadas: {preserved}.\nCondições pendentes não foram presumidas.")
             elif command=="unwarn":
                 parts=argument.split(maxsplit=1)
                 if len(parts)!=2 or not parts[0].isdigit():raise ValueError("Use /unwarn ID motivo.")

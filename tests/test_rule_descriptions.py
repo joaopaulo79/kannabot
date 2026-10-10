@@ -45,8 +45,8 @@ class RuleDescriptionTests(unittest.TestCase):
         result=self.admin.handle("catalog",self.message("/catalog R10"))
         self.assertIn("1 dia a 1 semana",result.message)
         result=self.admin.handle("catalog",self.message("/catalog R01"))
-        self.assertIn("reincidência",result.message)
-        self.assertIn("não definido",result.message)
+        self.assertIn("Advertência: 0 pontos",result.message)
+        self.assertNotIn("não definido",result.message)
 
     def test_catalog_index_groups_active_and_revoked_without_internal_values(self):
         self.import_rules();result=self.admin.handle("catalog",self.message("/catalog"))
@@ -80,7 +80,7 @@ class RuleDescriptionTests(unittest.TestCase):
 
     def test_custom_n1_defined_weight_is_not_reported_as_undefined(self):
         self.import_rules();rule=self.store.rule(1,"R01");rule.pop("version")
-        rule['weight']=1;rule['actions'].append('warn');self.store.put_rule(1,rule,1)
+        rule['weight']=1;self.store.put_rule(1,rule,1)
         result=self.admin.handle("catalog",self.message("/catalog R01"))
         self.assertIn("Advertência: +1 ponto",result.message)
         self.assertNotIn("peso não definido",result.message)

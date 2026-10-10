@@ -25,6 +25,8 @@ class RuleRefusalTests(unittest.TestCase):
 
     def test_n1_refusal_explains_pending_definition_and_has_no_effects(self):
         self.import_rules()
+        rule=self.store.rule(1,"R01");rule.pop("version");rule["weight"]=None;rule["actions"].remove("warn")
+        self.store.put_rule(1,rule,1)
         self.service.evidence = Mock()
         for command in ("warn", "delwarn"):
             with self.subTest(command=command):
@@ -74,6 +76,7 @@ class RuleRefusalTests(unittest.TestCase):
         self.import_rules()
         rule = self.store.rule(1, "R01")
         rule.pop("version"); rule["name"] = "<b>Assunto & grupo</b>"
+        rule["weight"]=None;rule["actions"].remove("warn")
         self.store.put_rule(1, rule, 1)
         for command in ("warn", "delwarn"):
             result = self.service.handle(command, self.message(f"/{command} R01 teste"))
@@ -84,7 +87,7 @@ class RuleRefusalTests(unittest.TestCase):
     def test_configured_n1_warning_still_works(self):
         self.import_rules()
         rule = self.store.rule(1, "R01")
-        rule.pop("version"); rule["actions"].append("warn"); rule["weight"] = 1
+        rule.pop("version"); rule["weight"] = 1
         self.store.put_rule(1, rule, 1)
         result = self.service.handle("warn", self.message("/warn R01 motivo"))
         self.assertEqual(result.outcome, "done")

@@ -20,7 +20,7 @@ class RuleCaseTests(unittest.TestCase):
     def test_delwarn_lowercase_and_unknown_or_revoked_do_not_fall_back(self):
         self.import_rules()
         for command in ("warn","delwarn"):
-            for code in ("r999","r04","r02"):
+            for code in ("r999","r04","r09"):
                 self.assertEqual(self.service.handle(command,self.message(f"/{command} {code} motivo")).outcome,"refused")
         self.bot.delete_message.assert_not_called();self.assertEqual(self.store.history(1,9)[0],0)
         self.assertEqual(self.service.handle("delwarn",self.message("/delwarn r10 motivo")).outcome,"done")

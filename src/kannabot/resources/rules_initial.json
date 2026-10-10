@@ -4,11 +4,12 @@
     "name": "Assunto do grupo",
     "description": "Este grupo é focado em animes e mangás. Evite discutir temas como games, política, religião, ideologias, esportes, investimentos, conspirações, entre outros. Não compartilhe vídeos, imagens, áudios ou links sobre esses assuntos sem autorização prévia, incluindo fotos e vídeos pessoais.\n§ 1° — Existem tópicos livres, que podem ser compartilhados no grupo sem autorização prévia.\nTópicos livres: https://t.me/febreotaku_topicoslivres/3",
     "level": "N1",
-    "weight": null,
+    "weight": 0,
     "active": true,
     "actions": [
       "delete",
-      "mute"
+      "mute",
+      "warn"
     ],
     "summary": "Respeite o foco em animes e mangás; assuntos externos exigem autorização, exceto os tópicos livres definidos."
   },
@@ -17,11 +18,12 @@
     "name": "Menções desnecessárias",
     "description": "Nosso sistema permite mencionar @admin para encaminhar uma publicação à Staff, mas use esse recurso com seriedade. Além disso, menções diretas aos administradores para relatar possíveis infrações devem ser feitas de forma responsável, evitando repetições desnecessárias. Sempre que possível, denuncie infrações diretamente em privado a um membro da Staff para evitar confusões no grupo.",
     "level": "N1",
-    "weight": null,
+    "weight": 0,
     "active": true,
     "actions": [
       "delete",
-      "mute"
+      "mute",
+      "warn"
     ],
     "summary": "Use menções à Staff com responsabilidade, sem repetições desnecessárias."
   },
@@ -30,11 +32,12 @@
     "name": "Spoilers",
     "description": "Evite enviar mensagens, imagens ou vídeos com grande potencial de conter spoilers para outros membros. Haverá certa tolerância, mas é altamente recomendável usar a tag de Spoiler do Telegram com disclaimer do conteúdo (definir de qual obra se trata, e de qual capítulo/episódio), para proteger quem ainda não viu.",
     "level": "N1",
-    "weight": null,
+    "weight": 0,
     "active": true,
     "actions": [
       "delete",
-      "mute"
+      "mute",
+      "warn"
     ],
     "summary": "Proteja spoilers com a marcação do Telegram e informe obra e capítulo/episódio."
   },

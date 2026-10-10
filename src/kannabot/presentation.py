@@ -39,7 +39,7 @@ def rule_text(rule):
     for action in rule['actions']:
         if action=='warn':
             weight=rule['weight']
-            lines.append(f"• Advertência: +{weight} {'ponto' if weight==1 else 'pontos'}." if weight is not None else "• Advertência: peso não definido.")
+            lines.append("• Advertência: 0 pontos; conta no histórico sem acrescentar pontos." if weight == 0 else f"• Advertência: +{weight} {'ponto' if weight==1 else 'pontos'}." if weight is not None else "• Advertência: peso não definido.")
         elif action=='delete':lines.append("• Exclusão da mensagem.")
         elif action=='mute':lines.append("• Silenciamento: de "+bounds[rule['level']]+"." if rule['level'] in bounds else "• Silenciamento, conforme condições definidas pela administração.")
         elif action=='ban':lines.append("• Banimento.")
