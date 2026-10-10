@@ -5,6 +5,7 @@ import sqlite3
 from contextlib import closing
 from kannabot.presentation import context, user_mention, mention, brief
 from telebot.types import ChatPermissions
+from telebot.apihelper import ApiTelegramException
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from html import escape
@@ -49,6 +50,7 @@ class Moderation:
         return reply, user.id
 
     def handle(self, command, message):
+        if command=="delwarn":return self.delwarn(message)
         actor, context_data = context(message)
         target = None
         reason = ""
@@ -242,3 +244,58 @@ class Moderation:
                 row=db.execute("SELECT status FROM sanctions WHERE chat_id=? AND event_id=? AND action=?",(message.chat.id,event,command)).fetchone()
                 return row[0] if row else None
         except sqlite3.Error:return None
+
+
+    def delwarn(self,message):
+        actor,metadata=context(message);target=None;error=None;reason="";claim=None;warning=None
+        try:
+            actor=self.permissions.actor(message,"warn")
+            self.permissions.actor(message,"delete")
+            if self.identities is not None:message=self.identities.prepare(message,"delwarn")
+            reply,target=self.reply_target(message)
+            self.permissions.target(message.chat.id,target,actor)
+            self.permissions.bot_right(message.chat.id,"can_delete_messages")
+            parts=message.text.split(maxsplit=1)
+            if len(parts)!=2 or not parts[1].strip():raise ValueError("Use /delwarn motivo ou /delwarn R10 motivo em resposta à mensagem.")
+            if not self.governance:raise ValueError("Histórico indisponível; nenhuma ação executada.")
+            argument=parts[1].strip();tokens=argument.split(maxsplit=1);rule=None
+            if re.fullmatch(r"R[0-9]+",tokens[0]):
+                if len(tokens)!=2:raise ValueError("Informe o motivo após o código da regra.")
+                rule=self.governance.rule(message.chat.id,tokens[0])
+                if not rule or not rule["active"] or "warn" not in rule["actions"] or rule["weight"] is None:
+                    raise ValueError("Regra inválida, revogada ou sem advertência/peso definido.")
+                argument=tokens[1]
+            reason=self.audit.clean(argument)
+            if not reason.strip():raise ValueError("Informe um motivo explícito.")
+            operation=self.governance.start_delwarn(message.chat.id,reply.message_id,actor,target,reason,rule)
+            if operation is None:raise ValueError("Esta mensagem já possui um delwarn registrado; ação não repetida.")
+            claim,warning=operation
+            metadata.update(warning_id=warning)
+            if rule:metadata.update(rule_code=rule["code"],rule_version=rule["version"],weight=rule["weight"])
+            # Snapshot persistence precedes the irreversible external effect.
+            self.permissions.target(message.chat.id,target,actor)
+            self.permissions.bot_right(message.chat.id,"can_delete_messages")
+            if self.bot.delete_message(message.chat.id,reply.message_id) is not True:
+                raise RuntimeError("Deletion not confirmed")
+            rule_info=(f"Regra: {escape(rule['code'])} — {escape(rule['name'])} · {rule['level']}\nDescrição: {brief(rule)}\nPeso: +{rule['weight']} pontos" if rule else "Tipo: advertência manual, sem regra vinculada.\nPeso: não definido; não acrescenta pontos.")
+            result=Result("done",f"🧹⚠️ Mensagem apagada e advertência #{warning} registrada.\nAlvo: {user_mention(reply.from_user)}\n{rule_info}\nMotivo: {escape(reason)}")
+            self.governance.finish(claim,"done","Advertência registrada; exclusão confirmada")
+        except (PermissionDenied,ValueError) as exc:
+            error=exc
+            result=Result("partial" if warning else "refused", ("⚠️ Advertência registrada, mas a exclusão foi recusada.\n" if warning else "")+escape(self.audit.clean(str(exc))))
+        except Exception as exc:
+            error=exc
+            confirmed=isinstance(exc,ApiTelegramException) and exc.error_code in (400,401,403,429)
+            outcome="partial" if warning and confirmed else "uncertain" if warning else "failed"
+            result=Result(outcome,f"⚠️ Advertência #{warning} registrada; "+("exclusão recusada." if confirmed else "resultado da exclusão não confirmado. Não repita o comando.") if warning else "⚠️ Não foi possível registrar a advertência. A exclusão não foi solicitada.")
+        if claim and result.outcome!="done":
+            try:self.governance.finish(claim,result.outcome,type(error).__name__)
+            except sqlite3.Error:result=Result("uncertain",result.message+" Não foi possível atualizar o registro da operação.")
+        if warning:
+            total=self.governance.history(message.chat.id,target)[0];points=self.governance.points(message.chat.id,target)
+            result=Result(result.outcome,result.message+f"\nSituação atual: {total} advertência(s) válida(s) · {points} pontos.")
+            metadata.update(valid_count=total,points=points)
+        if self.roles:metadata.update(self.roles.metadata(message.chat.id,actor,target))
+        metadata["detail"]=result.message
+        self.audit.record(message.chat.id,actor,target,"delwarn",reason,result.outcome,error,metadata=metadata)
+        return result
