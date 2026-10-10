@@ -6,6 +6,7 @@ from functools import partial
 from html import escape
 from pathlib import Path
 from kannabot.moderation import Result
+from kannabot.rule_validation import normalize_rule_code
 from kannabot.permissions import PermissionDenied
 
 COMMANDS=("role","role_remove","rules_import","rule_set","rule_disable","catalog","unwarn")
@@ -22,7 +23,7 @@ class Administration:
                 message=self.moderation.identities.prepare(message,command)
             argument=message.text.split(maxsplit=1)[1].strip() if len(message.text.split(maxsplit=1))>1 else ""
             if command in ("catalog","rule_disable"):
-                argument=argument.upper()
+                argument=normalize_rule_code(argument)
             if command in ("role","role_remove"):
                 _,target=self.moderation.reply_target(message)
                 previous=self.roles.role(message.chat.id,target)
@@ -32,7 +33,7 @@ class Administration:
             elif command=="rule_set":
                 rule=json.loads(argument)
                 if isinstance(rule,dict):
-                    if isinstance(rule.get("code"),str):rule["code"]=rule["code"].upper()
+                    if isinstance(rule.get("code"),str):rule["code"]=normalize_rule_code(rule["code"])
                     for key in ("name","description","summary"):
                         if isinstance(rule.get(key),str):rule[key]=self.audit.clean(rule[key],limit=4000)
                 version=self.store.put_rule(message.chat.id,rule,actor)
