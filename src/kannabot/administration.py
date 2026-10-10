@@ -21,6 +21,8 @@ class Administration:
             if command in ("role","role_remove","unwarn") and self.moderation.identities is not None:
                 message=self.moderation.identities.prepare(message,command)
             argument=message.text.split(maxsplit=1)[1].strip() if len(message.text.split(maxsplit=1))>1 else ""
+            if command in ("catalog","rule_disable"):
+                argument=argument.upper()
             if command in ("role","role_remove"):
                 _,target=self.moderation.reply_target(message)
                 previous=self.roles.role(message.chat.id,target)
@@ -30,6 +32,7 @@ class Administration:
             elif command=="rule_set":
                 rule=json.loads(argument)
                 if isinstance(rule,dict):
+                    if isinstance(rule.get("code"),str):rule["code"]=rule["code"].upper()
                     for key in ("name","description","summary"):
                         if isinstance(rule.get(key),str):rule[key]=self.audit.clean(rule[key],limit=4000)
                 version=self.store.put_rule(message.chat.id,rule,actor)

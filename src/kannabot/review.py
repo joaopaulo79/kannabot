@@ -53,6 +53,7 @@ class Review:
                     action,payload=decision
                     code_parts=payload.split()
                     code=code_parts[1] if action=="mute" and len(code_parts)>1 else code_parts[0]
+                    code=code.upper()
                     if not re.fullmatch(r"R[0-9]{2,4}",code):raise ValueError("A revisão requer um código de regra.")
                     catalog=getattr(self.moderation,"governance",None)
                     if catalog is None:raise ValueError("Catálogo ainda indisponível; revisão não aplica sanção.")
