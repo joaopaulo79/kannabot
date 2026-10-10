@@ -47,3 +47,22 @@ class RuleDescriptionTests(unittest.TestCase):
         result=self.admin.handle("catalog",self.message("/catalog R01"))
         self.assertIn("reincidência",result.message)
         self.assertIn("não definido",result.message)
+
+    def test_catalog_index_groups_active_and_revoked_without_internal_values(self):
+        self.import_rules();result=self.admin.handle("catalog",self.message("/catalog"))
+        self.assertEqual(result.outcome,"done")
+        self.assertIn("18 ativas · 1 revogada",result.message)
+        self.assertNotIn("None",result.message);self.assertNotIn(" v1",result.message)
+        active,revoked=result.message.split("Regras revogadas")
+        self.assertNotIn("R04",active);self.assertIn("R04",revoked)
+        for level in (1,2,3,4):self.assertIn(f"Nível {level}",active)
+        self.assertEqual(self.store.history(1,9)[0],0);self.bot.delete_message.assert_not_called()
+    def test_catalog_index_handles_more_than_twenty_and_escapes_names(self):
+        self.import_rules();base=self.store.rule(1,"R10");base.pop("version")
+        for number in range(20,45):
+            rule=dict(base,code=f"R{number}",name=f"Regra <teste> {number}")
+            self.store.put_rule(1,rule,1)
+        result=self.admin.handle("catalog",self.message("/catalog"))
+        self.assertIn("R44 — Regra &lt;teste&gt; 44",result.message)
+        self.assertNotIn("<teste>",result.message)
+        self.assertIn("43 ativas · 1 revogada",result.message)

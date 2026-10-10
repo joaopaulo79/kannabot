@@ -64,3 +64,24 @@ def send_reply(bot,chat,text):
             current+=("\n" if current else "")+piece
     if current:pages.append(current)
     for page in pages:bot.send_message(chat,page,parse_mode="HTML")
+
+
+def catalog_text(rules):
+    """Readable index; full policy data remains in the per-rule view."""
+    active=[rule for rule in rules if rule["active"]]
+    revoked=[rule for rule in rules if not rule["active"]]
+    active_label="ativa" if len(active)==1 else "ativas"
+    revoked_label="revogada" if len(revoked)==1 else "revogadas"
+    lines=["📚 <b>Regras do grupo</b>",f"{len(active)} {active_label} · {len(revoked)} {revoked_label}"]
+    for level in ("N1","N2","N3","N4"):
+        entries=sorted((rule for rule in active if rule["level"]==level),key=lambda rule:rule["code"])
+        if entries:
+            lines.extend(["",f"<b>Nível {level[1:]}</b>"])
+            lines.extend(f"{escape(rule['code'])} — {escape(rule['name'])}" for rule in entries)
+    if revoked:
+        lines.extend(["","🗂️ <b>Regras revogadas</b>"])
+        lines.extend(f"{escape(rule['code'])} — {escape(rule['name'].removesuffix(' — revogada'))}" for rule in sorted(revoked,key=lambda rule:rule["code"]))
+        lines.append("Não se aplicam a novas ocorrências.")
+    lines.extend(["","🔎 Para ler uma regra, use <code>/catalog R10</code>.",
+                  "A consulta detalhada mostra descrição, pontuação, condições e versão."])
+    return "\n".join(lines)
