@@ -1,7 +1,7 @@
 """SQLite governance, immutable rule versions, and persistent action claims."""
 import json
 import re
-import sqlite3
+from kannabot import database
 from contextlib import closing
 from datetime import datetime, timezone
 from kannabot.storage import WarningStore
@@ -50,7 +50,8 @@ def validate_rule(rule):
 class Governance(WarningStore):
     def __init__(self,path):
         super().__init__(path)
-        with closing(sqlite3.connect(self.path)) as db, db:
+        if database.is_postgres(self.path):return
+        with closing(database.connect(self.path)) as db, db:
             for statement in (
                 "CREATE TABLE IF NOT EXISTS roles(chat_id INTEGER NOT NULL,user_id INTEGER NOT NULL,role TEXT NOT NULL,actor_id INTEGER NOT NULL,time TEXT NOT NULL,PRIMARY KEY(chat_id,user_id))",
                 "CREATE TABLE IF NOT EXISTS rules(chat_id INTEGER NOT NULL,code TEXT NOT NULL,version INTEGER NOT NULL,snapshot TEXT NOT NULL,actor_id INTEGER NOT NULL,time TEXT NOT NULL,PRIMARY KEY(chat_id,code,version))",
@@ -69,14 +70,14 @@ class Governance(WarningStore):
             db.execute("PRAGMA user_version=3")
 
     def role(self,chat,user):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             row=db.execute("SELECT role FROM roles WHERE chat_id=? AND user_id=?",(chat,user)).fetchone()
             return row[0] if row else "member"
 
     def set_role(self,chat,user,role,actor,cause="assignment"):
         if role not in ("admin","mod","member"):raise ValueError("Cargo inválido.")
-        with closing(sqlite3.connect(self.path)) as db,db:
-            db.execute("BEGIN IMMEDIATE")
+        with closing(database.connect(self.path)) as db,db:
+            database.lock(db,"roles",chat,user)
             previous=db.execute("SELECT role FROM roles WHERE chat_id=? AND user_id=?",(chat,user)).fetchone()
             previous=previous[0] if previous else "member"
             if role=="member":db.execute("DELETE FROM roles WHERE chat_id=? AND user_id=?",(chat,user))
@@ -85,26 +86,26 @@ class Governance(WarningStore):
 
     def put_rule(self,chat,rule,actor):
         rule=validate_rule(rule)
-        with closing(sqlite3.connect(self.path)) as db, db:
-            db.execute("BEGIN IMMEDIATE")
+        with closing(database.connect(self.path)) as db, db:
+            database.lock(db,"rule",chat,rule["code"])
             version=db.execute("SELECT COALESCE(MAX(version),0)+1 FROM rules WHERE chat_id=? AND code=?",(chat,rule["code"])).fetchone()[0]
             db.execute("INSERT INTO rules VALUES(?,?,?,?,?,?)",(chat,rule["code"],version,json.dumps(rule,ensure_ascii=False),actor,utcnow()))
             return version
 
     def rule(self,chat,code):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             row=db.execute("SELECT version,snapshot FROM rules WHERE chat_id=? AND code=? ORDER BY version DESC LIMIT 1",(chat,code)).fetchone()
             if not row:return None
             return dict(json.loads(row[1]),version=row[0])
 
     def catalog(self,chat):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             codes=[row[0] for row in db.execute("SELECT DISTINCT code FROM rules WHERE chat_id=? ORDER BY code LIMIT 100",(chat,))]
         return [self.rule(chat,code) for code in codes]
 
     def add(self,chat,user,actor,reason,time,event_id,rule=None,manual_weight=None):
         validate_manual_weight(manual_weight,rule)
-        with closing(sqlite3.connect(self.path)) as db, db:
+        with closing(database.connect(self.path)) as db, db:
             cursor=db.execute("INSERT OR IGNORE INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,user,actor,reason,time,str(event_id)))
             if cursor.rowcount!=1:return False
             self.snapshot_identity(db,"warnings",cursor.lastrowid,chat,actor,user)
@@ -112,27 +113,27 @@ class Governance(WarningStore):
             return True
 
     def history(self,chat,user):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             where="FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? AND i.cancel_time IS NULL"
             total=db.execute("SELECT COUNT(*) "+where,(chat,user)).fetchone()[0]
             rows=db.execute("SELECT w.author_id,w.reason,w.time "+where+" ORDER BY w.id DESC LIMIT 20",(chat,user)).fetchall()
             return total,rows
 
     def points(self,chat,user):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             return db.execute("SELECT COALESCE(SUM(i.weight),0) FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? AND i.cancel_time IS NULL",(chat,user)).fetchone()[0]
 
     def infraction(self,chat,id):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             return db.execute("SELECT w.user_id,i.cancel_time FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND i.id=?",(chat,id)).fetchone()
 
     def cancel(self,chat,id,actor,reason):
-        with closing(sqlite3.connect(self.path)) as db, db:
+        with closing(database.connect(self.path)) as db, db:
             cursor=db.execute("UPDATE infractions SET cancel_time=?,cancel_actor=?,cancel_reason=? WHERE id=? AND cancel_time IS NULL AND warning_id IN (SELECT id FROM warnings WHERE chat_id=?)",(utcnow(),actor,reason,id,chat))
             return cursor.rowcount==1
 
     def begin(self,chat,event,action,actor,target,reason,rule=None):
-        with closing(sqlite3.connect(self.path)) as db, db:
+        with closing(database.connect(self.path)) as db, db:
             cursor=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,str(event),action,actor,target,rule["code"] if rule else None,rule["version"] if rule else None,reason,"pending","Resultado ainda não confirmado",utcnow()))
             if cursor.rowcount==1:
                 self.snapshot_identity(db,"sanctions",cursor.lastrowid,chat,actor,target)
@@ -141,25 +142,25 @@ class Governance(WarningStore):
 
     def finish(self,id,status,detail):
         if status not in ("done","refused","failed","partial","uncertain"):raise ValueError("Resultado inválido.")
-        with closing(sqlite3.connect(self.path)) as db, db:
+        with closing(database.connect(self.path)) as db, db:
             db.execute("UPDATE sanctions SET status=?,detail=? WHERE id=? AND status='pending'",(status,detail,id))
 
     def entries(self,chat,user):
-        with closing(sqlite3.connect(self.path)) as db:
+        with closing(database.connect(self.path)) as db:
             return db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,w.reason,i.cancel_time FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user)).fetchall()
 
 
     def detailed_entries(self,chat,user):
-        with closing(sqlite3.connect(self.path)) as db:
-            db.row_factory=sqlite3.Row
+        with closing(database.connect(self.path)) as db:
+            db.row_factory=database.Row
             return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id,w.actor_username,w.target_username FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]
 
 
     def start_delwarn(self,chat,message,actor,target,reason,rule=None,manual_weight=None):
         validate_manual_weight(manual_weight,rule)
         event=f"delwarn:{message}"
-        with closing(sqlite3.connect(self.path)) as db,db:
-            db.execute("BEGIN IMMEDIATE")
+        with closing(database.connect(self.path)) as db,db:
+            database.lock(db,"message",chat,message)
             if rule is not None:
                 latest=db.execute("SELECT version FROM rules WHERE chat_id=? AND code=? ORDER BY version DESC LIMIT 1",(chat,rule["code"])).fetchone()
                 if not latest or latest[0]!=rule["version"]:raise ValueError("Regra mudou; revise antes de executar.")
@@ -177,7 +178,7 @@ class Governance(WarningStore):
     @staticmethod
     def snapshot_identity(db,table,record,chat,actor,target):
         if table not in ("warnings","sanctions"):raise ValueError("Unsupported snapshot table")
-        if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='identities'").fetchone():return
+        if not database.has_identities(db):return
         def username(user):
             row=db.execute("SELECT username FROM identities WHERE chat_id=? AND user_id=?",(chat,user)).fetchone()
             return row[0] if row else None

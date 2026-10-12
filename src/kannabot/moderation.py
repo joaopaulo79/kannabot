@@ -1,7 +1,7 @@
 """Moderation services: validation precedes effects; failures are audited."""
 import re
 import json
-import sqlite3
+from kannabot import database
 from contextlib import closing
 from kannabot.presentation import context, user_mention, mention, brief
 from telebot.types import ChatPermissions
@@ -188,7 +188,7 @@ class Moderation:
             if claim:
                 status="partial" if isinstance(exc,PartialFailure) else "refused" if isinstance(exc,(PermissionDenied,ValueError)) else "uncertain"
                 try:self.governance.finish(claim,status,type(exc).__name__)
-                except sqlite3.Error:
+                except database.Error:
                     self.audit.record(chat_id,actor,target,command,reason,status,exc,metadata={"stage":"Persistência do resultado","detail":"Resultado externo requer conferência; ledger indisponível."})
             raise
         if claim:self.governance.finish(claim,result.outcome,result.message)
@@ -289,10 +289,10 @@ class Moderation:
         if not self.governance or command=="warnings":return None
         event=f"delete:{reply.message_id}" if command=="delete" and reply else f"manual:{message.message_id}"
         try:
-            with closing(sqlite3.connect(self.governance.path)) as db:
+            with closing(database.connect(self.governance.path)) as db:
                 row=db.execute("SELECT status FROM sanctions WHERE chat_id=? AND event_id=? AND action=?",(message.chat.id,event,command)).fetchone()
                 return row[0] if row else None
-        except sqlite3.Error:return None
+        except database.Error:return None
 
 
     def delwarn(self,message):
@@ -349,7 +349,7 @@ class Moderation:
             result=Result(outcome,f"⚠️ Advertência #{warning} registrada; "+("exclusão recusada." if confirmed else "resultado da exclusão não confirmado. Não repita o comando.") if warning else "⚠️ Não foi possível registrar a advertência. A exclusão não foi solicitada.")
         if claim and result.outcome!="done":
             try:self.governance.finish(claim,result.outcome,type(error).__name__)
-            except sqlite3.Error:result=Result("uncertain",result.message+" Não foi possível atualizar o registro da operação.")
+            except database.Error:result=Result("uncertain",result.message+" Não foi possível atualizar o registro da operação.")
         if warning:
             total=self.governance.history(message.chat.id,target)[0];points=self.governance.points(message.chat.id,target)
             result=Result(result.outcome,result.message+f"\nSituação atual: {total} advertência(s) válida(s) · {points} pontos.")
