@@ -16,7 +16,7 @@ from kannabot.presentation import ROLE_NAMES, context
 PAGES = {
  'warn':('warn','warnings','⚠️ Aplicar advertência','/warn R10 envio repetido de figurinhas',
     'Registra uma advertência no histórico do alvo. Não apaga a mensagem.',
-    'Com regra, aplica o peso do catálogo. /warn ou /warn motivo registra advertência manual com peso 0, sem acrescentar pontos. Sem motivo, registra “não informado”. Mostra registro e saldo atual.',
+    'Com regra, aplica o peso do catálogo. /warn p2 motivo usa peso manual de p0 a p4 e exige motivo. Não combine pN com regra. /warn ou /warn motivo registra advertência manual com peso 0. Sem motivo, registra “não informado”. Mostra registro e saldo atual.',
     'Responda à mensagem do alvo ou use /warn @usuario R10 motivo. A hierarquia é respeitada; o limite de pontos exige revisão humana, sem ban automático.'),
  'warnings':('warnings','warnings','📋 Consultar histórico','/warnings @usuario',
     'Consulta advertências do alvo, incluindo cancelamentos.',
@@ -32,7 +32,7 @@ PAGES = {
     'Responda à mensagem que deseja apagar. @username não identifica qual mensagem excluir. Motivo obrigatório.'),
  'delwarn':(('warn','delete'),'messages','🧹⚠️ Apagar e advertir','/delwarn R10 envio repetido de figurinhas',
     'Apaga a mensagem respondida e registra advertência no alvo.',
-    'Mostra exclusão, registro e saldo. /delwarn motivo usa advertência manual sem peso; não acrescenta pontos.',
+    'Mostra exclusão, registro e saldo. /delwarn p2 motivo usa peso manual de p0 a p4 e exige motivo. Não combine pN com regra. /delwarn motivo usa advertência manual sem peso; não acrescenta pontos.',
     'Sempre responda à mensagem. Falha de armazenamento impede o efeito. Uma advertência pode ser registrada mesmo se a exclusão falhar: confira resultado parcial/incerto antes de repetir.'),
  'mute':('mute','silence','🔇 Silenciar temporariamente','/mute @usuario 10m insistência após orientação',
     'Impede o alvo de enviar mensagens pelo prazo informado.',

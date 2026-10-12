@@ -14,7 +14,9 @@ class HelpTests(unittest.TestCase):
         allowed=helper.allowed('mod')
         for command in ('warn','warnings','delete','delwarn','mute','rules','rule','detections','dismiss','review'):self.assertIn(command,allowed)
         for command in ('ban','kick','unban','unwarn','role','rules_import','rule_set'):self.assertNotIn(command,allowed)
-        self.assertNotIn('p2',''.join(helper.render('mod',page) for page in allowed))
+        for page in ('warn','delwarn'):
+            self.assertIn('p2',helper.render('mod',page))
+            self.assertIn('p0 a p4',helper.render('mod',page))
     def test_admin_and_owner_commands_follow_capabilities(self):
         helper=Help(self.service);admin=helper.allowed('admin');owner=helper.allowed('owner')
         for command in ('ban','kick','unban','unwarn','role','role_remove'):self.assertIn(command,admin)
