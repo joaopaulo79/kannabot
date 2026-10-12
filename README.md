@@ -121,6 +121,17 @@ Sem destino configurado, destino publico ou falha de entrega, o registro sanitiz
 
 ## Advertencias
 
+Peso manual: `/warn p2 motivo` em resposta ou `/warn @usuario p2 motivo` registra
+uma advertência sem regra com peso inteiro de **0 a 4** (`p0` a `p4`). O motivo
+é obrigatório com `pN`, que ocupa a primeira posição após o alvo opcional.
+`/delwarn p2 motivo` exige resposta à mensagem e combina advertência com exclusão.
+Não combine peso manual e código de regra: `/warn R10 motivo` usa o peso do catálogo.
+Sem `pN`, `/warn` ou `/warn motivo` usa peso zero; `/delwarn motivo` conserva peso
+indefinido. Registros antigos não são alterados. Cancelar recalcula o saldo;
+atingir quatro pontos exige revisão humana e não causa banimento automático.
+Em `delwarn`, falha de exclusão conserva a advertência; confira resultados
+parciais/incertos antes de repetir o comando.
+
 Admin identificado: responda a mensagem do membro com `/warn motivo`. Consulte com `/warnings` em resposta ao mesmo membro. Historico por grupo/ID fica em `KANNA_HOME/var/moderation.sqlite3`, preservado no reinicio. Consulta mostra total e ultimas 20 entradas. Reentregar o mesmo comando nao duplica advertencia. Administradores sao protegidos; quantidade de advertencias nao aplica outra punicao.
 
 Exclusao: admin responde a mensagem com `/delete motivo`. O bot precisa de permissao de apagar mensagens. Somente a mensagem respondida e apagada; repeticao do mesmo alvo por 10 minutos e recusada. Limites/erros Telegram geram falha, sem sucesso presumido.

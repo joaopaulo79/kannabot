@@ -11,8 +11,21 @@ from datetime import datetime, timezone
 from html import escape
 from kannabot.permissions import Permissions, PermissionDenied
 from kannabot.interacoes import Seen
-from kannabot.governance import Governance
+from kannabot.governance import Governance, validate_manual_weight
 from kannabot.rule_validation import RuleRefusal, validate_rule_action, normalize_rule_code
+
+def parse_manual_weight(argument):
+    tokens = argument.split(maxsplit=1)
+    if not tokens or not re.match(r"p(?:$|[0-9+.,-])", tokens[0], re.IGNORECASE):
+        return argument, None
+    if not re.fullmatch(r"p[0-4]", tokens[0], re.IGNORECASE):
+        raise ValueError("Use peso manual de p0 a p4, seguido de motivo.")
+    if len(tokens) != 2 or not tokens[1].strip():
+        raise ValueError("Informe um motivo após o peso manual.")
+    next_token = tokens[1].split()[0]
+    if re.fullmatch(r"R[0-9]+", next_token, re.IGNORECASE) or re.match(r"p(?:$|[0-9+.,-])", next_token, re.IGNORECASE):
+        raise ValueError("Use regra ou um único peso manual, sem combinar os dois.")
+    return tokens[1], int(tokens[0][1])
 
 def parse_duration(text):
     match = re.fullmatch(r"([1-9][0-9]{0,8})([smhd])", text)
@@ -61,6 +74,7 @@ class Moderation:
         reason = ""
         error = None
         rule = None
+        manual_weight = None
         try:
             actor = self.permissions.actor(message, command)
             if self.identities is not None:
@@ -68,6 +82,10 @@ class Moderation:
             reply, target = self.reply_target(message)
             parts = message.text.split(maxsplit=1)
             reason = self.audit.clean(parts[1].strip()) if len(parts)>1 else ""
+            if command == "warn":
+                reason, manual_weight = parse_manual_weight(reason)
+                if manual_weight is not None and not self.governance:
+                    raise ValueError("Histórico indisponível; peso manual não pode ser registrado.")
             duration = None
             if command == "mute":
                 mute_parts = parts[1].split(maxsplit=1) if len(parts)>1 else []
@@ -79,6 +97,10 @@ class Moderation:
                 reason_parts=reason.split(maxsplit=1)
                 code=normalize_rule_code(reason_parts[0]) if reason_parts else ""
                 if re.fullmatch(r"R[0-9]{2,4}",code):
+                    if command == "warn" and len(reason_parts) > 1:
+                        _, override = parse_manual_weight(reason_parts[1])
+                        if override is not None:
+                            raise ValueError("Use regra ou peso manual, sem combinar os dois.")
                     rule=self.governance.rule(message.chat.id,code)
                     validate_rule_action(rule,code,command)
                     if command=="mute":
@@ -114,7 +136,7 @@ class Moderation:
                     self.permissions.bot_right(message.chat.id,"can_delete_messages")
                     evidence_id,evidence_state=self.evidence.capture(message.chat.id,reply,f"manual:{message.message_id}",command)
                     context_data.update(evidence_id=evidence_id,evidence_status=evidence_state)
-                result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration, rule=rule)
+                result = self.execute(command, message.chat.id, actor, target, reply.message_id, reason, f"manual:{message.message_id}", duration=duration, rule=rule, manual_weight=manual_weight)
         except (PermissionDenied, ValueError) as exc:
             result = Result("refused", escape(self.audit.clean(str(exc), limit=3500) if isinstance(exc,RuleRefusal) else str(exc)))
         except BanRoleRevocationFailure as exc:
@@ -145,7 +167,10 @@ class Moderation:
         self.audit.record(message.chat.id, actor, target, command, reason, result.outcome, error, metadata=metadata)
         return result
 
-    def execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None, rule=None):
+    def execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None, rule=None, manual_weight=None):
+        validate_manual_weight(manual_weight, rule)
+        if manual_weight is not None and (command != "warn" or not self.governance):
+            raise ValueError("Peso manual requer advertência com histórico disponível.")
         if self.roles:self.roles.authorize(chat_id,actor,command)
         self.permissions.target(chat_id,target,actor)
         if rule:
@@ -158,7 +183,7 @@ class Moderation:
             claim=self.governance.begin(chat_id,key,command,actor,target,reason,rule)
             if claim is None:return Result("refused", "Ação já registrada; não será repetida.")
         try:
-            result=self._execute(command,chat_id,actor,target,message_id,reason,event_id,duration,rule)
+            result=self._execute(command,chat_id,actor,target,message_id,reason,event_id,duration,rule,manual_weight)
         except Exception as exc:
             if claim:
                 status="partial" if isinstance(exc,PartialFailure) else "refused" if isinstance(exc,(PermissionDenied,ValueError)) else "uncertain"
@@ -169,7 +194,7 @@ class Moderation:
         if claim:self.governance.finish(claim,result.outcome,result.message)
         return result
 
-    def _execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None, rule=None):
+    def _execute(self, command, chat_id, actor, target, message_id, reason, event_id, duration=None, rule=None, manual_weight=None):
         self.permissions.target(chat_id, target, actor, action=command)
         if command in ("mute","kick","ban"):
             if self.permissions.member(chat_id,target).status in ("creator","administrator"):
@@ -231,7 +256,7 @@ class Moderation:
         if command != "warn":
             raise ValueError("Comando não suportado.")
         if self.governance:
-            created=self.governance.add(chat_id,target,actor,reason,self.clock().isoformat(),event_id,rule=rule)
+            created=self.governance.add(chat_id,target,actor,reason,self.clock().isoformat(),event_id,rule=rule,manual_weight=manual_weight)
         else:
             created = self.store.add(chat_id, target, actor, reason, self.clock().isoformat(), event_id)
         return Result("done", "Advertência registrada.") if created else Result("refused", "Esta advertência já foi registrada.")
@@ -282,10 +307,14 @@ class Moderation:
             parts=message.text.split(maxsplit=1)
             if len(parts)!=2 or not parts[1].strip():raise ValueError("Use /delwarn motivo ou /delwarn R10 motivo em resposta à mensagem.")
             if not self.governance:raise ValueError("Histórico indisponível; nenhuma ação executada.")
-            argument=parts[1].strip();tokens=argument.split(maxsplit=1);rule=None
+            argument,manual_weight=parse_manual_weight(parts[1].strip())
+            tokens=argument.split(maxsplit=1);rule=None
             code=normalize_rule_code(tokens[0])
             if re.fullmatch(r"R[0-9]+",code):
+                if manual_weight is not None:raise ValueError("Use regra ou peso manual, sem combinar os dois.")
                 if len(tokens)!=2:raise ValueError("Informe o motivo após o código da regra.")
+                _,override=parse_manual_weight(tokens[1])
+                if override is not None:raise ValueError("Use regra ou peso manual, sem combinar os dois.")
                 rule=self.governance.rule(message.chat.id,code)
                 validate_rule_action(rule,code,"delwarn")
                 argument=tokens[1]
@@ -294,10 +323,11 @@ class Moderation:
             if self.evidence is not None:
                 evidence_id,evidence_state=self.evidence.capture(message.chat.id,reply,f"manual:{message.message_id}","delwarn")
                 metadata.update(evidence_id=evidence_id,evidence_status=evidence_state)
-            operation=self.governance.start_delwarn(message.chat.id,reply.message_id,actor,target,reason,rule)
+            operation=self.governance.start_delwarn(message.chat.id,reply.message_id,actor,target,reason,rule,**({"manual_weight":manual_weight} if manual_weight is not None else {}))
             if operation is None:raise ValueError("Esta mensagem já possui um delwarn registrado; ação não repetida.")
             claim,warning=operation
             metadata.update(warning_id=warning)
+            if manual_weight is not None:metadata["weight"]=manual_weight
             if rule:metadata.update(rule_code=rule["code"],rule_version=rule["version"],weight=rule["weight"])
             # Snapshot persistence precedes the irreversible external effect.
             self.permissions.target(message.chat.id,target,actor)
@@ -305,6 +335,8 @@ class Moderation:
             if self.bot.delete_message(message.chat.id,reply.message_id) is not True:
                 raise RuntimeError("Deletion not confirmed")
             rule_info=(f"Regra: {escape(rule['code'])} — {escape(rule['name'])} · {rule['level']}\nDescrição: {brief(rule)}\nPeso: +{rule['weight']} pontos" if rule else "Tipo: advertência manual, sem regra vinculada.\nPeso: não definido; não acrescenta pontos.")
+            if manual_weight is not None:
+                rule_info=f"Tipo: advertência manual, sem regra vinculada.\nPeso: {manual_weight} pontos."
             result=Result("done",f"🧹⚠️ Mensagem apagada e advertência #{warning} registrada.\nAlvo: {user_mention(reply.from_user)}\n{rule_info}\nMotivo: {escape(reason)}")
             self.governance.finish(claim,"done","Advertência registrada; exclusão confirmada")
         except (PermissionDenied,ValueError) as exc:

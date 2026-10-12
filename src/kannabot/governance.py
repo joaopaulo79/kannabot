@@ -17,6 +17,13 @@ RANK = {"member":0,"mod":1,"admin":2,"owner":3}
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
 
+def validate_manual_weight(weight, rule=None):
+    if weight is not None:
+        if type(weight) is not int or not 0 <= weight <= 4:
+            raise ValueError("Peso manual deve ser inteiro de 0 a 4.")
+        if rule is not None:
+            raise ValueError("Use regra ou peso manual, sem combinar os dois.")
+
 def validate_rule(rule):
     keys={"code","name","description","level","weight","active","actions"}
     if not isinstance(rule,dict) or not keys.issubset(rule) or set(rule)-keys-{"summary"}:
@@ -95,12 +102,13 @@ class Governance(WarningStore):
             codes=[row[0] for row in db.execute("SELECT DISTINCT code FROM rules WHERE chat_id=? ORDER BY code LIMIT 100",(chat,))]
         return [self.rule(chat,code) for code in codes]
 
-    def add(self,chat,user,actor,reason,time,event_id,rule=None):
+    def add(self,chat,user,actor,reason,time,event_id,rule=None,manual_weight=None):
+        validate_manual_weight(manual_weight,rule)
         with closing(sqlite3.connect(self.path)) as db, db:
             cursor=db.execute("INSERT OR IGNORE INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,user,actor,reason,time,str(event_id)))
             if cursor.rowcount!=1:return False
             self.snapshot_identity(db,"warnings",cursor.lastrowid,chat,actor,user)
-            db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(cursor.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else 0,json.dumps(rule,ensure_ascii=False) if rule else None))
+            db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(cursor.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else manual_weight if manual_weight is not None else 0,json.dumps(rule,ensure_ascii=False) if rule else None))
             return True
 
     def history(self,chat,user):
@@ -147,7 +155,8 @@ class Governance(WarningStore):
             return [dict(row) for row in db.execute("SELECT i.id,i.rule_code,i.rule_version,i.weight,i.snapshot,i.cancel_time,i.cancel_reason,i.cancel_actor,w.reason,w.time,w.author_id,w.event_id,w.actor_username,w.target_username FROM warnings w JOIN infractions i ON w.id=i.warning_id WHERE w.chat_id=? AND w.user_id=? ORDER BY i.id DESC LIMIT 20",(chat,user))]
 
 
-    def start_delwarn(self,chat,message,actor,target,reason,rule=None):
+    def start_delwarn(self,chat,message,actor,target,reason,rule=None,manual_weight=None):
+        validate_manual_weight(manual_weight,rule)
         event=f"delwarn:{message}"
         with closing(sqlite3.connect(self.path)) as db,db:
             db.execute("BEGIN IMMEDIATE")
@@ -159,7 +168,7 @@ class Governance(WarningStore):
             claim=db.execute("INSERT OR IGNORE INTO sanctions(chat_id,event_id,action,actor_id,target_id,rule_code,rule_version,reason,status,detail,time) VALUES(?,?,?,?,?,?,?,?,?,?,?)",(chat,event,"delwarn",actor,target,rule["code"] if rule else None,rule["version"] if rule else None,reason,"pending","Exclusão ainda não confirmada",utcnow()))
             if claim.rowcount!=1:return None
             warning=db.execute("INSERT INTO warnings(chat_id,user_id,author_id,reason,time,event_id) VALUES(?,?,?,?,?,?)",(chat,target,actor,reason,utcnow(),event))
-            infraction=db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else None,json.dumps(rule,ensure_ascii=False) if rule else None))
+            infraction=db.execute("INSERT INTO infractions(warning_id,rule_code,rule_version,weight,snapshot) VALUES(?,?,?,?,?)",(warning.lastrowid,rule["code"] if rule else None,rule["version"] if rule else None,rule["weight"] if rule else manual_weight,json.dumps(rule,ensure_ascii=False) if rule else None))
             self.snapshot_identity(db,"sanctions",claim.lastrowid,chat,actor,target)
             self.snapshot_identity(db,"warnings",warning.lastrowid,chat,actor,target)
             return claim.lastrowid,infraction.lastrowid
