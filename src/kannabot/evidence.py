@@ -1,13 +1,14 @@
 """Explicitly moderated message snapshots; retained until administrative removal."""
 import json
-import sqlite3
+from kannabot import database
 from contextlib import closing
 from datetime import datetime, timezone
 
 class Evidence:
     def __init__(self,path,clean):
-        self.path,self.clean=path,clean
-        with closing(sqlite3.connect(path)) as db,db:
+        self.path,self.clean=database.location(path),clean
+        if database.initialize(self.path):return
+        with closing(database.connect(path)) as db,db:
             db.executescript("""
             CREATE TABLE IF NOT EXISTS evidence(
                 id INTEGER PRIMARY KEY, chat_id INTEGER NOT NULL, message_id INTEGER NOT NULL,
@@ -58,8 +59,8 @@ class Evidence:
         payload,state=self.snapshot(message);user=getattr(message,'from_user',None)
         username=getattr(user,'username',None)
         username=self.clean(username,limit=100) if isinstance(username,str) else None
-        with closing(sqlite3.connect(self.path)) as db,db:
-            db.execute('BEGIN IMMEDIATE')
+        with closing(database.connect(self.path)) as db,db:
+            database.lock(db,"evidence",chat,message.message_id)
             db.execute('INSERT OR IGNORE INTO evidence(chat_id,message_id,user_id,username,captured_at,payload,availability) VALUES(?,?,?,?,?,?,?)',
                 (chat,message.message_id,getattr(user,'id',None),username,datetime.now(timezone.utc).isoformat(),json.dumps(payload,ensure_ascii=False),state))
             row=db.execute('SELECT id,availability FROM evidence WHERE chat_id=? AND message_id=?',(chat,message.message_id)).fetchone()

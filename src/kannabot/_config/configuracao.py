@@ -24,6 +24,7 @@ class Configuracao:
     bot_username: str
     log_chat_id: int | None = None
     policy_path: Path | None = None
+    database_url: str | None = field(default=None, repr=False)
 
 
 def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
@@ -74,4 +75,15 @@ def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
         raise ErroConfiguracao("LOG_CHAT_ID deve ser o ID negativo de um grupo privado.")
     policy_path = os.getenv("CAMINHO_POLITICAS", "").strip()
     policy_file = (raiz / policy_path).resolve() if policy_path else None
-    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file)
+    database_url = os.getenv("DATABASE_URL", "").strip() or None
+    if database_url:
+        from urllib.parse import urlsplit
+        try:
+            address = urlsplit(database_url)
+            valid = address.scheme in ("postgresql", "postgres") and address.hostname and address.path.strip('/')
+            address.port
+        except ValueError:
+            valid = False
+        if not valid:
+            raise ErroConfiguracao("DATABASE_URL inválida. Confira a configuração local do banco.")
+    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file, database_url)

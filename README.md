@@ -1,5 +1,28 @@
 # Kanna
 
+## Persistência PostgreSQL
+
+Defina `DATABASE_URL` somente na configuração local para usar PostgreSQL.
+O banco precisa estar acessível ao processo com um usuário autorizado a inicializar
+o schema. A inicialização é transacional e idempotente; começa sem registros ou
+regras importadas. `/rules_import` continua sendo uma ação explícita do Dono.
+Esta entrega inicia uma base nova: não importa nem apaga dados de um SQLite anterior.
+
+Sem `DATABASE_URL`, o armazenamento SQLite existente permanece disponível para
+compatibilidade durante a transição. Mudar a configuração não transfere dados
+entre bancos. Não volte para um banco antigo após novas escritas esperando que
+os dados estejam sincronizados.
+
+Credenciais e detalhes operacionais ficam fora do repositório. Restrinja o acesso
+ao banco e use permissões adequadas. Para PostgreSQL, valide backup com `pg_dump`
+e restauração em uma base de teste com `pg_restore` antes de operar com dados reais.
+O backup do banco não inclui os arquivos locais de configuração e auditoria.
+
+Os testes PostgreSQL usam uma base **descartável e exclusiva** indicada por
+`KANNA_TEST_DATABASE_URL`: eles limpam as tabelas dessa base entre cenários.
+Nunca use esse parâmetro com dados reais. Sem essa variável, os testes de integração
+PostgreSQL são omitidos; a suíte local SQLite continua funcionando.
+
 Bot Telegram em Python com comandos de emotes e botões interativos. O MVP
 administrativo está em desenvolvimento: moderação, antispam, boas-vindas e
 logs administrativos ainda não estão implementados.

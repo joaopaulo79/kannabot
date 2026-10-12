@@ -17,14 +17,19 @@ from kannabot.moderation import Moderation
 from kannabot.handlers.moderation import register as register_moderation
 from kannabot._config.configuracao import carregar_configuracao, RAIZ_PROJETO
 from kannabot.handlers.emotes import register
+from kannabot import database
+from kannabot._config.configuracao import ErroConfiguracao
 
 def create_app(configuracao=None, client=None, home=None):
     root = Path(home or os.getenv("KANNA_HOME") or RAIZ_PROJETO).resolve()
     settings = configuracao or carregar_configuracao(root)
     policy = Policy.load(settings.policy_path)
     bot = client if client is not None else TeleBot(settings.token)
-    bot.kanna_audit = Audit(bot, settings.log_chat_id, root / "var/audit.jsonl", secrets=(settings.token,))
-    store = Governance(root / "var/moderation.sqlite3")
+    bot.kanna_audit = Audit(bot, settings.log_chat_id, root / "var/audit.jsonl", secrets=tuple(value for value in (settings.token, settings.database_url) if value))
+    try:
+        store = Governance(settings.database_url or root / "var/moderation.sqlite3")
+    except database.Error:
+        raise ErroConfiguracao("Banco indisponível; inicialização interrompida.") from None
     bot.kanna_identities = Identities(bot, settings.grupos_id, store.path)
     register_identities(bot, bot.kanna_identities)
     bot.kanna_roles = Roles(bot, settings.grupos_id, store)
@@ -34,7 +39,7 @@ def create_app(configuracao=None, client=None, home=None):
     bot.kanna_moderation.evidence = bot.kanna_evidence
     bot.kanna_administration = Administration(bot.kanna_moderation, store, bot.kanna_roles, bot.kanna_audit)
     bot.kanna_antispam = Antispam(bot, settings, policy, bot.kanna_audit, roles=bot.kanna_roles)
-    bot.kanna_review = Review(bot.kanna_moderation, ReviewStore(root / "var/moderation.sqlite3"), bot.kanna_audit)
+    bot.kanna_review = Review(bot.kanna_moderation, ReviewStore(store.path), bot.kanna_audit)
     register_antispam(bot, bot.kanna_antispam, bot.kanna_review.observe)
     register_review(bot, bot.kanna_review)
     bot.kanna_help = Help(bot.kanna_moderation)
