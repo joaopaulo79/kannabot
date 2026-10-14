@@ -74,7 +74,7 @@ class RegistrationTests(unittest.TestCase):
         token=self.ticket()
         for status in ("administrator","member","left"):
             self.status=status
-            self.assertIn("Dono real",self.activate(token))
+            self.assertIn("membro identificado" if status=="left" else "Dono real",self.activate(token))
             self.assertIsNone(self.registry.get(-10))
 
     def test_global_configuration_empty_or_different_actor_denies(self):

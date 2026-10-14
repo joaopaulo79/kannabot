@@ -229,9 +229,18 @@ O operador configura `KANNA_REGISTRAR_IDS` no ambiente privado com IDs numérico
 
 1. Adicione a Kanna como administradora em um grupo privado exclusivo de logs. O responsável autorizado também precisa ser administrador ali.
 2. Nesse grupo privado, envie `/cadastrar_logs`. A Kanna fornece um código que vale por 10 minutos, vinculado à conta que solicitou.
-3. Com a mesma conta, como Dono real do grupo principal, envie `/cadastrar_grupo CODIGO` no grupo principal. A Kanna precisa ser administradora com permissões para apagar mensagens e restringir membros.
+3. Com a mesma conta, como Dono real do grupo principal ou Operador configurado, envie `/cadastrar_grupo CODIGO` no grupo principal. A Kanna precisa ser administradora com permissões para apagar mensagens e restringir membros.
 4. A confirmação pública não exibe IDs. O vínculo é salvo no banco e passa a funcionar sem reinício. Depois importe as regras e atribua cargos internos.
 
-Os comandos podem ser endereçados com `@username_do_bot`. Nenhum outro comando é liberado antes de concluir o cadastro. Apenas o Dono autorizado cadastra; títulos cosméticos e cargos internos não substituem essa verificação. Não envie um ID como argumento: ambos os chats são identificados pelo contexto de cada comando.
+Os comandos podem ser endereçados com `@username_do_bot`. Nenhum outro comando é liberado antes de concluir o cadastro. Dono autorizado ou Operador configurado pode cadastrar; títulos cosméticos e cargos internos não substituem essa verificação. Não envie um ID como argumento: ambos os chats são identificados pelo contexto de cada comando.
 
 Grupos existentes no JSON continuam autorizados explicitamente. Para eles, LOG_CHAT_ID ainda serve de destino legado; após cadastro pelo fluxo, o vínculo específico tem precedência. Grupo novo ou desconhecido nunca herda LOG_CHAT_ID. Destino precisa permanecer privado; falha de entrega/resolução vai ao arquivo local de auditoria, sem redirecionar para outro grupo. O grupo de logs não é ativado para moderação pelo pareamento. Troca de destino, remoção e desativação não fazem parte deste fluxo.
+
+
+### Operador da instalação
+
+Configure `KANNA_OPERATOR_IDS` no `.env` privado com o ID numérico da sua conta do Telegram. Mais de uma conta pode ser separada por vírgula. Não use @username; ele pode mudar. O exemplo versionado fica vazio e os IDs reais permanecem locais/na configuração privada da VM.
+
+Operador pode cadastrar grupos sem ser o Dono real e possui acesso a regras, cargos e comandos administrativos nos grupos autorizados, desde que seja membro identificado. Também precisa administrar o destino privado de logs. Não é necessário atribuir Admin a essa conta pelo bot. O Dono real continua protegido contra sanções e os limites nativos do Telegram continuam valendo. O acesso aparece como Operador na ajuda e na auditoria; não se apresenta como Dono e não altera o título nativo.
+
+O cargo de Operador não pode ser atribuído ou revogado por `/role`: somente pela configuração privada. Remova o ID e reinicie/recrie o processo para retirar o acesso especial. Um cargo interno já existente permanece independente dessa configuração. Operadores são também autorizados ao cadastro; `KANNA_REGISTRAR_IDS` continua permitindo cadastro apenas pelo Dono real para contas sem acesso de Operador.

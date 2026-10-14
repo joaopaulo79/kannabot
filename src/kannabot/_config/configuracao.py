@@ -26,6 +26,7 @@ class Configuracao:
     policy_path: Path | None = None
     database_url: str | None = field(default=None, repr=False)
     registrar_ids: tuple[int, ...] = ()
+    operator_ids: tuple[int, ...] = ()
 
 
 def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
@@ -91,4 +92,8 @@ def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
     if registrars and not re.fullmatch(r"[1-9][0-9]*(?:\s*,\s*[1-9][0-9]*)*", registrars):
         raise ErroConfiguracao("KANNA_REGISTRAR_IDS deve conter IDs positivos separados por vírgula.")
     registrar_ids = tuple(dict.fromkeys(int(value.strip()) for value in registrars.split(","))) if registrars else ()
-    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file, database_url, registrar_ids)
+    operators = os.getenv("KANNA_OPERATOR_IDS", "").strip()
+    if operators and not re.fullmatch(r"[1-9][0-9]*(?:\s*,\s*[1-9][0-9]*)*", operators):
+        raise ErroConfiguracao("KANNA_OPERATOR_IDS deve conter IDs positivos separados por vírgula.")
+    operator_ids = tuple(dict.fromkeys(int(value.strip()) for value in operators.split(","))) if operators else ()
+    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file, database_url, registrar_ids, operator_ids)

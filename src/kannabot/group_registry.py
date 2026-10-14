@@ -13,12 +13,18 @@ class GroupRegistry:
         self.path = database.location(path)
         with closing(database.connect(self.path)) as db, db:
             database.lock(db, "registration_schema")
-            db.execute("CREATE TABLE IF NOT EXISTS group_registrations(chat_id BIGINT PRIMARY KEY CHECK(chat_id<0),log_chat_id BIGINT NOT NULL UNIQUE CHECK(log_chat_id<0),owner_id BIGINT NOT NULL CHECK(owner_id>0),registered_at TEXT NOT NULL,CHECK(chat_id!=log_chat_id))")
+            db.execute("CREATE TABLE IF NOT EXISTS group_registrations(chat_id BIGINT PRIMARY KEY CHECK(chat_id<0),log_chat_id BIGINT NOT NULL UNIQUE CHECK(log_chat_id<0),registered_by BIGINT NOT NULL CHECK(registered_by>0),registered_at TEXT NOT NULL,CHECK(chat_id!=log_chat_id))")
+            if database.is_postgres(self.path):
+                columns={row[0] for row in db.execute("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='group_registrations'")}
+            else:
+                columns={row[1] for row in db.execute("PRAGMA table_info(group_registrations)")}
+            if "owner_id" in columns and "registered_by" not in columns:
+                db.execute("ALTER TABLE group_registrations RENAME COLUMN owner_id TO registered_by")
             db.execute("CREATE TABLE IF NOT EXISTS registration_tickets(token_hash TEXT PRIMARY KEY,actor_id BIGINT NOT NULL UNIQUE,log_chat_id BIGINT NOT NULL,expires_at DOUBLE PRECISION NOT NULL)")
 
     def get(self, chat):
         with closing(database.connect(self.path)) as db:
-            return db.execute("SELECT log_chat_id,owner_id FROM group_registrations WHERE chat_id=?", (chat,)).fetchone()
+            return db.execute("SELECT log_chat_id,registered_by FROM group_registrations WHERE chat_id=?", (chat,)).fetchone()
 
     def chats(self):
         with closing(database.connect(self.path)) as db:

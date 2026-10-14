@@ -1,7 +1,7 @@
 """Human-facing output; IDs remain the authority."""
 from html import escape
 
-ROLE_NAMES = {"owner":"Dono","admin":"Admin","mod":"Mod","member":"Membro"}
+ROLE_NAMES = {"operator":"Operador","owner":"Dono","admin":"Admin","mod":"Mod","member":"Membro"}
 NATIVE_NAMES = {"creator":"Proprietário","administrator":"Administrador","member":"Membro","restricted":"Restrito","left":"Ausente","kicked":"Banido"}
 ACTION_NAMES = {"cadastrar_logs":"Preparação do chat de logs","cadastrar_grupo":"Cadastro do grupo e vínculo de logs","help":"Consulta de ajuda","help_feedback":"Retorno da ajuda","warn":"Advertência","warnings":"Consulta de advertências","unwarn":"Cancelamento de advertência","delete":"Exclusão de mensagem","delwarn":"Exclusão com advertência","mute":"Silenciamento","kick":"Expulsão","ban":"Banimento","unban":"Remoção de banimento","role":"Atribuição de cargo","role_remove":"Remoção de cargo","rules_import":"Importação de regras","rule_set":"Edição de regra","rule_disable":"Desativação de regra","catalog":"Consulta de regras","rules":"Consulta de regras","rule":"Consulta de regra","detections":"Consulta de detecções","review":"Revisão de detecção","dismiss":"Descarte de detecção","review_pending":"Detecção aguardando revisão","spam_observe":"Observação de antispam"}
 OUTCOME_NAMES = {"done":"Concluída","refused":"Recusada","failed":"Falha confirmada","partial":"Parcial","uncertain":"Resultado incerto"}

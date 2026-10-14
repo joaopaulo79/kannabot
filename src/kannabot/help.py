@@ -21,7 +21,7 @@ PAGES = {
  'cadastrar_grupo':('rules','setup','🐉 Cadastrar grupo','/cadastrar_grupo CODIGO',
     'Vincula este grupo ao destino privado preparado por /cadastrar_logs.',
     'Cadastro persistente sem publicar IDs. Depois use /rules_import e configure os cargos.',
-    'Somente Dono real, mesma conta que gerou o código e autorização do operador. Kanna precisa apagar mensagens e restringir membros. Antes do cadastro, os dois comandos de configuração funcionam sem /help.'),
+    'Dono real ou Operador da instalação, mesma conta que gerou o código e autorização do operador. Kanna precisa apagar mensagens e restringir membros. Antes do cadastro, os dois comandos de configuração funcionam sem /help.'),
  'warn':('warn','warnings','⚠️ Aplicar advertência','/warn R10 envio repetido de figurinhas',
     'Registra uma advertência no histórico do alvo. Não apaga a mensagem.',
     'Com regra, aplica o peso do catálogo. /warn p2 motivo usa peso manual de p0 a p4 e exige motivo. Não combine pN com regra. /warn ou /warn motivo registra advertência manual com peso 0. Sem motivo, registra “não informado”. Mostra registro e saldo atual.',
@@ -61,11 +61,11 @@ PAGES = {
  'role':('roles','roles','🛡️ Atribuir cargo','/role @usuario mod',
     'Atribui um cargo interno da Kanna ao alvo.',
     'Permissões passam a seguir o novo cargo. Não muda título cosmético ou poderes nativos do Telegram.',
-    'Admin gere apenas Mod. Dono também pode atribuir Admin com /role @usuario admin. Pode usar resposta; Dono real não é atribuído por comando.'),
+    'Admin gere apenas Mod. Dono e Operador também podem atribuir Admin com /role @usuario admin. Pode usar resposta; Dono real não é atribuído por comando.'),
  'role_remove':('roles','roles','🛡️ Remover cargo','/role_remove @usuario',
     'Remove o cargo interno do alvo, tornando-o Membro.',
     'Acesso administrativo interno é revogado, sem alterar cargo nativo.',
-    'Admin remove Mod; Dono pode remover Admin/Mod. Pode usar resposta.'),
+    'Admin remove Mod; Dono e Operador podem remover Admin/Mod. Pode usar resposta.'),
  'rules':('catalog','rules','📚 Listar regras','/rules',
     'Lista as regras do grupo, organizadas por nível, com regras revogadas separadas.',
     'Apenas consulta; não aplica punições. Use /rule R01 para ler uma regra específica.',
@@ -77,15 +77,15 @@ PAGES = {
  'rules_import':('rules','rules','📚 Importar catálogo','/rules_import atualizar',
     'Importa regras ausentes e, com atualizar, substitui redações reconhecidas como genéricas.',
     'Preserva regras personalizadas e versões históricas. /rules_import sem argumento importa apenas ausentes.',
-    'Somente Dono. Não presume condições ainda não definidas nem aplica punições.'),
+    'Dono ou Operador. Não presume condições ainda não definidas nem aplica punições.'),
  'rule_set':('rules','rules','📚 Criar versão de regra','/rule_set JSON',
     'Cria uma nova versão de uma regra.',
     'Novas aplicações usam a versão atual; advertências anteriores mantêm a versão aplicada.',
-    'Somente Dono. JSON requer code, name, description, level, weight, active e actions; summary é opcional. Use o catálogo para conferir os dados antes de alterar.'),
+    'Dono ou Operador. JSON requer code, name, description, level, weight, active e actions; summary é opcional. Use o catálogo para conferir os dados antes de alterar.'),
  'rule_disable':('rules','rules','📚 Revogar regra','/rule_disable R10',
     'Revoga uma regra para novas aplicações.',
     'Histórico preservado; advertências já registradas não são canceladas por este comando.',
-    'Somente Dono. Revogar não é apagar registros.'),
+    'Dono ou Operador. Revogar não é apagar registros.'),
  'detections':('review','review','🔎 Consultar detecções','/detections',
     'Lista detecções pendentes de revisão humana.',
     'Mostra IDs, alvos e mensagens relacionadas. Não aplica punição.',
@@ -121,7 +121,7 @@ class Help:
         roles=self.moderation.roles
         if roles is None:raise PermissionDenied('Não foi possível confirmar seu cargo interno.')
         role=roles.role(message.chat.id,actor)
-        if role not in ('owner','admin','mod'):raise PermissionDenied('🛡️ Esta ajuda é destinada ao Dono, Admin e Mod da Kanna.')
+        if role not in ('owner','operator','admin','mod'):raise PermissionDenied('🛡️ Esta ajuda é destinada ao Dono, Operador, Admin e Mod da Kanna.')
         return role
 
     def allowed(self,role):
@@ -134,7 +134,7 @@ class Help:
             'Escolha o que deseja fazer. Vou mostrar como usar e o que esperar. 🐉\n\n'
             '🎯 Responda à mensagem do alvo ou use @username conhecido e confirmado.\n'
             '🧹 /delete e /delwarn exigem resposta à mensagem específica.\n\n'
-            'Seu cargo na Kanna é independente do título/cargo no Telegram. Emotes continuam disponíveis para Membros.\n'
+            'Operador é um acesso definido na configuração privada e pode gerenciar regras, cargos e cadastros sem ser o Dono. O Dono continua protegido contra punições. Seu cargo na Kanna é independente do título/cargo no Telegram. Emotes continuam disponíveis para Membros.\n'
             'Se necessário, use /help@username_do_bot. Esta ajuda expira em 10 minutos; envie /help novamente.')
         if page.startswith('cat_'):
             category=page[4:]

@@ -40,11 +40,11 @@ def create_app(configuracao=None, client=None, home=None):
     bot.kanna_audit = Audit(bot, None, root / "var/audit.jsonl",
         secrets=tuple(value for value in (settings.token, settings.database_url) if value),
         destination=lambda chat: access.destination(chat, legacy_log))
-    bot.kanna_registration = Registration(bot, registry, bot.kanna_audit, settings.registrar_ids, legacy_groups, legacy_log=legacy_log)
+    bot.kanna_registration = Registration(bot, registry, bot.kanna_audit, settings.registrar_ids, legacy_groups, legacy_log=legacy_log, operators=settings.operator_ids)
     register_registration(bot, bot.kanna_registration)
     bot.kanna_identities = Identities(bot, settings.grupos_id, store.path)
     register_identities(bot, bot.kanna_identities)
-    bot.kanna_roles = Roles(bot, settings.grupos_id, store)
+    bot.kanna_roles = Roles(bot, settings.grupos_id, store, operators=settings.operator_ids)
     bot.kanna_moderation = Moderation(bot, settings, store, bot.kanna_audit, roles=bot.kanna_roles)
     bot.kanna_moderation.identities = bot.kanna_identities
     bot.kanna_evidence = Evidence(store.path,bot.kanna_audit.clean)

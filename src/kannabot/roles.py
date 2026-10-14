@@ -4,8 +4,9 @@ from kannabot.governance import CAPABILITIES, RANK
 from kannabot.permissions import PermissionDenied
 
 class Roles:
-    def __init__(self,bot,groups,store):
+    def __init__(self,bot,groups,store,operators=()):
         self.bot,self.groups,self.store=bot,preserve_access(groups),store
+        self.operators=frozenset(operators)
     def member(self,chat,user):
         if type(chat) is not int or chat not in self.groups or type(user) is not int:
             raise PermissionDenied("Grupo/identidade não autorizado.")
@@ -16,6 +17,7 @@ class Roles:
         if member.status=="creator":return "owner"
         if member.status not in ("member","administrator","restricted") or (member.status=="restricted" and getattr(member,"is_member",False) is not True):
             return "member"
+        if user in self.operators:return "operator"
         return self.store.role(chat,user)
     def authorize(self,chat,user,action):
         role=self.role(chat,user)
@@ -32,10 +34,11 @@ class Roles:
             raise PermissionDenied(f"🛡️ Você não pode {verb} um {ROLE_NAMES[target_role]}: cargo igual ou superior ao seu.")
     def assign(self,chat,actor,target,role):
         actor_role=self.role(chat,actor)
-        if actor_role not in ("owner","admin"):raise PermissionDenied("🛡️ Somente Dono ou Admin gerencia cargos.")
+        if actor_role not in ("owner","operator","admin"):raise PermissionDenied("🛡️ Somente Dono, Operador ou Admin gerencia cargos.")
         if actor_role=="admin" and (role not in ("mod","member") or self.role(chat,target) in ("admin","owner")):
             raise PermissionDenied("🛡️ Admin pode atribuir ou remover Mod, mas não alterar Admin ou Dono.")
         member=self.member(chat,target)
+        if target in self.operators:raise PermissionDenied("🛡️ O acesso de Operador é gerenciado apenas na configuração privada da instalação.")
         if member.status=="creator" or member.status not in ("member","administrator","restricted") or (member.status=="restricted" and getattr(member,"is_member",False) is not True):
             raise PermissionDenied("Alvo não pode receber esta atribuição.")
         self.store.set_role(chat,target,role,actor)

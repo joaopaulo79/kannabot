@@ -8,9 +8,10 @@ from kannabot.group_registry import RegistrationError
 
 
 class Registration:
-    def __init__(self, bot, registry, audit, registrars=(), legacy=(), clock=time, legacy_log=None):
+    def __init__(self, bot, registry, audit, registrars=(), legacy=(), clock=time, legacy_log=None, operators=()):
         self.bot,self.registry,self.audit=bot,registry,audit
-        self.registrars=frozenset(registrars)
+        self.operators=frozenset(operators)
+        self.registrars=frozenset(registrars) | self.operators
         self.legacy=frozenset(legacy)
         self.clock=clock
         self.legacy_log=legacy_log
@@ -32,8 +33,12 @@ class Registration:
             raise RegistrationError("Não consegui confirmar os cargos no Telegram. Nenhum cadastro foi alterado; tente novamente.") from None
 
     def check_source(self, chat, actor):
-        if self.member(chat,actor).status!="creator":
-            raise RegistrationError("🛡️ Somente o Dono real do grupo no Telegram pode concluir o cadastro.")
+        actor_member=self.member(chat,actor)
+        present=actor_member.status in ("creator","administrator","member") or (actor_member.status=="restricted" and getattr(actor_member,"is_member",False) is True)
+        if not present:
+            raise RegistrationError("🛡️ O responsável pelo cadastro precisa ser membro identificado deste grupo.")
+        if actor_member.status!="creator" and actor not in self.operators:
+            raise RegistrationError("🛡️ Somente o Dono real do grupo ou um Operador configurado na instalação pode concluir o cadastro.")
         try:bot_id=self.bot.get_me().id
         except Exception:raise RegistrationError("Não consegui confirmar a identidade da Kanna. Tente novamente.") from None
         member=self.member(chat,bot_id)
@@ -72,7 +77,7 @@ class Registration:
                 outcome="done"
                 text=("🔒 Grupo de logs preparado.\n\nNo grupo principal, envie com esta mesma conta:\n"
                       +"/cadastrar_grupo "+token+"\n\nO código vale por 10 minutos e só você pode usá-lo. "
-                      "Você precisa ser o Dono do grupo principal. Não há IDs para copiar.")
+                      "Você precisa ser o Dono do grupo principal ou Operador autorizado da Kanna. Não há IDs para copiar.")
             elif command=="cadastrar_grupo":
                 self.check_source(message.chat.id,actor)
                 if message.chat.id==self.legacy_log and self.legacy:
@@ -92,7 +97,7 @@ class Registration:
                     self.check_source(message.chat.id,actor)
                     created=self.registry.activate(message.chat.id,destination,actor,args[0],self.clock(),datetime.now(timezone.utc).isoformat())
                     outcome="done"
-                    text=("✅ Grupo cadastrado e chat de logs vinculado. 🐉\nO Dono já pode importar as regras com /rules_import e configurar os cargos internos."
+                    text=("✅ Grupo cadastrado e chat de logs vinculado. 🐉\nO Dono ou Operador já pode importar as regras com /rules_import e configurar os cargos internos."
                           if created else "✅ Este grupo já está cadastrado. Nenhuma configuração foi alterada.")
             else:raise RegistrationError("Comando de cadastro desconhecido.")
         except RegistrationError as error:

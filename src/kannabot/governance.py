@@ -12,7 +12,8 @@ CAPABILITIES = {
     "mod": frozenset(("warn","warnings","delete","mute","catalog","review")),
     "member": frozenset(),
 }
-RANK = {"member":0,"mod":1,"admin":2,"owner":3}
+CAPABILITIES["operator"] = CAPABILITIES["owner"]
+RANK = {"member":0,"mod":1,"admin":2,"owner":3,"operator":3}
 
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
