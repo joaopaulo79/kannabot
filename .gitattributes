@@ -1,0 +1,5 @@
+Dockerfile text eol=lf
+compose.yaml text eol=lf
+.dockerignore text eol=lf
+deploy/*.sh text eol=lf
+deploy/*.py text eol=lf

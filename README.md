@@ -23,9 +23,15 @@ Os testes PostgreSQL usam uma base **descartável e exclusiva** indicada por
 Nunca use esse parâmetro com dados reais. Sem essa variável, os testes de integração
 PostgreSQL são omitidos; a suíte local SQLite continua funcionando.
 
-Bot Telegram em Python com comandos de emotes e botões interativos. O MVP
-administrativo está em desenvolvimento: moderação, antispam, boas-vindas e
-logs administrativos ainda não estão implementados.
+Bot Telegram em Python com emotes, moderação, cargos internos, catálogo de regras,
+auditoria e revisão humana de detecções. Antispam observa e encaminha à revisão;
+não aplica punições automaticamente. A configuração global multi-grupo continua pendente.
+
+## Docker e monitoramento
+
+Consulte [Operação com Docker e PostgreSQL](docs/operacao-docker.md) para os dois
+serviços, configuração privada, saúde, backup, testes isolados e acesso por SSH.
+Não coloque credenciais no Compose, na imagem ou no repositório.
 
 ## Preparação no Windows / PowerShell
 
@@ -138,7 +144,7 @@ Imports não inicializam o bot. Use `python -m kannabot`. `KANNA_HOME` aponta pa
 
 ## Auditoria administrativa
 
-Configure `LOG_CHAT_ID` no `.env` local com o ID negativo de um grupo privado dedicado aos administradores. Adicione o bot e permita enviar mensagens. Mantenha nesse grupo somente pessoas autorizadas a consultar moderacao; nao configure um grupo publico. Cada registro inclui horario UTC, grupo, autor (ou automacao), alvo, acao, motivo e resultado.
+Configure `LOG_CHAT_ID` no `.env` local com o ID negativo de um grupo privado dedicado aos administradores. Adicione o bot e permita enviar mensagens. Mantenha nesse grupo somente pessoas autorizadas a consultar moderacao; nao configure um grupo publico. Cada registro inclui data/hora em Brasília na apresentação, grupo, autor, alvo, ação, motivo e resultado; o evento estruturado conserva UTC.
 
 Sem destino configurado, destino publico ou falha de entrega, o registro sanitizado vai para `KANNA_HOME/var/audit.jsonl`. Falhar ao registrar nao repete uma punicao. O arquivo local e ignorado pelo Git; restrinja seu acesso e retenha apenas pelo periodo necessario. Erros registram a classe da excecao, sem payload ou token.
 
@@ -197,14 +203,14 @@ As consultas de identidade falham sem conceder autorização.
 
 Comandos de administração:
 
-- `/role admin` ou `/role mod`, em resposta ao alvo, e `/role_remove`: somente Dono.
+- `/role admin`: somente Dono. Admin pode atribuir/remover Mod; Dono gerencia Admin/Mod. Use resposta ou username confirmado.
 - `/rules_import`: Dono importa explicitamente as 19 entradas resumidas do livro recebido;
   não sobrescreve regras existentes. Enquetes (R04) permanece revogada.
 - `/rule_set JSON`: Dono cria uma versão imutável com os campos `code`, `name`,
   `description`, `level`, `weight`, `active` e `actions`. Exemplo:
   `{"code":"R20","name":"Nova regra","description":"Descrição","level":"N2","weight":2,"active":true,"actions":["warn","delete","mute"]}`.
 - `/rule_disable R20`: nova versão revogada; ocorrências antigas mantêm seus dados.
-- `/catalog` ou `/catalog R10`: consulta da Staff (lista limitada a 20 entradas).
+- `/rules`: lista da Staff; `/rule R10`: consulta individual. `/catalog` e `/rules R10` continuam como aliases.
 - `/warn R10 motivo`, em resposta: registra uma infração com código, versão e peso.
 - `/mute 1d R10 motivo`, em resposta: executa somente o silêncio solicitado, dentro da faixa do nível.
 - `/unwarn ID motivo`: Admin/Dono cancela uma infração sem apagar seu histórico, respeitando a hierarquia.
@@ -216,7 +222,7 @@ mesmo após reinício. Timeout conserva resultado incerto, e uma expulsão incom
 resultado parcial. Esses casos exigem inspeção humana, sem repetição automática.
 
 Quatro pontos apenas indicam revisão humana. Não há ban automático, nem execução de um
-pacote de punições ao escolher um nível. N1 não recebe peso inventado; regras especiais
+pacote de punições ao escolher um nível. N1 registra advertência de peso zero, sem acrescentar pontos; regras especiais
 sem condições definidas ficam indisponíveis para as ações indefinidas. Expiração de pontos,
 reincidência de N1, duração para nome de usuário especial e escolha entre ban de 30 dias ou
 permanente continuam dependendo de uma decisão do Dono. Comandos legados com motivo livre
