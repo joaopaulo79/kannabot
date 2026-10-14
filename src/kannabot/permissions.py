@@ -1,3 +1,4 @@
+from kannabot.group_registry import preserve_access
 from telebot import apihelper
 
 class PermissionDenied(ValueError):
@@ -7,7 +8,7 @@ class Permissions:
     def __init__(self, bot, groups, roles=None):
         self.bot = bot
         self.roles = roles
-        self.groups = frozenset(groups)
+        self.groups = preserve_access(groups)
 
     def authorized(self, chat_id):
         return type(chat_id) is int and chat_id in self.groups

@@ -1,4 +1,5 @@
 """Observed group identities; username lookup always revalidates by numeric ID."""
+from kannabot.group_registry import preserve_access
 import copy
 import re
 from kannabot import database
@@ -10,7 +11,7 @@ from telebot.handler_backends import ContinueHandling
 
 class Identities:
     def __init__(self,bot,groups,path,clock=None,ttl=86400,capacity=10000):
-        self.bot,self.groups,self.path=bot,frozenset(groups),database.location(path)
+        self.bot,self.groups,self.path=bot,preserve_access(groups),database.location(path)
         self.clock=clock or time.time
         self.ttl,self.capacity=ttl,capacity
         if database.initialize(self.path):return

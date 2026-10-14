@@ -221,3 +221,17 @@ sem condições definidas ficam indisponíveis para as ações indefinidas. Expi
 reincidência de N1, duração para nome de usuário especial e escolha entre ban de 30 dias ou
 permanente continuam dependendo de uma decisão do Dono. Comandos legados com motivo livre
 continuam manuais e não adicionam peso presumido.
+
+
+## Cadastro oficial de grupo e logs
+
+O operador configura `KANNA_REGISTRAR_IDS` no ambiente privado com IDs numéricos dos responsáveis autorizados, separados por vírgula. Vazio bloqueia novos cadastros. Não publicar esses valores no repositório. Isso não atribui cargo interno nem substitui o Dono real do Telegram.
+
+1. Adicione a Kanna como administradora em um grupo privado exclusivo de logs. O responsável autorizado também precisa ser administrador ali.
+2. Nesse grupo privado, envie `/cadastrar_logs`. A Kanna fornece um código que vale por 10 minutos, vinculado à conta que solicitou.
+3. Com a mesma conta, como Dono real do grupo principal, envie `/cadastrar_grupo CODIGO` no grupo principal. A Kanna precisa ser administradora com permissões para apagar mensagens e restringir membros.
+4. A confirmação pública não exibe IDs. O vínculo é salvo no banco e passa a funcionar sem reinício. Depois importe as regras e atribua cargos internos.
+
+Os comandos podem ser endereçados com `@username_do_bot`. Nenhum outro comando é liberado antes de concluir o cadastro. Apenas o Dono autorizado cadastra; títulos cosméticos e cargos internos não substituem essa verificação. Não envie um ID como argumento: ambos os chats são identificados pelo contexto de cada comando.
+
+Grupos existentes no JSON continuam autorizados explicitamente. Para eles, LOG_CHAT_ID ainda serve de destino legado; após cadastro pelo fluxo, o vínculo específico tem precedência. Grupo novo ou desconhecido nunca herda LOG_CHAT_ID. Destino precisa permanecer privado; falha de entrega/resolução vai ao arquivo local de auditoria, sem redirecionar para outro grupo. O grupo de logs não é ativado para moderação pelo pareamento. Troca de destino, remoção e desativação não fazem parte deste fluxo.

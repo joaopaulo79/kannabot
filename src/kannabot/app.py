@@ -1,3 +1,6 @@
+from dataclasses import replace
+from kannabot.group_registry import GroupRegistry, GroupAccess
+from kannabot.registration import Registration, register as register_registration
 from kannabot.help import Help, register as register_help
 from kannabot.evidence import Evidence
 import os
@@ -25,11 +28,20 @@ def create_app(configuracao=None, client=None, home=None):
     settings = configuracao or carregar_configuracao(root)
     policy = Policy.load(settings.policy_path)
     bot = client if client is not None else TeleBot(settings.token)
-    bot.kanna_audit = Audit(bot, settings.log_chat_id, root / "var/audit.jsonl", secrets=tuple(value for value in (settings.token, settings.database_url) if value))
     try:
         store = Governance(settings.database_url or root / "var/moderation.sqlite3")
+        registry = GroupRegistry(store.path)
     except database.Error:
         raise ErroConfiguracao("Banco indisponível; inicialização interrompida.") from None
+    access = GroupAccess(registry, settings.grupos_id)
+    legacy_groups = settings.grupos_id
+    legacy_log = settings.log_chat_id
+    settings = replace(settings, grupos_id=access)
+    bot.kanna_audit = Audit(bot, None, root / "var/audit.jsonl",
+        secrets=tuple(value for value in (settings.token, settings.database_url) if value),
+        destination=lambda chat: access.destination(chat, legacy_log))
+    bot.kanna_registration = Registration(bot, registry, bot.kanna_audit, settings.registrar_ids, legacy_groups, legacy_log=legacy_log)
+    register_registration(bot, bot.kanna_registration)
     bot.kanna_identities = Identities(bot, settings.grupos_id, store.path)
     register_identities(bot, bot.kanna_identities)
     bot.kanna_roles = Roles(bot, settings.grupos_id, store)

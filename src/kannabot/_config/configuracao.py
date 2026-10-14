@@ -25,6 +25,7 @@ class Configuracao:
     log_chat_id: int | None = None
     policy_path: Path | None = None
     database_url: str | None = field(default=None, repr=False)
+    registrar_ids: tuple[int, ...] = ()
 
 
 def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
@@ -86,4 +87,8 @@ def carregar_configuracao(raiz: Path | None = None) -> Configuracao:
             valid = False
         if not valid:
             raise ErroConfiguracao("DATABASE_URL inválida. Confira a configuração local do banco.")
-    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file, database_url)
+    registrars = os.getenv("KANNA_REGISTRAR_IDS", "").strip()
+    if registrars and not re.fullmatch(r"[1-9][0-9]*(?:\s*,\s*[1-9][0-9]*)*", registrars):
+        raise ErroConfiguracao("KANNA_REGISTRAR_IDS deve conter IDs positivos separados por vírgula.")
+    registrar_ids = tuple(dict.fromkeys(int(value.strip()) for value in registrars.split(","))) if registrars else ()
+    return Configuracao(token, arquivo, tuple(grupos), f"@{username}", int(log_id) if log_id else None, policy_file, database_url, registrar_ids)

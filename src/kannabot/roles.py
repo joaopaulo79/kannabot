@@ -1,10 +1,11 @@
 """Internal capabilities never derive from usernames or cosmetic titles."""
+from kannabot.group_registry import preserve_access
 from kannabot.governance import CAPABILITIES, RANK
 from kannabot.permissions import PermissionDenied
 
 class Roles:
     def __init__(self,bot,groups,store):
-        self.bot,self.groups,self.store=bot,frozenset(groups),store
+        self.bot,self.groups,self.store=bot,preserve_access(groups),store
     def member(self,chat,user):
         if type(chat) is not int or chat not in self.groups or type(user) is not int:
             raise PermissionDenied("Grupo/identidade não autorizado.")

@@ -166,6 +166,7 @@ with patch.object(dotenv, "load_dotenv", return_value=False), \
             CHAVE_API_BOT=token,
             BOT_USERNAME="KannaTesteBot",
             CAMINHO_AUTORZACAO=str(self.grupos),
+            KANNA_HOME=str(self.raiz),
             PYTHONPATH=str(RAIZ / "src"),
             SYSTEMROOT=os.getenv("SYSTEMROOT", "C:\\Windows"),
         )
@@ -183,6 +184,7 @@ with patch.object(dotenv, "load_dotenv", return_value=False), \
         resultado = self.executar_integracao(TOKEN_FICTICIO)
         self.assertEqual(resultado.returncode, 0, resultado.stderr)
         self.assertIn("simulados", resultado.stdout)
+        self.assertTrue((self.raiz / "var/moderation.sqlite3").is_file())
         self.assertNotIn(TOKEN_FICTICIO, resultado.stdout + resultado.stderr)
 
 

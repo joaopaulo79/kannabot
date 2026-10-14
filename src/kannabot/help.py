@@ -14,6 +14,14 @@ from kannabot.presentation import ROLE_NAMES, context
 
 # capability, category, title, example, purpose, expected, constraints
 PAGES = {
+ 'cadastrar_logs':('rules','setup','🔒 Preparar grupo de logs','/cadastrar_logs',
+    'Prepara um grupo privado separado para receber a auditoria.',
+    'Gera um código vinculado à sua conta, válido por 10 minutos. Envie o comando no grupo de logs.',
+    'Exige autorização do operador da Kanna e você e a Kanna como administradores no destino. Não use o grupo principal como logs.'),
+ 'cadastrar_grupo':('rules','setup','🐉 Cadastrar grupo','/cadastrar_grupo CODIGO',
+    'Vincula este grupo ao destino privado preparado por /cadastrar_logs.',
+    'Cadastro persistente sem publicar IDs. Depois use /rules_import e configure os cargos.',
+    'Somente Dono real, mesma conta que gerou o código e autorização do operador. Kanna precisa apagar mensagens e restringir membros. Antes do cadastro, os dois comandos de configuração funcionam sem /help.'),
  'warn':('warn','warnings','⚠️ Aplicar advertência','/warn R10 envio repetido de figurinhas',
     'Registra uma advertência no histórico do alvo. Não apaga a mensagem.',
     'Com regra, aplica o peso do catálogo. /warn p2 motivo usa peso manual de p0 a p4 e exige motivo. Não combine pN com regra. /warn ou /warn motivo registra advertência manual com peso 0. Sem motivo, registra “não informado”. Mostra registro e saldo atual.',
@@ -91,7 +99,7 @@ PAGES = {
     'Respeita regra, hierarquia e permissões da ação. /review 2 mute 1d R10 motivo para silenciar.',
     'Exige ID, ação, regra e argumentos; não aceita @username como substituto do ID. Ações disponíveis dependem do seu cargo.'),
 }
-CATEGORIES={'warnings':'⚠️ Advertências','messages':'🧹 Mensagens','silence':'🔇 Silenciamento','bans':'⛔ Banimentos','roles':'🛡️ Cargos','rules':'📚 Regras','review':'🔎 Revisão'}
+CATEGORIES={'setup':'🐉 Cadastro e logs','warnings':'⚠️ Advertências','messages':'🧹 Mensagens','silence':'🔇 Silenciamento','bans':'⛔ Banimentos','roles':'🛡️ Cargos','rules':'📚 Regras','review':'🔎 Revisão'}
 
 @dataclass
 class Session:
