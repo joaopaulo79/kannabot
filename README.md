@@ -210,7 +210,7 @@ Comandos de administração:
   `description`, `level`, `weight`, `active` e `actions`. Exemplo:
   `{"code":"R20","name":"Nova regra","description":"Descrição","level":"N2","weight":2,"active":true,"actions":["warn","delete","mute"]}`.
 - `/rule_disable R20`: nova versão revogada; ocorrências antigas mantêm seus dados.
-- `/rules`: lista da Staff; `/rule R10`: consulta individual. `/catalog` e `/rules R10` continuam como aliases.
+- `/catalog`: catálogo da Staff; `/rule R10` ou `/catalog R10`: consulta individual. `/rules` não é atendido pela Kanna, para evitar conflito com o Group Help.
 - `/warn R10 motivo`, em resposta: registra uma infração com código, versão e peso.
 - `/mute 1d R10 motivo`, em resposta: executa somente o silêncio solicitado, dentro da faixa do nível.
 - `/unwarn ID motivo`: Admin/Dono cancela uma infração sem apagar seu histórico, respeitando a hierarquia.

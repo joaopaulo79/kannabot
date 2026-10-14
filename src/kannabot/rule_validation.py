@@ -12,7 +12,7 @@ def validate_rule_action(rule, code, action):
              "mute": "silenciamento", "ban": "banimento",
              "kick": "expulsão", "unban": "remoção de banimento"}.get(catalog_action, catalog_action)
     if rule is None:
-        explanation = f"A regra {code} não foi encontrada no catálogo deste grupo.\nUse /rules para consultar os códigos disponíveis."
+        explanation = f"A regra {code} não foi encontrada no catálogo deste grupo.\nUse /catalog para consultar os códigos disponíveis."
     elif not rule["active"]:
         explanation = f"A regra {code} — {rule['name']} foi revogada e não pode fundamentar novas ações.\nConsulte /rule {code} para ver os detalhes."
     elif catalog_action not in rule["actions"]:

@@ -9,7 +9,7 @@ from kannabot.moderation import Result
 from kannabot.rule_validation import normalize_rule_code
 from kannabot.permissions import PermissionDenied
 
-COMMANDS=("role","role_remove","rules_import","rule_set","rule_disable","catalog","rules","rule","unwarn")
+COMMANDS=("role","role_remove","rules_import","rule_set","rule_disable","catalog","rule","unwarn")
 
 def revised_initial_rule(existing, initial):
     """Replace known legacy prose, retaining policy and customized wording."""
@@ -28,12 +28,13 @@ class Administration:
     def handle(self,command,message):
         actor,context_data=context(message);target=None;reason="";error=None
         try:
+            if command not in COMMANDS:raise ValueError("Comando administrativo não reconhecido.")
             action="roles" if command in ("role","role_remove") else "rules" if command in ("rule_set","rule_disable","rules_import") else "unwarn" if command=="unwarn" else "catalog"
             actor=self.moderation.permissions.actor(message,action)
             if command in ("role","role_remove","unwarn") and self.moderation.identities is not None:
                 message=self.moderation.identities.prepare(message,command)
             argument=message.text.split(maxsplit=1)[1].strip() if len(message.text.split(maxsplit=1))>1 else ""
-            if command in ("catalog","rules","rule","rule_disable"):
+            if command in ("catalog","rule","rule_disable"):
                 argument=normalize_rule_code(argument)
             if command in ("role","role_remove"):
                 _,target=self.moderation.reply_target(message)
@@ -87,7 +88,7 @@ class Administration:
                 result=Result("done",f"✅ Advertência #{parts[0]} cancelada!\nAlvo: {mention(target)}\nMotivo: {escape(reason)}\nSituação atual: {self.store.history(message.chat.id,target)[0]} advertência(s) válida(s) · {self.store.points(message.chat.id,target)} pontos.\nHistórico preservado.") if changed else Result("refused","Advertência já cancelada.")
             else:
                 if command=="rule" and not argument:
-                    raise ValueError("📖 Informe a regra, como /rule R01. Para ver a lista, use /rules.")
+                    raise ValueError("📖 Informe a regra, como /rule R01. Para ver a lista, use /catalog.")
                 rules=[self.store.rule(message.chat.id,argument)] if argument else self.store.catalog(message.chat.id)
                 if not rules or any(rule is None for rule in rules):raise ValueError("Catálogo vazio ou regra inexistente.")
                 result=Result("done",rule_text(rules[0]) if argument else catalog_text(rules))
