@@ -1,0 +1,15 @@
+*
+!Dockerfile
+!pyproject.toml
+!poetry.lock
+!src/
+!src/**
+!deploy/
+!deploy/**
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*
+**/*.key
+**/*.pem
+**/*.sqlite3

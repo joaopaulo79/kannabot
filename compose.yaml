@@ -1,0 +1,65 @@
+name: kanna
+services:
+  db:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    container_name: kanna-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kanna
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    secrets: [postgres_password, app_password, monitor_password]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/init-db.sh:/docker-entrypoint-initdb.d/10-kanna.sh:ro
+    ports: ["127.0.0.1:15432:5432"]
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=25", "-c", "work_mem=2MB", "-c", "maintenance_work_mem=32MB"]
+    mem_limit: 256m
+    cpus: 0.75
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d kanna"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    logging: &logging
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+  kanna:
+    image: kanna-app:${KANNA_IMAGE_TAG:-local}
+    build:
+      context: .
+      args: {SOURCE_REVISION: "${KANNA_SOURCE_REVISION:-unknown}"}
+    container_name: kanna-bot
+    init: true
+    restart: unless-stopped
+    depends_on:
+      db: {condition: service_healthy}
+    env_file: ["${KANNA_PRIVATE_DIR:?Set KANNA_PRIVATE_DIR}/bot.env"]
+    environment:
+      KANNA_HOME: /state
+      DATABASE_URL_FILE: /run/secrets/database_url
+      CAMINHO_AUTORZACAO: /run/kanna-config/groups.json
+      CAMINHO_POLITICAS: /run/kanna-config/policies.json
+      KANNA_SKIP_PENDING: "true"
+    secrets: [database_url]
+    volumes:
+      - kanna_state:/state
+      - ${KANNA_PRIVATE_DIR:?Set KANNA_PRIVATE_DIR}/config:/run/kanna-config:ro
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 45s
+    mem_limit: 384m
+    cpus: 0.75
+    logging: *logging
+volumes:
+  postgres_data:
+  kanna_state:
+secrets:
+  postgres_password: {file: "${KANNA_PRIVATE_DIR:?Set KANNA_PRIVATE_DIR}/postgres_password"}
+  app_password: {file: "${KANNA_PRIVATE_DIR:?Set KANNA_PRIVATE_DIR}/app_password"}
+  monitor_password: {file: "${KANNA_PRIVATE_DIR:?Set KANNA_PRIVATE_DIR}/monitor_password"}
+  database_url: {file: "${KANNA_PRIVATE_DIR:?Set KANNA_PRIVATE_DIR}/database_url"}
