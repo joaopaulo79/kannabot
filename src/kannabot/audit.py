@@ -9,12 +9,13 @@ from kannabot.presentation import mention, ROLE_NAMES, NATIVE_NAMES, ACTION_NAME
 from threading import RLock
 
 class Audit:
-    def __init__(self, bot, chat_id=None, path=None, secrets=(), clock=None):
+    def __init__(self, bot, chat_id=None, path=None, secrets=(), clock=None, destination=None):
         self.bot, self.chat_id = bot, chat_id
         self.path = Path(path) if path else None
         self.secrets = tuple(value for value in secrets if value)
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.lock = RLock()
+        self.destination = destination
 
     def clean(self, text, limit=300):
         text = str(text)
@@ -41,13 +42,17 @@ class Audit:
             result=getattr(error,"result_json",None)
             if not isinstance(description,str) and isinstance(result,dict):description=result.get("description")
             if isinstance(description,str):event["error_description"]=self.clean(description)
-        if self.chat_id is not None:
+        try:
+            destination = self.destination(chat_id) if self.destination is not None else self.chat_id
+        except Exception:
+            destination = None
+        if destination is not None and destination != chat_id:
             try:
-                chat = self.bot.get_chat(self.chat_id)
-                if chat.type not in ("group", "supergroup") or getattr(chat, "username", None):
+                chat = self.bot.get_chat(destination)
+                if chat.type not in ("group", "supergroup") or getattr(chat, "username", None) or getattr(chat, "active_usernames", None):
                     raise ValueError("Private log group required")
                 text = self.render(event)
-                self.bot.send_message(self.chat_id, text, parse_mode="HTML")
+                self.bot.send_message(destination, text, parse_mode="HTML")
                 return True
             except Exception:
                 pass
